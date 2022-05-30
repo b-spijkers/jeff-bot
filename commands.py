@@ -1,6 +1,19 @@
 import requests
 import json
 
+
+def recognise(author):
+    insult = 'Fuck you, ' + author
+    return insult
+
+
+def dumbledore(author):
+    response = requests.get('https://foaas.com/dumbledore/' + author + '', headers={"Accept": "application/json"})
+    json_data = json.loads(response.text)
+    dumble = json_data['message']
+    return dumble
+
+
 def throw_yoda(name):
     yoda = 'Fuck off, you must, ' + name
     return yoda

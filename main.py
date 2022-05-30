@@ -70,13 +70,30 @@ async def on_message(message):
             await message.channel.send(fasc)
 
     if message.content.startswith(f'#yoda'):
-        if message.mentions:
+        if client.user.mentioned_in(message):
+            await message.channel.send('Fuck you')
+        elif message.mentions:
             mentioned = '<@' + str(message.mentions[0].id) + '>'
             yoda = commands.throw_yoda(mentioned)
             await message.channel.send(yoda)
         else:
-            error = 'Good job, idiot. Command is `#yoda <@mention>`'
+            if '#yoda <@mention>' in message.content:
+                error = 'Very funny, asshole'
+            else:
+                error = 'Good job, idiot. Command is `#yoda <@mention>`'
             await message.channel.send(error)
 
+    if message.content.startswith(f'#jooda'):
+        msg = 'https://pbs.twimg.com/profile_images/1223826538660974593/7Clo2xOB_400x400.jpg'
+        await message.channel.send(msg)
+
+    if 'Jeff' in message.content:
+        mentioned = str(message.author.mention)
+        insult = commands.recognise(mentioned)
+        await message.channel.send(insult)
+
+    if message.content.startswith(f'#dum'):
+        dumble = commands.dumbledore(str(message.author.mention))
+        await message.channel.send(dumble)
 
 client.run('OTgwNzk4MzAxNDcxNDA0MDYy.Gn_FSl.B-AzhCNYmEmBub-92zef29YQYri4jnwwHwZgJk')
