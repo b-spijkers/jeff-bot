@@ -29,11 +29,6 @@ async def on_message(message):
     if message.author == bot.user:
         return
 
-    if 'jeff' in message.content.lower():
-        mentioned = str(message.author.mention)
-        insult = jeffThings.recognise(mentioned)
-        await message.channel.send(insult)
-
     if 'el hefe' in message.content.lower():
         mentioned = str(message.author.mention)
         insult = jeffThings.spanish(mentioned)
@@ -154,7 +149,7 @@ async def stop(ctx):
 
 @bot.command(
     help="Too lazy to explain",
-    brief="Tells you to fuck off in Yoda, must @mention someone"
+    brief="Tells you to fuck off like he's yoda, must @mention someone"
 )
 async def yoda(ctx):
     if bot.user.mentioned_in(ctx.message):
