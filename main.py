@@ -54,7 +54,7 @@ async def on_ready():
 async def dad(ctx):
     joke = funnies.dad()
     msg = discord.Embed(
-        title=":thumbsup:",
+        title="Funny joke",
         description=joke,
         color=0xFF5733,
     )
@@ -136,6 +136,19 @@ async def fasc(ctx):
         await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
     else:
         msg = foaas.fasc(str(ctx.author.mention))
+        await ctx.channel.send(msg)
+
+
+@bot.command(
+    help="Too lazy to explain",
+    brief="Don't want to talk"
+)
+async def stop(ctx):
+    if ctx.message.mentions:
+        msg = foaas.stop(str(ctx.author.mention))
+        await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
+    else:
+        msg = foaas.stop(str(ctx.author.mention))
         await ctx.channel.send(msg)
 
 
@@ -234,5 +247,16 @@ async def kill(ctx):
 
     await ctx.channel.send(embed=msg)
 
+
+@bot.command()
+async def nicht(ctx):
+    vid = funnies.nicht()
+    await ctx.channel.send(vid)
+
+
+@bot.command()
+async def b2ba(ctx):
+    vid = funnies.b2ba()
+    await ctx.channel.send(vid)
 
 bot.run(DISCORD_TOKEN)

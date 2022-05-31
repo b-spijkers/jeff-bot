@@ -28,3 +28,10 @@ def because(author):
     json_data = json.loads(response.text)
     because = json_data['message']
     return because
+
+
+def stop(author):
+    response = requests.get('https://foaas.com/diabetes/' + author + '', headers={"Accept": "application/json"})
+    json_data = json.loads(response.text)
+    stop = json_data['message']
+    return stop

@@ -54,3 +54,11 @@ def kill(author, victim):
     else:
         gif = random.choice(kill_gifs)
     return gif
+
+
+# Nicht rijder zooi
+def nicht():
+    return 'https://www.youtube.com/watch?v=Pie6izHuaMU'
+
+def b2ba():
+    return 'https://www.youtube.com/watch?v=YajODJwJhwk'
