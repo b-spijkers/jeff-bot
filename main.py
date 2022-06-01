@@ -1,6 +1,5 @@
 import os
 import random
-import webbrowser
 
 import discord
 from discord.ext import commands
