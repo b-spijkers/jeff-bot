@@ -34,7 +34,8 @@ def kill(author, victim):
         'https://media.giphy.com/media/uAH7abSiUAlPO/giphy.gif',
         'https://c.tenor.com/YNK5CjT9dw8AAAAC/kill-wasted.gif',
         'https://c.tenor.com/mZ1h2IELTmoAAAAC/wasted-shovel.gif',
-        'https://c.tenor.com/6BEtB9KcY2YAAAAC/funny-kid.gif'
+        'https://c.tenor.com/6BEtB9KcY2YAAAAC/funny-kid.gif',
+        'https://tenor.com/view/murderer-pillow-gif-25218991'
     ]
 
     suicide_gifs = [
@@ -58,6 +59,7 @@ def kill(author, victim):
 # Nicht rijder zooi
 def nicht():
     return 'https://www.youtube.com/watch?v=Pie6izHuaMU'
+
 
 def b2ba():
     return 'https://www.youtube.com/watch?v=YajODJwJhwk'
