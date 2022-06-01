@@ -1,20 +1,60 @@
+import os
 import random
+import webbrowser
 
 import discord
+from discord.ext import commands
+from discord.utils import find
+from dotenv import load_dotenv
+
 import foaas
 import funnies
 import jeffThings
-import os
-
-from discord.utils import find
-from discord.ext import commands
-from dotenv import load_dotenv
+import uncyclopedia
 
 load_dotenv()
 
 DISCORD_TOKEN = os.getenv("TOKEN")
 
 bot = commands.Bot(command_prefix="#")
+
+
+@bot.command(name='random', help='Random uncyclopedia article, which is probably horrible')
+async def pedia(ctx):
+    title_of_post = uncyclopedia.wikilink()
+    embed = discord.Embed(
+        title=title_of_post,
+        description="Want to view this article?",
+        color=discord.Color.blue()
+    )
+    message = await ctx.send(embed=embed)
+
+    thumb_up = '👍'
+    thumb_down = '👎'
+
+    await message.add_reaction(thumb_up)
+    await message.add_reaction(thumb_down)
+
+    def check(reaction, user):
+        return user == ctx.author and str(
+            reaction.emoji) in [thumb_up, thumb_down]
+
+    member = ctx.author
+
+    while True:
+        reaction, user = await bot.wait_for("reaction_add", timeout=5.0, check=check)
+
+        if str(reaction.emoji) == thumb_up:
+            url = "https://en.uncyclopedia.co/wiki/%s" % title_of_post
+            embed = discord.Embed(
+                title='Here you go',
+                description=url,
+                color=discord.Color.blue()
+            )
+            await message.delete()
+            await ctx.send(embed=embed)
+        if str(reaction.emoji) == thumb_down:
+            await message.delete()
 
 
 @bot.event
@@ -72,6 +112,7 @@ async def beadick(ctx):
 
 # Because fuck you
 @bot.command(
+    name="why",
     help="Why? Because fuck you, that's why.",
     brief="Why? Because fuck you, that's why."
 )
@@ -92,7 +133,7 @@ async def honk(ctx):
     msg = discord.Embed(color=0xFF5733)
     msg.set_image(url='https://www.pngitem.com/pimgs/m/630-6301861_honk-honk-goose-hd-png-download.png')
 
-    await ctx.channel.send(embed=msg)
+    await ctx.channel.send(embed=msg, delete_after=10)
 
 
 @bot.command(
@@ -229,7 +270,8 @@ async def kill(ctx):
             ]
             gif = funnies.kill(author_of_msg, str(ctx.message.mentions[0].id))
             msg = discord.Embed(
-                description=str(ctx.author.mention) + random.choice(killed_messages) + '<@' + str(ctx.message.mentions[0].id) + '>',
+                description=str(ctx.author.mention) + random.choice(killed_messages) + '<@' + str(
+                    ctx.message.mentions[0].id) + '>',
                 color=discord.Color.blue()
             )
             msg.set_image(url=gif)
@@ -253,5 +295,6 @@ async def nicht(ctx):
 async def b2ba(ctx):
     vid = funnies.b2ba()
     await ctx.channel.send(vid)
+
 
 bot.run(DISCORD_TOKEN)
