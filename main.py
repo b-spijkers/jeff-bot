@@ -53,7 +53,7 @@ async def pedia(ctx):
             reaction, user = await bot.wait_for("reaction_add", timeout=20.0, check=check)
         except asyncio.TimeoutError:
             await message.delete()
-            await ctx.send("I don't have all day....")
+            await ctx.send("I don't have all day....", delete_after=10)
 
         if str(reaction.emoji) == thumb_up:
             post = title_of_post.replace(" ", "_")
@@ -67,7 +67,7 @@ async def pedia(ctx):
             await ctx.send(embed=embed)
         if str(reaction.emoji) == thumb_down:
             await message.delete()
-            await ctx.send("Asshole")
+            await ctx.send("Asshole", delete_after=10)
 
 
 @bot.event
@@ -217,7 +217,7 @@ async def yoda(ctx):
             error = 'Very funny, asshole'
         else:
             error = 'Good job, idiot. Command is `#yoda <@mention>`'
-        await ctx.channel.send(error)
+        await ctx.channel.send(error, delete_after=10)
 
 
 # Jewda
