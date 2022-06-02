@@ -8,6 +8,7 @@ from discord.ext import commands
 from discord.utils import find
 from dotenv import load_dotenv
 
+import apis
 import foaas
 import funnies
 import jeffThings
@@ -395,5 +396,47 @@ async def b2ba(ctx):
     vid = funnies.b2ba()
     await ctx.channel.send(vid)
 
+
+@bot.command(
+    help="Gives you a random useless fact",
+    brief="Gives you a random useless fact"
+)
+async def fact(ctx):
+    useless_fact = apis.useless_fact()
+    useless_fact.replace("'", '"')
+    msg = discord.Embed(
+        title="This fact is as useless as you are",
+        description=useless_fact,
+        color=discord.Color.blurple()
+    )
+    msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+    msg.set_author(name=bot.user.display_name,
+                   icon_url=bot.user.avatar_url)
+
+    await ctx.channel.send(embed=msg)
+
+
+@bot.command(
+    help="Shows when the next episode is supposed to air of given TV show",
+    brief="<prefix>ne <title_of_show>",
+    pass_context=True,
+    name="ne"
+)
+async def next_episode(ctx, *args):
+    try:
+        name, countdown = apis.next_episode(args)
+
+        msg = discord.Embed(
+            title=name,
+            description=countdown,
+            color=discord.Color.blurple()
+        )
+        msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+        msg.set_author(name=bot.user.display_name,
+                       icon_url=bot.user.avatar_url)
+
+        await ctx.channel.send(embed=msg)
+    except Exception:
+        await ctx.send("Seems like API broke, get fucked", delete_after=10)
 
 bot.run(DISCORD_TOKEN)
