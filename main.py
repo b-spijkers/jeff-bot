@@ -4,7 +4,6 @@ import os
 import random
 
 import discord
-from discord import guild
 from discord.ext import commands
 from discord.utils import find
 from dotenv import load_dotenv
@@ -26,6 +25,12 @@ def get_prefix(bot, message):  # first we define get_prefix
 
 
 bot = commands.Bot(command_prefix=get_prefix, )
+
+
+@bot.event
+async def on_ready():
+    print('{0.user}'.format(bot) + ' is online and ready')
+    await bot.change_presence(activity=discord.Game('with the kids in my basement'))
 
 
 @bot.event
@@ -141,12 +146,15 @@ async def on_message(message):
         mentioned = str(message.author.mention)
         insult = jeffThings.spanish(mentioned)
         await message.channel.send(insult)
+
+    if 'el gordo' in message.content.lower():
+        mentioned = message.author
+        insult = jeffThings.el_gordo(mentioned)
+        insult.set_image(url='https://img.iex.nl/uploads/2017/elgordo2_efc38044-abb2-4eda-82b0-477bae0e3303.jpg')
+        await message.channel.send(message.author.mention)
+        await message.channel.send(embed=insult)
+
     await bot.process_commands(message)
-
-
-@bot.event
-async def on_ready():
-    print('{0.user}'.format(bot) + ' is online and ready')
 
 
 @bot.command(

@@ -1,6 +1,21 @@
+import discord
+
+
 def spanish(author):
     insult = 'Fuck you in spanish' + author
     return insult
+
+
+def el_gordo(author):
+    msg = discord.Embed(
+        title="This is what " + author.display_name + " looks like",
+        description="Imagine not being able to see your penis"
+    )
+    msg.set_author(name=author,
+                   icon_url=author.avatar_url)
+    msg.set_image(url='https://img.iex.nl/uploads/2017/elgordo2_efc38044-abb2-4eda-82b0-477bae0e3303.jpg')
+    msg.set_footer(text="Mucho grande")
+    return msg
 
 
 def recognise(author):
