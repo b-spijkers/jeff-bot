@@ -1,5 +1,7 @@
+import asyncio
 import os
 import random
+import time
 
 import discord
 from discord.ext import commands
@@ -20,12 +22,19 @@ bot = commands.Bot(command_prefix="#")
 
 @bot.command(name='random', help='Random uncyclopedia article, which is probably horrible')
 async def pedia(ctx):
+    global reaction
+
     title_of_post = uncyclopedia.wikilink()
     embed = discord.Embed(
-        title=title_of_post,
+        title="Title: " + title_of_post,
         description="Want to view this article?",
         color=discord.Color.blue()
     )
+    embed.set_thumbnail(url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png")
+    embed.add_field(name="What do?", value="Sends a link on thumbs up. Removes the message on thumbs down.",
+                    inline=False)
+    embed.set_footer(text="Requested by: {}".format(ctx.author.display_name) + ". Jeff has worked very very hard to send you this message.")
+
     message = await ctx.send(embed=embed)
 
     thumb_up = '👍'
@@ -41,10 +50,15 @@ async def pedia(ctx):
     member = ctx.author
 
     while True:
-        reaction, user = await bot.wait_for("reaction_add", timeout=5.0, check=check)
+        try:
+            reaction, user = await bot.wait_for("reaction_add", timeout=20.0, check=check)
+        except asyncio.TimeoutError:
+            await message.delete()
+            await ctx.send("I don't have all day....")
 
         if str(reaction.emoji) == thumb_up:
-            url = "https://en.uncyclopedia.co/wiki/%s" % title_of_post
+            post = title_of_post.replace(" ", "_")
+            url = "https://en.uncyclopedia.co/wiki/%s" % post
             embed = discord.Embed(
                 title='Here you go',
                 description=url,
@@ -54,6 +68,7 @@ async def pedia(ctx):
             await ctx.send(embed=embed)
         if str(reaction.emoji) == thumb_down:
             await message.delete()
+            await ctx.send("Asshole")
 
 
 @bot.event
@@ -231,7 +246,7 @@ async def dum(ctx):
 
 @bot.command(
     help="Too lazy to explain",
-    brief="Kill someone"
+    brief="Kill someone or everyone"
 )
 async def kill(ctx):
     if ctx.message.mentions:
@@ -274,6 +289,14 @@ async def kill(ctx):
                 color=discord.Color.blue()
             )
             msg.set_image(url=gif)
+    elif '@everyone' in ctx.message.content:
+        msg = discord.Embed(
+            description="Jeff is done with this planet"
+        )
+        msg.set_footer(text="Requested by: {}".format(
+            ctx.author.display_name) + ". Jeff has always wanted to do this")
+        msg.set_image(url='https://c.tenor.com/RjAxaS7VppAAAAAC/deathstar.gif')
+        # msg.set_thumbnail(url='https://i.imgflip.com/4bdfem.png')
     else:
         msg = discord.Embed(
             title='Uh oh! Someone is retarded!',
