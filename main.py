@@ -20,8 +20,8 @@ DISCORD_TOKEN = os.getenv("TOKEN")
 
 
 def get_prefix(bot, message):  # first we define get_prefix
-    with open('prefixes.json', 'r') as f:  # we open and read the prefixes.json, assuming it's in the same file
-        prefixes = json.load(f)  # load the json as prefixes
+    with open('prefixes.json', 'r') as f:
+        prefixes = json.load(f)
     return prefixes[str(message.guild.id)]  # receive the prefix for the guild id given
 
 
@@ -30,18 +30,18 @@ bot = commands.Bot(command_prefix=get_prefix, )
 
 @bot.event
 async def on_guild_join(guild):  # when the bot joins the guild
-    with open('prefixes.json', 'r') as f:  # read the prefix.json file
-        prefixes = json.load(f)  # load the json file
+    with open('prefixes.json', 'r') as f:
+        prefixes = json.load(f)
 
-    prefixes[str(guild.id)] = 'bl!'  # default prefix
+    prefixes[str(guild.id)] = '#'
 
-    with open('prefixes.json', 'w') as f:  # write in the prefix.json "message.guild.id": "bl!"
-        json.dump(prefixes, f, indent=4)  # the indent is to make everything look a bit neater
+    with open('prefixes.json', 'w') as f:
+        json.dump(prefixes, f, indent=4)
 
 
 @bot.event
 async def on_guild_remove(guild):  # when the bot is removed from the guild
-    with open('prefixes.json', 'r') as f:  # read the file
+    with open('prefixes.json', 'r') as f:
         prefixes = json.load(f)
 
     prefixes.pop(str(guild.id))  # find the guild.id that bot was removed from
@@ -56,7 +56,7 @@ async def on_guild_remove(guild):  # when the bot is removed from the guild
     brief="Type: <prefix> <new prefix>"
 )
 @commands.has_permissions(administrator=True)  # ensure that only administrators can use this command
-async def prefix(ctx, prefix):  # command: bl!changeprefix ...
+async def prefix(ctx, prefix):
     with open('prefixes.json', 'r') as f:
         prefixes = json.load(f)
 
@@ -78,6 +78,8 @@ async def pedia(ctx):
         description="Want to view this article?",
         color=discord.Color.blue()
     )
+    embed.set_author(name="Uncyclopedia", url="https://en.uncyclopedia.co/",
+                     icon_url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png")
     embed.set_thumbnail(url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png")
     embed.add_field(name="What do?", value="Sends a link on thumbs up. Removes the message on thumbs down.",
                     inline=False)
@@ -113,6 +115,9 @@ async def pedia(ctx):
                 description=url,
                 color=discord.Color.blue()
             )
+            embed.set_author(name="Uncyclopedia", url="https://en.uncyclopedia.co/",
+                             icon_url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png")
+            embed.set_footer(text="Stolen from Uncyclopedia for your entertainment")
             await message.delete()
             await ctx.send(embed=embed)
         if str(reaction.emoji) == thumb_down:
@@ -129,8 +134,6 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_message(message):
-    print(str(message.guild.id))
-
     if message.author == bot.user:
         return
 
@@ -157,7 +160,7 @@ async def jeff(ctx):
 
 # Returns a dad joke
 @bot.command(
-    help="Random dad joke from a library with with around 630 dad jokes",
+    help="Random dad joke from a library with around 630 dad jokes",
     brief="Random dad joke"
 )
 async def dad(ctx):
@@ -323,6 +326,8 @@ async def kill(ctx):
                 description='Nice try, bitch!',
                 color=discord.Color.red()
             )
+            msg.set_author(name=bot.user.display_name,
+                           icon_url=bot.user.avatar_url)
             msg.set_image(url=gif)
         elif author_of_msg == victim:
             gif = funnies.kill(author_of_msg, str(ctx.message.mentions[0].id))
@@ -330,6 +335,8 @@ async def kill(ctx):
                 description=str(ctx.author.mention) + ' commited suicide',
                 color=discord.Color.red()
             )
+            msg.set_author(name=ctx.author.display_name,
+                           icon_url=ctx.author.avatar_url)
             msg.set_image(url=gif)
         else:
             killed_messages = [
@@ -351,12 +358,14 @@ async def kill(ctx):
             msg.set_image(url=gif)
     elif '@everyone' in ctx.message.content:
         msg = discord.Embed(
-            description="Jeff is done with this planet"
+            description="Jeff is done with this planet",
+            color=discord.Color.blurple()
         )
         msg.set_footer(text="Requested by: {}".format(
             ctx.author.display_name) + ". Jeff has always wanted to do this")
         msg.set_image(url='https://c.tenor.com/RjAxaS7VppAAAAAC/deathstar.gif')
-        # msg.set_thumbnail(url='https://i.imgflip.com/4bdfem.png')
+        msg.set_author(name=bot.user.display_name,
+                       icon_url=bot.user.avatar_url)
     else:
         msg = discord.Embed(
             title='Uh oh! Someone is retarded!',
