@@ -50,7 +50,11 @@ async def on_guild_remove(guild):  # when the bot is removed from the guild
         json.dump(prefixes, f, indent=4)
 
 
-@bot.command(pass_context=True)
+@bot.command(
+    pass_context=True,
+    help="Change Jeff's prefix",
+    brief="Type: <prefix> <new prefix>"
+)
 @commands.has_permissions(administrator=True)  # ensure that only administrators can use this command
 async def prefix(ctx, prefix):  # command: bl!changeprefix ...
     with open('prefixes.json', 'r') as f:
