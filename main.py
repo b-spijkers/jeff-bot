@@ -1,8 +1,10 @@
 import asyncio
+import json
 import os
 import random
 
 import discord
+from discord import guild
 from discord.ext import commands
 from discord.utils import find
 from dotenv import load_dotenv
@@ -16,7 +18,50 @@ load_dotenv()
 
 DISCORD_TOKEN = os.getenv("TOKEN")
 
-bot = commands.Bot(command_prefix="#")
+
+def get_prefix(bot, message):  # first we define get_prefix
+    with open('prefixes.json', 'r') as f:  # we open and read the prefixes.json, assuming it's in the same file
+        prefixes = json.load(f)  # load the json as prefixes
+    return prefixes[str(message.guild.id)]  # receive the prefix for the guild id given
+
+
+bot = commands.Bot(command_prefix=get_prefix, )
+
+
+@bot.event
+async def on_guild_join(guild):  # when the bot joins the guild
+    with open('prefixes.json', 'r') as f:  # read the prefix.json file
+        prefixes = json.load(f)  # load the json file
+
+    prefixes[str(guild.id)] = 'bl!'  # default prefix
+
+    with open('prefixes.json', 'w') as f:  # write in the prefix.json "message.guild.id": "bl!"
+        json.dump(prefixes, f, indent=4)  # the indent is to make everything look a bit neater
+
+
+@bot.event
+async def on_guild_remove(guild):  # when the bot is removed from the guild
+    with open('prefixes.json', 'r') as f:  # read the file
+        prefixes = json.load(f)
+
+    prefixes.pop(str(guild.id))  # find the guild.id that bot was removed from
+
+    with open('prefixes.json', 'w') as f:  # deletes the guild.id as well as its prefix
+        json.dump(prefixes, f, indent=4)
+
+
+@bot.command(pass_context=True)
+@commands.has_permissions(administrator=True)  # ensure that only administrators can use this command
+async def prefix(ctx, prefix):  # command: bl!changeprefix ...
+    with open('prefixes.json', 'r') as f:
+        prefixes = json.load(f)
+
+    prefixes[str(ctx.guild.id)] = prefix
+
+    with open('prefixes.json', 'w') as f:  # writes the new prefix into the .json
+        json.dump(prefixes, f, indent=4)
+
+    await ctx.send(f'Prefix changed to: {prefix}')  # confirms the prefix it's been changed to
 
 
 @bot.command(name='random', help='Random uncyclopedia article, which is probably horrible')
@@ -32,7 +77,8 @@ async def pedia(ctx):
     embed.set_thumbnail(url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png")
     embed.add_field(name="What do?", value="Sends a link on thumbs up. Removes the message on thumbs down.",
                     inline=False)
-    embed.set_footer(text="Requested by: {}".format(ctx.author.display_name) + ". Jeff has worked very very hard to send you this message.")
+    embed.set_footer(text="Requested by: {}".format(
+        ctx.author.display_name) + ". Jeff has worked very very hard to send you this message.")
 
     message = await ctx.send(embed=embed)
 
@@ -75,11 +121,12 @@ async def on_guild_join(guild):
     general = find(lambda x: x.name == 'general', guild.text_channels)
     if general and general.permissions_for(guild.me).send_messages:
         await general.send("Sup' fuckers")
-        await general.send("My prefix can't be changed. The dude that made me is still too dumb to add that feature")
 
 
 @bot.event
 async def on_message(message):
+    print(str(message.guild.id))
+
     if message.author == bot.user:
         return
 
