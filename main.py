@@ -75,7 +75,7 @@ async def on_guild_join(guild):
     general = find(lambda x: x.name == 'general', guild.text_channels)
     if general and general.permissions_for(guild.me).send_messages:
         await general.send("Sup' fuckers")
-        await general.send("My prefix can't be changed. The dude that made me still too dumb to add that feature")
+        await general.send("My prefix can't be changed. The dude that made me is still too dumb to add that feature")
 
 
 @bot.event
