@@ -95,6 +95,15 @@ async def on_ready():
     print('{0.user}'.format(bot) + ' is online and ready')
 
 
+@bot.command(
+    help="Jeff",
+    brief="My name a Jeff"
+)
+async def jeff(ctx):
+    message = jeffThings.jeff()
+    await ctx.channel.send(message)
+
+
 # Returns a dad joke
 @bot.command(
     help="Random dad joke from a library with with around 630 dad jokes",
