@@ -117,7 +117,7 @@ async def pedia(ctx):
             post = title_of_post.replace(" ", "_")
             url = "https://en.uncyclopedia.co/wiki/%s" % post
             embed = discord.Embed(
-                title='Here you go',
+                title=title_of_post,
                 description=url,
                 color=discord.Color.blue()
             )
@@ -296,9 +296,10 @@ async def yoda(ctx):
 # Jewda
 @bot.command(
     help="Jewda",
-    brief="Jewda"
+    brief="Jewda",
+    name="jooda"
 )
-async def jooda(ctx):
+async def Jewda(ctx):
     msg = discord.Embed(
         title="Jewda",
         color=0xFF5733
@@ -339,9 +340,15 @@ async def kill(ctx):
                            icon_url=bot.user.avatar_url)
             msg.set_image(url=gif)
         elif author_of_msg == victim:
+            suicide_messages = [
+                ' robloxed themselves',
+                ' committed neck rope',
+                ' game overed themselves',
+                ' wasted themselves'
+            ]
             gif = funnies.kill(author_of_msg, str(ctx.message.mentions[0].id))
             msg = discord.Embed(
-                description=str(ctx.author.mention) + ' commited suicide',
+                description=str(ctx.author.mention) + random.choice(suicide_messages),
                 color=discord.Color.red()
             )
             msg.set_author(name=ctx.author.display_name,
@@ -403,7 +410,7 @@ async def b2ba(ctx):
 )
 async def fact(ctx):
     useless_fact = apis.useless_fact()
-    useless_fact.replace("'", '"')
+    useless_fact.replace('"', "'")
     msg = discord.Embed(
         title="This fact is as useless as you are",
         description=useless_fact,
