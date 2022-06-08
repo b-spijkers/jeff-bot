@@ -2,6 +2,8 @@ import requests
 import json
 
 
+# Fuck Off As A Service API commands
+
 def give(author):
     response = requests.get('https://foaas.com/give/' + author + '', headers={"Accept": "application/json"})
     json_data = json.loads(response.text)
@@ -9,7 +11,7 @@ def give(author):
     return give
 
 
-def fasc(author):
+def fascinating(author):
     response = requests.get('https://foaas.com/fascinating/' + author + '', headers={"Accept": "application/json"})
     json_data = json.loads(response.text)
     fascinating = json_data['message']

@@ -31,7 +31,8 @@ bot = commands.Bot(command_prefix=get_prefix, )
 @bot.event
 async def on_ready():
     print('{0.user}'.format(bot) + ' is online and ready')
-    await bot.change_presence(activity=discord.Game('with the kids in my basement'))
+    await bot.change_presence(
+        activity=discord.Activity(type=discord.ActivityType.watching, name='humans from his pond'))
 
 
 @bot.event
@@ -39,7 +40,7 @@ async def on_guild_join(guild):  # when the bot joins the guild
     with open('prefixes.json', 'r') as f:
         prefixes = json.load(f)
 
-    prefixes[str(guild.id)] = '#'
+    prefixes[str(guild.id)] = '//'
 
     with open('prefixes.json', 'w') as f:
         json.dump(prefixes, f, indent=4)
@@ -62,19 +63,25 @@ async def on_guild_remove(guild):  # when the bot is removed from the guild
     brief="Type: <prefix> <new prefix>"
 )
 @commands.has_permissions(administrator=True)  # ensure that only administrators can use this command
-async def prefix(ctx, prefix):
-    with open('prefixes.json', 'r') as f:
-        prefixes = json.load(f)
+async def prefix(ctx, *, prefix: str = None):
+    if prefix is None:
+        return await ctx.send(f'Please set a new prefix by typing the new prefix after the command')
+    else:
+        with open('prefixes.json', 'r') as f:
+            prefixes = json.load(f)
 
-    prefixes[str(ctx.guild.id)] = prefix
+        prefixes[str(ctx.guild.id)] = prefix
 
-    with open('prefixes.json', 'w') as f:  # writes the new prefix into the .json
-        json.dump(prefixes, f, indent=4)
+        with open('prefixes.json', 'w') as f:  # writes the new prefix into the .json
+            json.dump(prefixes, f, indent=4)
 
-    await ctx.send(f'Prefix changed to: {prefix}')  # confirms the prefix it's been changed to
+        await ctx.send(f'Prefix changed to: {prefix}')  # confirms the prefix it's been changed to
 
 
-@bot.command(name='random', help='Random uncyclopedia article, which is probably horrible')
+@bot.command(
+    name='random',
+    help='Random uncyclopedia article, which is probably horrible'
+)
 async def pedia(ctx):
     global reaction
 
@@ -92,7 +99,7 @@ async def pedia(ctx):
     embed.set_footer(text="Requested by: {}".format(
         ctx.author.display_name) + ". Jeff has worked very very hard to send you this message.")
 
-    message = await ctx.send(embed=embed)
+    message = await ctx.send(embed=embed, delete_after=10)
 
     thumb_up = '👍'
     thumb_down = '👎'
@@ -108,7 +115,7 @@ async def pedia(ctx):
 
     while True:
         try:
-            reaction, user = await bot.wait_for("reaction_add", timeout=20.0, check=check)
+            reaction, user = await bot.wait_for("reaction_add", timeout=10.0, check=check)
         except asyncio.TimeoutError:
             await message.delete()
             await ctx.send("I don't have all day....", delete_after=10)
@@ -135,7 +142,7 @@ async def pedia(ctx):
 async def on_guild_join(guild):
     general = find(lambda x: x.name == 'general', guild.text_channels)
     if general and general.permissions_for(guild.me).send_messages:
-        await general.send("Sup' fuckers")
+        await general.send("Sup' fuckers. Use //help to check my commands. Use //prefix to set a new prefix")
 
 
 @bot.event
@@ -175,7 +182,7 @@ async def jeff(ctx):
 async def dad(ctx):
     joke = funnies.dad()
     msg = discord.Embed(
-        title="Funny joke",
+        title="Hi, I'm dad",
         description=joke,
         color=0xFF5733,
     )
@@ -250,14 +257,15 @@ async def cool(ctx):
 
 @bot.command(
     help="Too lazy to explain",
-    brief="Fascinating story"
+    brief="Fascinating story",
+    name='fasc'
 )
-async def fasc(ctx):
+async def fascinating(ctx):
     if ctx.message.mentions:
-        msg = foaas.fasc(str(ctx.author.mention))
+        msg = foaas.fascinating(str(ctx.author.mention))
         await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
     else:
-        msg = foaas.fasc(str(ctx.author.mention))
+        msg = foaas.fascinating(str(ctx.author.mention))
         await ctx.channel.send(msg)
 
 
@@ -299,7 +307,7 @@ async def yoda(ctx):
     brief="Jewda",
     name="jooda"
 )
-async def Jewda(ctx):
+async def jewda(ctx):
     msg = discord.Embed(
         title="Jewda",
         color=0xFF5733
@@ -364,6 +372,7 @@ async def kill(ctx):
                 ' terminated ',
                 ' killed ',
                 ' wasted '
+                " KO'd "
             ]
             gif = funnies.kill(author_of_msg, str(ctx.message.mentions[0].id))
             msg = discord.Embed(
@@ -412,7 +421,7 @@ async def fact(ctx):
     useless_fact = apis.useless_fact()
     useless_fact.replace('"', "'")
     msg = discord.Embed(
-        title="This fact is as useless as you are",
+        title="Random bullshit, GO!",
         description=useless_fact,
         color=discord.Color.blurple()
     )
@@ -426,24 +435,84 @@ async def fact(ctx):
 @bot.command(
     help="Shows when the next episode is supposed to air of given TV show",
     brief="<prefix>ne <title_of_show>",
-    pass_context=True,
     name="ne"
 )
 async def next_episode(ctx, *args):
-    try:
-        name, countdown = apis.next_episode(args)
+    name = apis.next_episode(args)
 
-        msg = discord.Embed(
-            title=name,
-            description=countdown,
-            color=discord.Color.blurple()
-        )
-        msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-        msg.set_author(name=bot.user.display_name,
-                       icon_url=bot.user.avatar_url)
+    msg = discord.Embed(
+        title=name,
+        description='',
+        color=discord.Color.blurple()
+    )
+    msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+    msg.set_author(name=bot.user.display_name,
+                   icon_url=bot.user.avatar_url)
 
-        await ctx.channel.send(embed=msg)
-    except Exception:
-        await ctx.send("Seems like API broke, get fucked", delete_after=10)
+    await ctx.channel.send(embed=msg)
+
+
+@bot.command(
+    help="<prefix>fm <title_of_movie>",
+    brief="Gets movie score",
+    name="fm"
+)
+async def find_movie(ctx, *args):
+    movieId, movieImg = apis.find_movie(args)
+    movieTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating = apis.movie_data(movieId)
+
+    msg = discord.Embed(
+        title=movieTitle,
+        description='Movie ratings:',
+        color=discord.Color.orange()
+    )
+    msg.set_thumbnail(url=movieImg)
+    msg.add_field(name="IMDb", value=imdbRating,
+                  inline=True)
+    msg.add_field(name="Metacritic", value=metaRating,
+                  inline=True)
+    msg.add_field(name="The Movie Db", value=tmdbRating,
+                  inline=True)
+    msg.add_field(name="Rotten Tomatoes", value=rottRating,
+                  inline=True)
+    msg.add_field(name="Film Affinity", value=filmRating,
+                  inline=True)
+    msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+    msg.set_author(name='IMDb',
+                   icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/640px-IMDB_Logo_2016.svg.png')
+
+    await ctx.channel.send(embed=msg)
+
+
+@bot.command(
+    help="<prefix>fs <title_of_show>",
+    brief="Gets show score",
+    name="fs"
+)
+async def find_show(ctx, *args):
+    showId, showImg = apis.find_show(args)
+    showTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating = apis.show_data(showId)
+
+    msg = discord.Embed(
+        title=showTitle,
+        description='Show ratings:',
+        color=discord.Color.orange()
+    )
+    msg.set_thumbnail(url=showImg)
+    msg.add_field(name="IMDb", value=imdbRating,
+                  inline=True)
+    msg.add_field(name="Metacritic", value=metaRating,
+                  inline=True)
+    msg.add_field(name="The Movie Db", value=tmdbRating,
+                  inline=True)
+    msg.add_field(name="Rotten Tomatoes", value=rottRating,
+                  inline=True)
+    msg.add_field(name="Film Affinity", value=filmRating,
+                  inline=True)
+    msg.set_footer(text="Data gatherd from IMDb. Click title to go to IMDb-page")
+    msg.set_author(name='IMDb',
+                   icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/640px-IMDB_Logo_2016.svg.png')
+
+    await ctx.channel.send(embed=msg)
 
 bot.run(DISCORD_TOKEN)

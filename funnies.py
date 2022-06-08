@@ -3,18 +3,21 @@ import requests
 import json
 
 
+# Just some commands I find funny or are just generally pretty fun
+
+
 def dad():
     response = requests.get('https://icanhazdadjoke.com/', headers={"Accept": "application/json"})
     json_data = json.loads(response.text)
-    dad = json_data['joke']
-    return dad
+    joke = json_data['joke']
+    return joke
 
 
 def dumbledore(author):
     response = requests.get('https://foaas.com/dumbledore/' + author + '', headers={"Accept": "application/json"})
     json_data = json.loads(response.text)
-    dumble = json_data['message']
-    return dumble
+    msg = json_data['message']
+    return msg
 
 
 def yoda(name):
@@ -57,7 +60,7 @@ def kill(author, victim):
     return gif
 
 
-# Nicht rijder zooi
+# Nicht rijder zooi, born 2 be alive is van The Village People, iedereen weet dat. Wat is een Patrick Hernandez? Idk
 def nicht():
     return 'https://www.youtube.com/watch?v=Pie6izHuaMU'
 
