@@ -518,7 +518,7 @@ async def find_show(ctx, *args):
 
 
 # restart bot admin command
-
+# TODO: Need to get this to work, now everybody can restart the bot. I just need it so only I can restart the bot. Probably have to do it with user id
 # def guild_owner_only():
 #     async def predicate(ctx):
 #         return ctx.author == ctx.guild.owner  # checks if author is the owner
