@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import random
+import sys
 
 import discord
 from discord.ext import commands
@@ -514,5 +515,27 @@ async def find_show(ctx, *args):
                    icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/640px-IMDB_Logo_2016.svg.png')
 
     await ctx.channel.send(embed=msg)
+
+
+# restart bot admin command
+
+# def guild_owner_only():
+#     async def predicate(ctx):
+#         return ctx.author == ctx.guild.owner  # checks if author is the owner
+#
+#     return commands.check(predicate)
+#
+#
+# def restart_bot():
+#     python = sys.executable
+#     os.execl(python, python, *sys.argv)
+#
+#
+# @bot.command(name='restart')
+# @guild_owner_only()
+# async def restart(ctx):
+#     await ctx.send("Restarting bot...")
+#     restart_bot()
+
 
 bot.run(DISCORD_TOKEN)
