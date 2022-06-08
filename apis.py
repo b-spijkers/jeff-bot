@@ -16,7 +16,7 @@ def useless_fact():
 def next_episode(name):
     show = '-'.join(name)
     response = requests.get('https://catchtheshow.herokuapp.com/api/' + show)
-    json_data = json.loads(response.json())
+    json_data = json.loads(response.text)
     show_name = json_data['name']
     return show_name
 

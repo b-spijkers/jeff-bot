@@ -510,7 +510,7 @@ async def find_show(ctx, *args):
                   inline=True)
     msg.add_field(name="Film Affinity", value=filmRating,
                   inline=True)
-    msg.set_footer(text="Data gatherd from IMDb. Click title to go to IMDb-page")
+    msg.set_footer(text="Data gathered from IMDb.")
     msg.set_author(name='IMDb',
                    icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/640px-IMDB_Logo_2016.svg.png')
 
