@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 import random
-import sys
+# import sys
 
 import discord
 from discord.ext import commands
