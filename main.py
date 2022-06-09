@@ -1,8 +1,10 @@
 import asyncio
+import datetime
 import json
 import os
 import random
 import sys
+import time
 
 import discord
 from discord.ext import commands
@@ -20,6 +22,11 @@ load_dotenv()
 DISCORD_TOKEN = os.getenv("TOKEN")
 
 
+def date_time(self):
+    current_time = datetime.datetime.date(self)
+    return current_time
+
+
 def get_prefix(bot, message):  # first we define get_prefix
     with open('prefixes.json', 'r') as f:
         prefixes = json.load(f)
@@ -33,7 +40,8 @@ bot = commands.Bot(command_prefix=get_prefix)
 async def on_ready():
     print('{0.user}'.format(bot) + ' is online and ready')
     await bot.change_presence(
-        activity=discord.Activity(type=discord.ActivityType.watching, name='humans from his pond'))
+        activity=discord.Activity(type=discord.ActivityType.watching, name='humans from his pond')
+    )
 
 
 @bot.event
@@ -66,8 +74,24 @@ async def on_guild_remove(guild):  # when the bot is removed from the guild
 @commands.has_permissions(administrator=True)  # ensure that only administrators can use this command
 async def prefix(ctx, *, prefix: str = None):
     if prefix is None:
+        print(
+            'Command: change prefix failed \n'
+            'User: ' + ctx.message.author.name + '\n'
+                                                 'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                                 'Time: ' + time.strftime(
+                "%Y-%m-%d %H:%M"
+            )
+        )
         return await ctx.send(f'Please set a new prefix by typing the new prefix after the command')
     else:
+        print(
+            'Command: changed prefix \n'
+            'User: ' + ctx.message.author.name + '\n'
+                                                 'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                                 'Time: ' + time.strftime(
+                "%Y-%m-%d %H:%M"
+            )
+        )
         with open('prefixes.json', 'r') as f:
             prefixes = json.load(f)
 
@@ -86,19 +110,35 @@ async def prefix(ctx, *, prefix: str = None):
 async def pedia(ctx):
     global reaction
 
+    print(
+        'Command: Uncyclopedia article \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
+
     title_of_post = uncyclopedia.wikilink()
     embed = discord.Embed(
         title="Title: " + title_of_post,
         description="Want to view this article?",
         color=discord.Color.blue()
     )
-    embed.set_author(name="Uncyclopedia", url="https://en.uncyclopedia.co/",
-                     icon_url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png")
+    embed.set_author(
+        name="Uncyclopedia", url="https://en.uncyclopedia.co/",
+        icon_url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png"
+    )
     embed.set_thumbnail(url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png")
-    embed.add_field(name="What do?", value="Sends a link on thumbs up. Removes the message on thumbs down.",
-                    inline=False)
-    embed.set_footer(text="Requested by: {}".format(
-        ctx.author.display_name) + ". Jeff has worked very very hard to send you this message.")
+    embed.add_field(
+        name="What do?", value="Sends a link on thumbs up. Removes the message on thumbs down.",
+        inline=False
+    )
+    embed.set_footer(
+        text="Requested by: {}".format(
+            ctx.author.display_name
+        ) + ". Jeff has worked very very hard to send you this message."
+    )
 
     message = await ctx.send(embed=embed, delete_after=10)
 
@@ -110,7 +150,8 @@ async def pedia(ctx):
 
     def check(reaction, user):
         return user == ctx.author and str(
-            reaction.emoji) in [thumb_up, thumb_down]
+            reaction.emoji
+        ) in [thumb_up, thumb_down]
 
     member = ctx.author
 
@@ -129,8 +170,10 @@ async def pedia(ctx):
                 description=url,
                 color=discord.Color.blue()
             )
-            embed.set_author(name="Uncyclopedia", url="https://en.uncyclopedia.co/",
-                             icon_url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png")
+            embed.set_author(
+                name="Uncyclopedia", url="https://en.uncyclopedia.co/",
+                icon_url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png"
+            )
             embed.set_footer(text="Stolen from Uncyclopedia for your entertainment")
             await message.delete()
             await ctx.send(embed=embed)
@@ -152,11 +195,23 @@ async def on_message(message):
         return
 
     if 'el hefe' in message.content.lower():
+        print(
+            'Command: el hefe trigger \n'
+            'User: ' + message.author.name + '\n'
+                                             'Guild: ' + message.channel.guild.name + '\n'
+                                                                                      'Time: ' + time.strftime("%Y-%m-%d %H:%M")
+        )
         mentioned = str(message.author.mention)
         insult = jeffThings.spanish(mentioned)
         await message.channel.send(insult)
 
     if 'el gordo' in message.content.lower():
+        print(
+            'Command: el gordo trigger \n'
+            'User: ' + message.author.name + '\n'
+                                             'Guild: ' + message.channel.guild.name + '\n'
+                                                                                      'Time: ' + time.strftime("%Y-%m-%d %H:%M")
+        )
         mentioned = message.author
         insult = jeffThings.el_gordo(mentioned)
         insult.set_image(url='https://img.iex.nl/uploads/2017/elgordo2_efc38044-abb2-4eda-82b0-477bae0e3303.jpg')
@@ -171,6 +226,14 @@ async def on_message(message):
     brief="My name a Jeff"
 )
 async def jeff(ctx):
+    print(
+        'Command: my name a jeff \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     message = jeffThings.jeff()
     await ctx.channel.send(message)
 
@@ -181,6 +244,14 @@ async def jeff(ctx):
     brief="Random dad joke"
 )
 async def dad(ctx):
+    print(
+        'Command: dad \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     joke = funnies.dad()
     msg = discord.Embed(
         title="Hi, I'm dad",
@@ -196,6 +267,14 @@ async def dad(ctx):
     brief="Returns a random insult which makes no sense"
 )
 async def beadick(ctx):
+    print(
+        'Command: be a dick \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     if ctx.message.mentions:
         insult = funnies.insult()
         await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + insult)
@@ -211,6 +290,14 @@ async def beadick(ctx):
     brief="Why? Because fuck you, that's why."
 )
 async def because(ctx):
+    print(
+        'Command: because \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     if ctx.message.mentions:
         msg = foaas.because(str(ctx.author.mention))
         await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
@@ -224,6 +311,14 @@ async def because(ctx):
     brief="Honk"
 )
 async def honk(ctx):
+    print(
+        'Command: honk \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     msg = discord.Embed(color=0xFF5733)
     msg.set_image(url='https://www.pngitem.com/pimgs/m/630-6301861_honk-honk-goose-hd-png-download.png')
 
@@ -235,6 +330,14 @@ async def honk(ctx):
     brief="Jeff doesn't give a fuck"
 )
 async def give(ctx):
+    print(
+        'Command: give \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     if ctx.message.mentions:
         msg = foaas.give(str(ctx.author.mention))
         await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
@@ -248,6 +351,14 @@ async def give(ctx):
     brief="Cool story, bro"
 )
 async def cool(ctx):
+    print(
+        'Command: cool \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     if ctx.message.mentions:
         msg = foaas.cool(str(ctx.author.mention))
         await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
@@ -262,6 +373,14 @@ async def cool(ctx):
     name='fasc'
 )
 async def fascinating(ctx):
+    print(
+        'Command: fascinating \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     if ctx.message.mentions:
         msg = foaas.fascinating(str(ctx.author.mention))
         await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
@@ -275,6 +394,14 @@ async def fascinating(ctx):
     brief="Don't want to talk"
 )
 async def stop(ctx):
+    print(
+        'Command: stop \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     if ctx.message.mentions:
         msg = foaas.stop(str(ctx.author.mention))
         await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
@@ -288,6 +415,14 @@ async def stop(ctx):
     brief="Tells you to fuck off like he's yoda, must @mention someone"
 )
 async def yoda(ctx):
+    print(
+        'Command: yoda \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     if bot.user.mentioned_in(ctx.message):
         await ctx.channel.send('Fuck you')
     elif ctx.message.mentions:
@@ -309,6 +444,14 @@ async def yoda(ctx):
     name="jooda"
 )
 async def jewda(ctx):
+    print(
+        'Command: jewda \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     msg = discord.Embed(
         title="Jewda",
         color=0xFF5733
@@ -322,6 +465,14 @@ async def jewda(ctx):
     brief="Too lazy to explain"
 )
 async def dum(ctx):
+    print(
+        'Command: dumbledore \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     dumble = funnies.dumbledore(str(ctx.author.mention))
     await ctx.channel.send(dumble)
 
@@ -331,6 +482,14 @@ async def dum(ctx):
     brief="Kill someone or everyone"
 )
 async def kill(ctx):
+    print(
+        'Command: kill \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     if ctx.message.mentions:
         author_of_msg = str(ctx.author.mention)
         victim = '<@!' + str(ctx.message.mentions[0].id) + '>'
@@ -345,8 +504,10 @@ async def kill(ctx):
                 description='Nice try, bitch!',
                 color=discord.Color.red()
             )
-            msg.set_author(name=bot.user.display_name,
-                           icon_url=bot.user.avatar_url)
+            msg.set_author(
+                name=bot.user.display_name,
+                icon_url=bot.user.avatar_url
+            )
             msg.set_image(url=gif)
         elif author_of_msg == victim:
             suicide_messages = [
@@ -360,8 +521,10 @@ async def kill(ctx):
                 description=str(ctx.author.mention) + random.choice(suicide_messages),
                 color=discord.Color.red()
             )
-            msg.set_author(name=ctx.author.display_name,
-                           icon_url=ctx.author.avatar_url)
+            msg.set_author(
+                name=ctx.author.display_name,
+                icon_url=ctx.author.avatar_url
+            )
             msg.set_image(url=gif)
         else:
             killed_messages = [
@@ -378,7 +541,8 @@ async def kill(ctx):
             gif = funnies.kill(author_of_msg, str(ctx.message.mentions[0].id))
             msg = discord.Embed(
                 description=str(ctx.author.mention) + random.choice(killed_messages) + '<@' + str(
-                    ctx.message.mentions[0].id) + '>',
+                    ctx.message.mentions[0].id
+                ) + '>',
                 color=discord.Color.blue()
             )
             msg.set_image(url=gif)
@@ -387,11 +551,16 @@ async def kill(ctx):
             description="Jeff is done with this planet",
             color=discord.Color.blurple()
         )
-        msg.set_footer(text="Requested by: {}".format(
-            ctx.author.display_name) + ". Jeff has always wanted to do this")
+        msg.set_footer(
+            text="Requested by: {}".format(
+                ctx.author.display_name
+            ) + ". Jeff has always wanted to do this"
+        )
         msg.set_image(url='https://c.tenor.com/RjAxaS7VppAAAAAC/deathstar.gif')
-        msg.set_author(name=bot.user.display_name,
-                       icon_url=bot.user.avatar_url)
+        msg.set_author(
+            name=bot.user.display_name,
+            icon_url=bot.user.avatar_url
+        )
     else:
         msg = discord.Embed(
             title='Uh oh! Someone is retarded!',
@@ -404,12 +573,28 @@ async def kill(ctx):
 
 @bot.command()
 async def nicht(ctx):
+    print(
+        'Command: nicht rijder \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     vid = funnies.nicht()
     await ctx.channel.send(vid)
 
 
 @bot.command()
 async def b2ba(ctx):
+    print(
+        'Command: born 2 be alive \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     vid = funnies.b2ba()
     await ctx.channel.send(vid)
 
@@ -419,6 +604,14 @@ async def b2ba(ctx):
     brief="Gives you a random useless fact"
 )
 async def fact(ctx):
+    print(
+        'Command: fact \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     useless_fact = apis.useless_fact()
     useless_fact.replace('"', "'")
     msg = discord.Embed(
@@ -427,8 +620,10 @@ async def fact(ctx):
         color=discord.Color.blurple()
     )
     msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-    msg.set_author(name=bot.user.display_name,
-                   icon_url=bot.user.avatar_url)
+    msg.set_author(
+        name=bot.user.display_name,
+        icon_url=bot.user.avatar_url
+    )
 
     await ctx.channel.send(embed=msg)
 
@@ -441,14 +636,25 @@ async def fact(ctx):
 async def next_episode(ctx, *args):
     name = apis.next_episode(args)
 
+    print(
+        'Command: next_episode \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
+
     msg = discord.Embed(
         title=name,
         description='',
         color=discord.Color.blurple()
     )
     msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-    msg.set_author(name=bot.user.display_name,
-                   icon_url=bot.user.avatar_url)
+    msg.set_author(
+        name=bot.user.display_name,
+        icon_url=bot.user.avatar_url
+    )
 
     await ctx.channel.send(embed=msg)
 
@@ -462,25 +668,46 @@ async def find_movie(ctx, *args):
     movieId, movieImg = apis.find_movie(args)
     movieTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating = apis.movie_data(movieId)
 
+    print(
+        'Command: find_movie \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
+
     msg = discord.Embed(
         title=movieTitle,
         description='Movie ratings:',
         color=discord.Color.orange()
     )
     msg.set_thumbnail(url=movieImg)
-    msg.add_field(name="IMDb", value=imdbRating,
-                  inline=True)
-    msg.add_field(name="Metacritic", value=metaRating,
-                  inline=True)
-    msg.add_field(name="The Movie Db", value=tmdbRating,
-                  inline=True)
-    msg.add_field(name="Rotten Tomatoes", value=rottRating,
-                  inline=True)
-    msg.add_field(name="Film Affinity", value=filmRating,
-                  inline=True)
+    msg.add_field(
+        name="IMDb", value=imdbRating,
+        inline=True
+    )
+    msg.add_field(
+        name="Metacritic", value=metaRating,
+        inline=True
+    )
+    msg.add_field(
+        name="The Movie Db", value=tmdbRating,
+        inline=True
+    )
+    msg.add_field(
+        name="Rotten Tomatoes", value=rottRating,
+        inline=True
+    )
+    msg.add_field(
+        name="Film Affinity", value=filmRating,
+        inline=True
+    )
     msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-    msg.set_author(name='IMDb',
-                   icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/640px-IMDB_Logo_2016.svg.png')
+    msg.set_author(
+        name='IMDb',
+        icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/640px-IMDB_Logo_2016.svg.png'
+    )
 
     await ctx.channel.send(embed=msg)
 
@@ -494,25 +721,46 @@ async def find_show(ctx, *args):
     showId, showImg = apis.find_show(args)
     showTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating = apis.show_data(showId)
 
+    print(
+        'Command: find_show \n'
+        'User: ' + ctx.message.author.name + '\n'
+                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
+                                                                                                                             'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
+
     msg = discord.Embed(
         title=showTitle,
         description='Show ratings:',
         color=discord.Color.orange()
     )
     msg.set_thumbnail(url=showImg)
-    msg.add_field(name="IMDb", value=imdbRating,
-                  inline=True)
-    msg.add_field(name="Metacritic", value=metaRating,
-                  inline=True)
-    msg.add_field(name="The Movie Db", value=tmdbRating,
-                  inline=True)
-    msg.add_field(name="Rotten Tomatoes", value=rottRating,
-                  inline=True)
-    msg.add_field(name="Film Affinity", value=filmRating,
-                  inline=True)
+    msg.add_field(
+        name="IMDb", value=imdbRating,
+        inline=True
+    )
+    msg.add_field(
+        name="Metacritic", value=metaRating,
+        inline=True
+    )
+    msg.add_field(
+        name="The Movie Db", value=tmdbRating,
+        inline=True
+    )
+    msg.add_field(
+        name="Rotten Tomatoes", value=rottRating,
+        inline=True
+    )
+    msg.add_field(
+        name="Film Affinity", value=filmRating,
+        inline=True
+    )
     msg.set_footer(text="Data gathered from IMDb.")
-    msg.set_author(name='IMDb',
-                   icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/640px-IMDB_Logo_2016.svg.png')
+    msg.set_author(
+        name='IMDb',
+        icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/640px-IMDB_Logo_2016.svg.png'
+    )
 
     await ctx.channel.send(embed=msg)
 
