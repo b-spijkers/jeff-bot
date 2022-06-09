@@ -524,9 +524,13 @@ def restart_bot():
     os.execl(python, python, *sys.argv)
 
 
-@bot.command(name='restart')
+@bot.command(
+    name='restart',
+    brief='Restarts the bot'
+)
 async def restart(ctx):
     if ctx.message.author.id == 273898204960129025:
+        print('Restarting bot...')
         await ctx.send("Restarting bot...")
         restart_bot()
     else:
