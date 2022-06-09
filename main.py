@@ -75,20 +75,20 @@ async def on_guild_remove(guild):  # when the bot is removed from the guild
 async def prefix(ctx, *, prefix: str = None):
     if prefix is None:
         print(
-            'Command: change prefix failed \n'
-            'User: ' + ctx.message.author.name + '\n'
-                                                 'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                                 'Time: ' + time.strftime(
+            'Command: change prefix failed \n',
+            'User: ' + ctx.message.author.name + '\n',
+            'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+            'Time: ' + time.strftime(
                 "%Y-%m-%d %H:%M"
             )
         )
         return await ctx.send(f'Please set a new prefix by typing the new prefix after the command')
     else:
         print(
-            'Command: changed prefix \n'
-            'User: ' + ctx.message.author.name + '\n'
-                                                 'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                                 'Time: ' + time.strftime(
+            'Command: changed prefix \n',
+            'User: ' + ctx.message.author.name + '\n',
+            'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+            'Time: ' + time.strftime(
                 "%Y-%m-%d %H:%M"
             )
         )
@@ -111,12 +111,10 @@ async def pedia(ctx):
     global reaction
 
     print(
-        'Command: Uncyclopedia article \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: Uncyclopedia article \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
 
     title_of_post = uncyclopedia.wikilink()
@@ -196,10 +194,10 @@ async def on_message(message):
 
     if 'el hefe' in message.content.lower():
         print(
-            'Command: el hefe trigger \n'
-            'User: ' + message.author.name + '\n'
-                                             'Guild: ' + message.channel.guild.name + '\n'
-                                                                                      'Time: ' + time.strftime("%Y-%m-%d %H:%M")
+            'Command: el hefe trigger \n',
+            'User: ' + message.author.name + '\n',
+            'Guild: ' + message.channel.guild.name + '\n',
+            'Time: ' + time.strftime("%Y-%m-%d %H:%M")
         )
         mentioned = str(message.author.mention)
         insult = jeffThings.spanish(mentioned)
@@ -207,10 +205,10 @@ async def on_message(message):
 
     if 'el gordo' in message.content.lower():
         print(
-            'Command: el gordo trigger \n'
-            'User: ' + message.author.name + '\n'
-                                             'Guild: ' + message.channel.guild.name + '\n'
-                                                                                      'Time: ' + time.strftime("%Y-%m-%d %H:%M")
+            'Command: el gordo trigger \n',
+            'User: ' + message.author.name + '\n',
+            'Guild: ' + message.channel.guild.name + '\n',
+            'Time: ' + time.strftime("%Y-%m-%d %H:%M")
         )
         mentioned = message.author
         insult = jeffThings.el_gordo(mentioned)
@@ -227,12 +225,10 @@ async def on_message(message):
 )
 async def jeff(ctx):
     print(
-        'Command: my name a jeff \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: my name a jeff \n',,
+    'User: ' + ctx.message.author.name + '\n',,
+    'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',,
+    'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     message = jeffThings.jeff()
     await ctx.channel.send(message)
@@ -245,12 +241,10 @@ async def jeff(ctx):
 )
 async def dad(ctx):
     print(
-        'Command: dad \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: dad \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     joke = funnies.dad()
     msg = discord.Embed(
@@ -268,12 +262,10 @@ async def dad(ctx):
 )
 async def beadick(ctx):
     print(
-        'Command: be a dick \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: be a dick \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     if ctx.message.mentions:
         insult = funnies.insult()
@@ -291,12 +283,10 @@ async def beadick(ctx):
 )
 async def because(ctx):
     print(
-        'Command: because \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: because \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     if ctx.message.mentions:
         msg = foaas.because(str(ctx.author.mention))
@@ -312,12 +302,10 @@ async def because(ctx):
 )
 async def honk(ctx):
     print(
-        'Command: honk \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: honk \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     msg = discord.Embed(color=0xFF5733)
     msg.set_image(url='https://www.pngitem.com/pimgs/m/630-6301861_honk-honk-goose-hd-png-download.png')
@@ -331,12 +319,10 @@ async def honk(ctx):
 )
 async def give(ctx):
     print(
-        'Command: give \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: give \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     if ctx.message.mentions:
         msg = foaas.give(str(ctx.author.mention))
@@ -352,12 +338,10 @@ async def give(ctx):
 )
 async def cool(ctx):
     print(
-        'Command: cool \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: cool \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     if ctx.message.mentions:
         msg = foaas.cool(str(ctx.author.mention))
@@ -374,12 +358,10 @@ async def cool(ctx):
 )
 async def fascinating(ctx):
     print(
-        'Command: fascinating \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: fascinating \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     if ctx.message.mentions:
         msg = foaas.fascinating(str(ctx.author.mention))
@@ -395,12 +377,10 @@ async def fascinating(ctx):
 )
 async def stop(ctx):
     print(
-        'Command: stop \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: stop \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     if ctx.message.mentions:
         msg = foaas.stop(str(ctx.author.mention))
@@ -416,12 +396,10 @@ async def stop(ctx):
 )
 async def yoda(ctx):
     print(
-        'Command: yoda \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: yoda \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     if bot.user.mentioned_in(ctx.message):
         await ctx.channel.send('Fuck you')
@@ -445,12 +423,10 @@ async def yoda(ctx):
 )
 async def jewda(ctx):
     print(
-        'Command: jewda \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: jewda \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     msg = discord.Embed(
         title="Jewda",
@@ -466,12 +442,10 @@ async def jewda(ctx):
 )
 async def dum(ctx):
     print(
-        'Command: dumbledore \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: dumbledore \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     dumble = funnies.dumbledore(str(ctx.author.mention))
     await ctx.channel.send(dumble)
@@ -483,12 +457,10 @@ async def dum(ctx):
 )
 async def kill(ctx):
     print(
-        'Command: kill \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: kill \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     if ctx.message.mentions:
         author_of_msg = str(ctx.author.mention)
@@ -574,12 +546,10 @@ async def kill(ctx):
 @bot.command()
 async def nicht(ctx):
     print(
-        'Command: nicht rijder \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: nicht rijder \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     vid = funnies.nicht()
     await ctx.channel.send(vid)
@@ -588,12 +558,10 @@ async def nicht(ctx):
 @bot.command()
 async def b2ba(ctx):
     print(
-        'Command: born 2 be alive \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: born 2 be alive \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     vid = funnies.b2ba()
     await ctx.channel.send(vid)
@@ -605,12 +573,10 @@ async def b2ba(ctx):
 )
 async def fact(ctx):
     print(
-        'Command: fact \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: fact \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     useless_fact = apis.useless_fact()
     useless_fact.replace('"', "'")
@@ -637,12 +603,10 @@ async def next_episode(ctx, *args):
     name = apis.next_episode(args)
 
     print(
-        'Command: next_episode \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: next_episode \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
 
     msg = discord.Embed(
@@ -669,12 +633,10 @@ async def find_movie(ctx, *args):
     movieTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating = apis.movie_data(movieId)
 
     print(
-        'Command: find_movie \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: find_movie \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
 
     msg = discord.Embed(
@@ -722,12 +684,10 @@ async def find_show(ctx, *args):
     showTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating = apis.show_data(showId)
 
     print(
-        'Command: find_show \n'
-        'User: ' + ctx.message.author.name + '\n'
-                                             'Guild: ' + ctx.channel.guild.name + '\n' 'Guild ID: ' + str(ctx.channel.guild.id) + '\n'
-                                                                                                                             'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
+        'Command: find_show \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
 
     msg = discord.Embed(
