@@ -212,7 +212,7 @@ async def on_message(message):
         )
         mentioned = message.author
         insult = jeffThings.el_gordo(mentioned)
-        insult.set_image(url='https://img.iex.nl/uploads/2017/elgordo2_efc38044-abb2-4eda-82b0-477bae0e3303.jpg')
+        insult.set_image(url='https://pbs.twimg.com/profile_images/1452468940404314114/oCO9SlPF_400x400.jpg')
         await message.channel.send(message.author.mention)
         await message.channel.send(embed=insult)
 
