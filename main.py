@@ -226,9 +226,9 @@ async def on_message(message):
 async def jeff(ctx):
     print(
         'Command: my name a jeff \n',
-    'User: ' + ctx.message.author.name + '\n',
-    'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-    'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
     )
     message = jeffThings.jeff()
     await ctx.channel.send(message)
