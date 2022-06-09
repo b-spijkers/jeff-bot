@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 import random
-# import sys
+import sys
 
 import discord
 from discord.ext import commands
@@ -26,7 +26,7 @@ def get_prefix(bot, message):  # first we define get_prefix
     return prefixes[str(message.guild.id)]  # receive the prefix for the guild id given
 
 
-bot = commands.Bot(command_prefix=get_prefix, )
+bot = commands.Bot(command_prefix=get_prefix)
 
 
 @bot.event
@@ -518,24 +518,19 @@ async def find_show(ctx, *args):
 
 
 # restart bot admin command
-# TODO: Need to get this to work, now everybody can restart the bot. I just need it so only I can restart the bot. Probably have to do it with user id
-# def guild_owner_only():
-#     async def predicate(ctx):
-#         return ctx.author == ctx.guild.owner  # checks if author is the owner
-#
-#     return commands.check(predicate)
-#
-#
-# def restart_bot():
-#     python = sys.executable
-#     os.execl(python, python, *sys.argv)
-#
-#
-# @bot.command(name='restart')
-# @guild_owner_only()
-# async def restart(ctx):
-#     await ctx.send("Restarting bot...")
-#     restart_bot()
+
+def restart_bot():
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
+
+
+@bot.command(name='restart')
+async def restart(ctx):
+    if ctx.message.author.id == 273898204960129025:
+        await ctx.send("Restarting bot...")
+        restart_bot()
+    else:
+        await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO (i wanna die)")
 
 
 bot.run(DISCORD_TOKEN)
