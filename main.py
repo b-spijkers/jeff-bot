@@ -860,7 +860,7 @@ def restart_bot():
 async def restart(ctx):
     if ctx.message.author.id == 273898204960129025:
         print('Restarting bot...\n')
-        await ctx.send("Restarting bot... should be back online after 5 sec. This message doesn't get removed or changed because i'm a dumbass")
+        await ctx.send("Restarting bot... should be back online in 5 sec. This message doesn't get removed or edited because i'm a dumbass")
         restart_bot()
     else:
         await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO (i wanna die)")
