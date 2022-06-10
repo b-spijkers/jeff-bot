@@ -1,1 +1,6 @@
-TOKEN=YOUR TOKEN HERE
+TOKEN=discord_token
+
+HOST=database_host
+USER=database_username
+PASSWORD=database_password
+DATABASE=name_of_database
