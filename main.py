@@ -108,6 +108,15 @@ async def prefix(ctx, *, prefix: str = None):
     help='Be blessed'
 )
 async def kingbas(ctx):
+    print(
+        'Command: Somebody just got blessed by King Bas \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M"
+        )
+    )
+
     message = await ctx.channel.send(file=discord.File('images/kingbas.png'))
     heart_eyes = '\U0001F60D'
     await message.add_reaction(heart_eyes)
