@@ -104,6 +104,16 @@ async def prefix(ctx, *, prefix: str = None):
 
 
 @bot.command(
+    name='kingbas',
+    help='Be blessed'
+)
+async def kingbas(ctx):
+    message = await ctx.channel.send(file=discord.File('images/kingbas.png'))
+    heart_eyes = '\U0001F60D'
+    await message.add_reaction(heart_eyes)
+
+
+@bot.command(
     name='random',
     help='Random uncyclopedia article, which is probably horrible'
 )
