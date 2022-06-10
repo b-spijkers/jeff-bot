@@ -6,6 +6,8 @@ import random
 import sys
 import time
 
+from mysql.connector import connect, Error
+
 import discord
 from discord.ext import commands
 from discord.utils import find
@@ -21,6 +23,30 @@ load_dotenv()
 
 DISCORD_TOKEN = os.getenv("TOKEN")
 
+#
+# DB connection START
+#
+DB_USER = os.getenv("USER")
+DB_PASSWORD = os.getenv("PASSWORD")
+DB_HOST = os.getenv("HOST")
+DB_DATABASE = os.getenv("DATABASE")
+
+try:
+    connection = connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_DATABASE
+    )
+    print('Connected to database')
+except Error as e:
+    print(e)
+
+
+#
+# DB connection END
+#
+
 
 def date_time(self):
     current_time = datetime.datetime.date(self)
@@ -28,42 +54,81 @@ def date_time(self):
 
 
 def get_prefix(bot, message):  # first we define get_prefix
-    with open('prefixes.json', 'r') as f:
-        prefixes = json.load(f)
-    return prefixes[str(message.guild.id)]  # receive the prefix for the guild id given
+    current_guild = str(message.guild.id)
+    select_prefix = f""" SELECT guild_prefix FROM prefixes WHERE guild_id = {current_guild} """
+    with connection.cursor() as cursor:
+        connection.reconnect()
+        cursor.execute(select_prefix)
+        guild_prefix = cursor.fetchall()[0]
+    return guild_prefix
 
 
 bot = commands.Bot(command_prefix=get_prefix)
 
 
 @bot.event
+async def called_once_a_day(guild):
+    if datetime.date.today().weekday() == 0:
+        general = find(lambda x: x.name == 'general', guild.text_channels)
+        if general and general.permissions_for(guild.me).send_messages:
+            await general.send("I hate mondays")
+
+
+@bot.event
 async def on_ready():
-    print('{0.user}'.format(bot) + ' is online and ready')
+    print('{0.user}'.format(bot) + ' is online and ready\n')
     await bot.change_presence(
         activity=discord.Activity(type=discord.ActivityType.watching, name='humans from his pond')
     )
 
 
 @bot.event
-async def on_guild_join(guild):  # when the bot joins the guild
-    with open('prefixes.json', 'r') as f:
-        prefixes = json.load(f)
-
-    prefixes[str(guild.id)] = '//'
-
-    with open('prefixes.json', 'w') as f:
-        json.dump(prefixes, f, indent=4)
+async def on_guild_join(guild):
+    general = find(lambda x: x.name == 'general', guild.text_channels)
+    if general and general.permissions_for(guild.me).send_messages:
+        await general.send("Sup' fuckers. Use //help to check my commands. Use //prefix to set a new prefix")
 
 
 @bot.event
-async def on_guild_remove(guild):  # when the bot is removed from the guild
-    with open('prefixes.json', 'r') as f:
-        prefixes = json.load(f)
+async def on_guild_join(guild, message):  # when the bot joins the guild
+    current_guild = str(message.guild.id)
+    current_guild_name = str(message.guild.name)
+    add_guild = f""" INSERT INTO prefixes VALUES ({current_guild}, {current_guild_name}, '//') """
+    with connection.cursor() as cursor:
+        connection.reconnect()
+        cursor.execute(add_guild)
+        connection.commit()
 
-    prefixes.pop(str(guild.id))  # find the guild.id that bot was removed from
 
-    with open('prefixes.json', 'w') as f:  # deletes the guild.id as well as its prefix
-        json.dump(prefixes, f, indent=4)
+@bot.event
+async def on_guild_remove(guild, message):  # when the bot is removed from the guild
+    current_guild = str(message.guild.id)
+    delete_guild = f""" DELETE FROM prefixes WHERE guild_id = {current_guild} """
+    with connection.cursor() as cursor:
+        connection.reconnect()
+        cursor.execute(delete_guild)
+        connection.commit()
+
+
+@bot.command(
+    help='Show info about Jeff-bot',
+    name='jeffinfo'
+)
+async def jeff_info(ctx):
+    msg = discord.Embed(
+        title='Jeff-bot info',
+        description="I don't know",
+        color=discord.Color.blurple()
+    )
+
+    msg.set_footer(
+        text='Created by: BaronVonBarron#7882'
+    )
+    msg.set_image(url='https://c.tenor.com/RjAxaS7VppAAAAAC/deathstar.gif')
+    msg.set_author(
+        name=bot.user.display_name,
+        icon_url=bot.user.avatar_url
+    )
 
 
 @bot.command(
@@ -79,7 +144,7 @@ async def prefix(ctx, *, prefix: str = None):
             'User: ' + ctx.message.author.name + '\n',
             'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
             'Time: ' + time.strftime(
-                "%Y-%m-%d %H:%M"
+                "%Y-%m-%d %H:%M \n"
             )
         )
         return await ctx.send(f'Please set a new prefix by typing the new prefix after the command')
@@ -89,16 +154,17 @@ async def prefix(ctx, *, prefix: str = None):
             'User: ' + ctx.message.author.name + '\n',
             'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
             'Time: ' + time.strftime(
-                "%Y-%m-%d %H:%M"
+                "%Y-%m-%d %H:%M \n"
             )
         )
-        with open('prefixes.json', 'r') as f:
-            prefixes = json.load(f)
 
-        prefixes[str(ctx.guild.id)] = prefix
+        current_guild = str(ctx.guild.id)
+        update_prefix = f""" UPDATE prefixes SET guild_prefix = '{prefix}' WHERE guild_id = {current_guild} """
 
-        with open('prefixes.json', 'w') as f:  # writes the new prefix into the .json
-            json.dump(prefixes, f, indent=4)
+        with connection.cursor() as cursor:
+            connection.reconnect()
+            cursor.execute(update_prefix)
+            connection.commit()
 
         await ctx.send(f'Prefix changed to: {prefix}')  # confirms the prefix it's been changed to
 
@@ -120,6 +186,32 @@ async def kingbas(ctx):
     message = await ctx.channel.send(file=discord.File('images/kingbas.png'))
     heart_eyes = '\U0001F60D'
     await message.add_reaction(heart_eyes)
+
+
+# Blackjack commands START
+@bot.command(
+    name='joincasino',
+    help='By joining you are allowed to play blackjack(WIP) and other casino games that will be added later'
+)
+async def joinblackjack(ctx):
+    with open('chips.json', 'r') as f:
+        chips = json.load(f)
+
+    chips[str(ctx.author.id)] = '0'
+
+    with open('chips.json', 'w') as f:
+        json.dump(chips, f, indent=4)
+
+
+@bot.command(
+    name='bj',
+    help='By joining you are allowed to play blackjack'
+)
+async def blackjack(ctx):
+    return await ctx.channel.send('Blackjack is still being worked on. No idea when BaronVonBarron#7882 will be done.')
+
+
+# Blackjack commands END
 
 
 @bot.command(
@@ -197,13 +289,6 @@ async def pedia(ctx):
         if str(reaction.emoji) == thumb_down:
             await message.delete()
             await ctx.send("Asshole", delete_after=10)
-
-
-@bot.event
-async def on_guild_join(guild):
-    general = find(lambda x: x.name == 'general', guild.text_channels)
-    if general and general.permissions_for(guild.me).send_messages:
-        await general.send("Sup' fuckers. Use //help to check my commands. Use //prefix to set a new prefix")
 
 
 @bot.event
@@ -329,7 +414,7 @@ async def honk(ctx):
     msg = discord.Embed(color=0xFF5733)
     msg.set_image(url='https://www.pngitem.com/pimgs/m/630-6301861_honk-honk-goose-hd-png-download.png')
 
-    await ctx.channel.send(embed=msg, delete_after=10)
+    await ctx.channel.send(embed=msg)
 
 
 @bot.command(
@@ -758,7 +843,7 @@ def restart_bot():
 async def restart(ctx):
     if ctx.message.author.id == 273898204960129025:
         print('Restarting bot...')
-        await ctx.send("Restarting bot...")
+        await ctx.send("Restarting bot...\n")
         restart_bot()
     else:
         await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO (i wanna die)")
