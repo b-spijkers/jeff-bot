@@ -111,7 +111,7 @@ async def on_guild_remove(guild, message):  # when the bot is removed from the g
 
 
 @bot.command(
-    help='Show info about Jeff-bot',
+    help='Show info about Jeff-bot (not working atm)',
     name='jeffinfo'
 )
 async def jeff_info(ctx):
@@ -179,7 +179,7 @@ async def kingbas(ctx):
         'User: ' + ctx.message.author.name + '\n',
         'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
         'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M"
+            "%Y-%m-%d %H:%M \n"
         )
     )
 
@@ -194,6 +194,15 @@ async def kingbas(ctx):
     help='By joining you are allowed to play blackjack(WIP) and other casino games that will be added later'
 )
 async def joinblackjack(ctx):
+    print(
+        'Command: Tried joining the casino \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
+
     with open('chips.json', 'r') as f:
         chips = json.load(f)
 
@@ -205,9 +214,17 @@ async def joinblackjack(ctx):
 
 @bot.command(
     name='bj',
-    help='By joining you are allowed to play blackjack'
+    help='Play a round of blackjack (WIP)'
 )
 async def blackjack(ctx):
+    print(
+        'Command: Tried to play blackjack \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
     return await ctx.channel.send('Blackjack is still being worked on. No idea when BaronVonBarron#7882 will be done.')
 
 
@@ -842,8 +859,8 @@ def restart_bot():
 )
 async def restart(ctx):
     if ctx.message.author.id == 273898204960129025:
-        print('Restarting bot...')
-        await ctx.send("Restarting bot...\n")
+        print('Restarting bot...\n')
+        await ctx.send("Restarting bot... should be back online after 5 sec. This message doesn't get removed or changed because i'm a dumbass")
         restart_bot()
     else:
         await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO (i wanna die)")
