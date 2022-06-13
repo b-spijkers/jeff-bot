@@ -723,42 +723,75 @@ async def fact(ctx):
 )
 async def next_episode(ctx, *args):
     try:
-        name, countdown, next_day, next_month, next_year, prev_day, prev_month, prev_year = apis.next_episode(args)
+        status = apis.check_next_episode_status(args)
 
-        print(
-            'Command: next_episode \n',
-            'User: ' + ctx.message.author.name + '\n',
-            'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-            'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-        )
+        if status == 'Canceled/Ended':
+            try:
+                name, countdown, next_day, next_month, next_year, prev_day, prev_month, prev_year = apis.next_episode(args)
 
-        msg = discord.Embed(
-            title=name,
-            description='Episode information',
-            color=discord.Color.blurple()
-        )
-        msg.add_field(
-            name="Prev. episode date:", value=str(prev_day) + '-' + str(prev_month) + '-' + str(prev_year),
-            inline=False
-        )
-        msg.add_field(
-            name="Next episode date: ", value=str(next_day) + '-' + str(next_month) + '-' + str(next_year),
-            inline=False
-        )
-        msg.add_field(
-            name="Countdown:", value=countdown,
-            inline=False
-        )
-        msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-        msg.set_author(
-            name=bot.user.display_name,
-            icon_url=bot.user.avatar_url
-        )
+                print(
+                    'Command: next_episode \n',
+                    'User: ' + ctx.message.author.name + '\n',
+                    'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+                    'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
+                )
 
-        await ctx.channel.send(embed=msg)
-    except Exception as e:
-        print(e, '\n')
-        await ctx.channel.send("Either i can't find the show or something else went wrong")
+                msg = discord.Embed(
+                    title=name,
+                    description='Episode information',
+                    color=discord.Color.blurple()
+                )
+                msg.add_field(
+                    name="Prev. episode date:", value=str(prev_day) + ' ' + str(prev_month) + ' ' + str(prev_year),
+                    inline=False
+                )
+                msg.add_field(
+                    name="Next episode date: ", value=str(next_day) + ' ' + str(next_month) + ' ' + str(next_year),
+                    inline=False
+                )
+                msg.add_field(
+                    name="Countdown:", value=countdown,
+                    inline=False
+                )
+                msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+                msg.set_author(
+                    name=bot.user.display_name,
+                    icon_url=bot.user.avatar_url
+                )
+
+                await ctx.channel.send(embed=msg)
+            except Exception as e:
+                print(e, '\n')
+                await ctx.channel.send("Either i can't find the show or something else went wrong")
+        else:
+            try:
+                name, status = apis.next_episode(args)
+
+                print(
+                    'Command: next_episode \n',
+                    'User: ' + ctx.message.author.name + '\n',
+                    'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+                    'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
+                )
+
+                msg = discord.Embed(
+                    title=name + ' - ' + status,
+                    description='Show has ended or has been cancelled',
+                    color=discord.Color.blurple()
+                )
+                msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+                msg.set_author(
+                    name=bot.user.display_name,
+                    icon_url=bot.user.avatar_url
+                )
+
+                await ctx.channel.send(embed=msg)
+            except Exception as e:
+                print(e, '\n')
+                await ctx.channel.send("Either i can't find the show or something else went wrong")
+    except Exception as ex:
+        print(ex, '\n')
+        await ctx.channel.send("API broke, this tends to happen A LOT")
 
 
 @bot.command(
