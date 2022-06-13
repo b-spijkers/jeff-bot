@@ -18,7 +18,29 @@ def next_episode(name):
     response = requests.get('https://catchtheshow.herokuapp.com/api/' + show)
     json_data = json.loads(response.text)
     show_name = json_data['name']
-    return show_name
+    next_episode_countdown = json_data['nextEpisode']['countdown']
+    next_episode_day = json_data['nextEpisode']['date']['day']
+    next_episode_month = json_data['nextEpisode']['date']['month']
+    next_episode_year = json_data['nextEpisode']['date']['year']
+    previous_episode_day = json_data['previousEpisode']['date']['day']
+    previous_episode_month = json_data['previousEpisode']['date']['month']
+    previous_episode_year = json_data['previousEpisode']['date']['year']
+
+    months = {
+        1: 'Jan',
+        2: 'Feb',
+        3: 'Mar',
+        4: 'Apr',
+        5: 'May',
+        6: 'Jun',
+        7: 'Jul',
+        8: 'Aug',
+        9: 'Sep',
+        10: 'Okt',
+        11: 'Nov',
+        12: 'Dec'
+    }
+    return show_name, next_episode_countdown, next_episode_day, months[next_episode_month], next_episode_year,  previous_episode_day, months[previous_episode_month], previous_episode_year
 
 
 def find_movie(name):

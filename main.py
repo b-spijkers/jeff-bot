@@ -117,18 +117,19 @@ async def on_guild_remove(guild, message):  # when the bot is removed from the g
 async def jeff_info(ctx):
     msg = discord.Embed(
         title='Jeff-bot info',
-        description="I don't know",
+        description="*honk*",
         color=discord.Color.blurple()
     )
 
     msg.set_footer(
         text='Created by: BaronVonBarron#7882'
     )
-    msg.set_image(url='https://c.tenor.com/RjAxaS7VppAAAAAC/deathstar.gif')
     msg.set_author(
         name=bot.user.display_name,
         icon_url=bot.user.avatar_url
     )
+
+    await ctx.channel.send(embed=msg)
 
 
 @bot.command(
@@ -716,32 +717,48 @@ async def fact(ctx):
 
 
 @bot.command(
-    help="Shows when the next episode is supposed to air of given TV show",
+    help="Shows when the next episode is supposed to air of given TV . Some show's might not me available",
     brief="<prefix>ne <title_of_show>",
     name="ne"
 )
 async def next_episode(ctx, *args):
-    name = apis.next_episode(args)
+    try:
+        name, countdown, next_day, next_month, next_year, prev_day, prev_month, prev_year = apis.next_episode(args)
 
-    print(
-        'Command: next_episode \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
+        print(
+            'Command: next_episode \n',
+            'User: ' + ctx.message.author.name + '\n',
+            'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+            'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
+        )
 
-    msg = discord.Embed(
-        title=name,
-        description='',
-        color=discord.Color.blurple()
-    )
-    msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-    msg.set_author(
-        name=bot.user.display_name,
-        icon_url=bot.user.avatar_url
-    )
+        msg = discord.Embed(
+            title=name,
+            description='Episode information',
+            color=discord.Color.blurple()
+        )
+        msg.add_field(
+            name="Prev. episode date:", value=str(prev_day) + '-' + str(prev_month) + '-' + str(prev_year),
+            inline=False
+        )
+        msg.add_field(
+            name="Next episode date: ", value=str(next_day) + '-' + str(next_month) + '-' + str(next_year),
+            inline=False
+        )
+        msg.add_field(
+            name="Countdown:", value=countdown,
+            inline=False
+        )
+        msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+        msg.set_author(
+            name=bot.user.display_name,
+            icon_url=bot.user.avatar_url
+        )
 
-    await ctx.channel.send(embed=msg)
+        await ctx.channel.send(embed=msg)
+    except Exception as e:
+        print(e, '\n')
+        await ctx.channel.send("Either i can't find the show or something else went wrong")
 
 
 @bot.command(
