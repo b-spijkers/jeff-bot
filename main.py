@@ -71,7 +71,7 @@ async def called_once_a_day(guild):
     if datetime.date.today().weekday() == 0:
         general = find(lambda x: x.name == 'general', guild.text_channels)
         if general and general.permissions_for(guild.me).send_messages:
-            await general.send("I hate mondays")
+            await general.channel.send("I hate mondays")
 
 
 @bot.event
@@ -117,7 +117,7 @@ async def on_guild_remove(guild, message):  # when the bot is removed from the g
 async def jeff_info(ctx):
     msg = discord.Embed(
         title='Jeff-bot info',
-        description="*honk*",
+        description="Currently Jeff uses 7 API's to give you the best of random garbage. Use `<prefix>why` to figure out why",
         color=discord.Color.blurple()
     )
 
@@ -338,7 +338,15 @@ async def on_message(message):
         await message.channel.send(message.author.mention)
         await message.channel.send(embed=insult)
 
-    await bot.process_commands(message)
+    if 'pong' in message.content.lower():
+        print(
+            'Command: pepeJs at it again \n',
+            'User: ' + message.author.name + '\n',
+            'Guild: ' + message.channel.guild.name + '\n',
+            'Time: ' + time.strftime("%Y-%m-%d %H:%M")
+        )
+        await message.channel.send(str(message.author.mention) + 'Shut up')
+        await bot.process_commands(message)
 
 
 @bot.command(
@@ -354,6 +362,55 @@ async def jeff(ctx):
     )
     message = jeffThings.jeff()
     await ctx.channel.send(message)
+
+
+# returns random joke
+@bot.command(
+    help="Random joke, most are dark. Always specify type of joke. Joke types are: Programming, Misc, Dark, Pun, Spooky, Christmas",
+    brief="Random joke, most are dark. And some are really racist"
+)
+async def joke(ctx, args):
+    print(
+        'Command: joke \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
+    )
+
+    retrieve_joke = apis.joke_finder(args)
+    check_joke = retrieve_joke.__class__ is tuple
+    try:
+        if check_joke:
+            setup, delivery = apis.joke_finder(args)
+            msg = discord.Embed(
+                title=setup,
+                description=delivery,
+                color=0xFF5733,
+            )
+        else:
+            setup = apis.joke_finder(args)
+            msg = discord.Embed(
+                title=setup,
+                color=0xFF5733,
+            )
+        msg.set_footer(
+            text="Requested by: {}".format(
+                ctx.author.display_name
+            )
+        )
+        msg.set_author(
+            name=bot.user.display_name,
+            icon_url=bot.user.avatar_url
+        )
+        await ctx.channel.send(embed=msg)
+    except Exception:
+        await ctx.channel.send("Something went wrong... I've no idea why... Try again")
+
+
+@joke.error
+async def joke_handler(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):  # Check if the exception is what you want to handler
+        await ctx.send(f"Please specify a joke type. Use `<prefix>help joke` for more information")
 
 
 # Returns a dad joke
@@ -629,7 +686,7 @@ async def kill(ctx):
                 ' fucked up ',
                 ' terminated ',
                 ' killed ',
-                ' wasted '
+                ' wasted ',
                 " KO'd "
             ]
             gif = funnies.kill(author_of_msg, str(ctx.message.mentions[0].id))
@@ -725,7 +782,7 @@ async def next_episode(ctx, *args):
     try:
         status = apis.check_next_episode_status(args)
 
-        if status == 'Canceled/Ended':
+        if status != 'Canceled/Ended':
             try:
                 name, countdown, next_day, next_month, next_year, prev_day, prev_month, prev_year = apis.next_episode(args)
 

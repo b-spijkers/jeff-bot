@@ -48,7 +48,8 @@ def kill(author, victim):
         'https://c.tenor.com/tDHcVAwpsbEAAAAC/wasted-funny.gif',
         'https://c.tenor.com/HMc73AnstjEAAAAC/wasted-gta-v.gif',
         'https://c.tenor.com/iEjB32ZQlesAAAAC/epic-meme.gif',
-        'https://media3.giphy.com/media/w29hHnsoaqsy4/giphy.gif?cid=790b7611b892a8e0f1f62a050c49599ace21d60598f91bd2&rid=giphy.gif&ct=g'
+        'https://media3.giphy.com/media/w29hHnsoaqsy4/giphy.gif?cid=790b7611b892a8e0f1f62a050c49599ace21d60598f91bd2&rid=giphy.gif&ct=g',
+        'https://c.tenor.com/2gIn6DLSTOcAAAAd/general-grievous-star-wars.gif'
     ]
 
     victim = '<@!' + victim + '>'

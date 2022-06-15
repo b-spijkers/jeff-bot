@@ -42,20 +42,21 @@ def next_episode(name):
         previous_episode_year = json_data['previousEpisode']['date']['year']
 
         months = {
-            1: 'Jan',
-            2: 'Feb',
-            3: 'Mar',
-            4: 'Apr',
-            5: 'May',
-            6: 'Jun',
-            7: 'Jul',
-            8: 'Aug',
-            9: 'Sep',
+            1 : 'Jan',
+            2 : 'Feb',
+            3 : 'Mar',
+            4 : 'Apr',
+            5 : 'May',
+            6 : 'Jun',
+            7 : 'Jul',
+            8 : 'Aug',
+            9 : 'Sep',
             10: 'Okt',
             11: 'Nov',
             12: 'Dec'
         }
-        return show_name, next_episode_countdown, next_episode_day, months[next_episode_month], next_episode_year,  previous_episode_day, months[previous_episode_month], previous_episode_year
+        return show_name, next_episode_countdown, next_episode_day, months[next_episode_month], next_episode_year, previous_episode_day, \
+            months[previous_episode_month], previous_episode_year
 
 
 def find_movie(name):
@@ -98,3 +99,20 @@ def show_data(movieId):
     rottRating = json_data['rottenTomatoes']
     filmRating = json_data['filmAffinity']
     return showTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating
+
+
+def joke_finder(jokeType):
+    if jokeType == 'misc':
+        jokeType = 'Miscellaneous'
+
+    response = requests.get('https://v2.jokeapi.dev/joke/' + jokeType)
+    json_data = json.loads(response.text)
+    joke_type = json_data['type']
+
+    if joke_type == 'single':
+        joke = json_data['joke']
+        return joke
+    elif joke_type == 'twopart':
+        joke_setup = json_data['setup']
+        joke_delivery = json_data['delivery']
+        return joke_setup, joke_delivery
