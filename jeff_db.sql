@@ -41,9 +41,9 @@ CREATE TABLE IF NOT EXISTS `prefixes` (
 --
 
 INSERT INTO `prefixes` (`guild_id`, `guild_name`, `guild_prefix`) VALUES
-('296015702891167744', NULL, '#'),
+('296015702891167744', 'DE JONGENS MET VLOTTE MONTUURTJES', '#'),
 ('706152322492923925', 'Bas\'s Depression Chamber', '//'),
-('885427295152652289', NULL, '#'),
+('885427295152652289', 'Project', '#'),
 ('946439345320099841', 'Buurman en Buurman praatschuur', 'jeff');
 
 -- --------------------------------------------------------

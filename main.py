@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-import json
 import os
 import random
 import sys
@@ -14,6 +13,7 @@ from discord.utils import find
 from dotenv import load_dotenv
 
 import apis
+import blackjack
 import foaas
 import funnies
 import jeffThings
@@ -70,8 +70,7 @@ bot = commands.Bot(command_prefix=get_prefix)
 async def called_once_a_day(guild):
     if datetime.date.today().weekday() == 0:
         general = find(lambda x: x.name == 'general', guild.text_channels)
-        if general and general.permissions_for(guild.me).send_messages:
-            await general.channel.send("I hate mondays")
+        await general.channel.send("I hate mondays")
 
 
 @bot.event
@@ -111,7 +110,7 @@ async def on_guild_remove(guild, message):  # when the bot is removed from the g
 
 
 @bot.command(
-    help='Show info about Jeff-bot (not working atm)',
+    help='Show info about Jeff-bot',
     name='jeffinfo'
 )
 async def jeff_info(ctx):
@@ -191,10 +190,10 @@ async def kingbas(ctx):
 
 # Blackjack commands START
 @bot.command(
-    name='joincasino',
+    name='jc',
     help='By joining you are allowed to play blackjack(WIP) and other casino games that will be added later'
 )
-async def joinblackjack(ctx):
+async def blackjack_join(ctx):
     print(
         'Command: Tried joining the casino \n',
         'User: ' + ctx.message.author.name + '\n',
@@ -203,21 +202,19 @@ async def joinblackjack(ctx):
             "%Y-%m-%d %H:%M \n"
         )
     )
-
-    with open('chips.json', 'r') as f:
-        chips = json.load(f)
-
-    chips[str(ctx.author.id)] = '0'
-
-    with open('chips.json', 'w') as f:
-        json.dump(chips, f, indent=4)
+    try:
+        blackjack.join_casino(ctx)
+        await ctx.channel.send('You joined the casino! There is fuck all to do at the moment :D')
+    except Exception as e:
+        print(e)
+        await ctx.channel.send('Something went wrong')
 
 
 @bot.command(
     name='bj',
     help='Play a round of blackjack (WIP)'
 )
-async def blackjack(ctx):
+async def blackjack_play(ctx):
     print(
         'Command: Tried to play blackjack \n',
         'User: ' + ctx.message.author.name + '\n',
@@ -226,7 +223,8 @@ async def blackjack(ctx):
             "%Y-%m-%d %H:%M \n"
         )
     )
-    return await ctx.channel.send('Blackjack is still being worked on. No idea when BaronVonBarron#7882 will be done.')
+
+    await ctx.channel.send('Blackjack is still being worked on. No idea when BaronVonBarron#7882 will be done.')
 
 
 # Blackjack commands END
@@ -237,8 +235,6 @@ async def blackjack(ctx):
     help='Random uncyclopedia article, which is probably horrible'
 )
 async def pedia(ctx):
-    global reaction
-
     print(
         'Command: Uncyclopedia article \n',
         'User: ' + ctx.message.author.name + '\n',
@@ -285,28 +281,28 @@ async def pedia(ctx):
     while True:
         try:
             reaction, user = await bot.wait_for("reaction_add", timeout=10.0, check=check)
-        except asyncio.TimeoutError:
-            await message.delete()
-            await ctx.send("I don't have all day....", delete_after=10)
 
-        if str(reaction.emoji) == thumb_up:
-            post = title_of_post.replace(" ", "_")
-            url = "https://en.uncyclopedia.co/wiki/%s" % post
-            embed = discord.Embed(
-                title=title_of_post,
-                description=url,
-                color=discord.Color.blue()
-            )
-            embed.set_author(
-                name="Uncyclopedia", url="https://en.uncyclopedia.co/",
-                icon_url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png"
-            )
-            embed.set_footer(text="Stolen from Uncyclopedia for your entertainment")
-            await message.delete()
-            await ctx.send(embed=embed)
-        if str(reaction.emoji) == thumb_down:
-            await message.delete()
-            await ctx.send("Asshole", delete_after=10)
+            if str(reaction.emoji) == thumb_up:
+                post = title_of_post.replace(" ", "_")
+                url = "https://en.uncyclopedia.co/wiki/%s" % post
+                embed = discord.Embed(
+                    title=title_of_post,
+                    description=url,
+                    color=discord.Color.blue()
+                )
+                embed.set_author(
+                    name="Uncyclopedia", url="https://en.uncyclopedia.co/",
+                    icon_url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png"
+                )
+                embed.set_footer(text="Stolen from Uncyclopedia for your entertainment")
+                await message.delete()
+                await ctx.send(embed=embed)
+            if str(reaction.emoji) == thumb_down:
+                await message.delete()
+                await ctx.send("Asshole", delete_after=10)
+        except asyncio.TimeoutError:
+            await ctx.send("I don't have all day....", delete_after=10)
+            break
 
 
 @bot.event
