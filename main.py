@@ -334,19 +334,26 @@ async def on_message(message):
         )
         mentioned = message.author
         insult = jeffThings.el_gordo(mentioned)
-        insult.set_image(url='https://pbs.twimg.com/profile_images/1452468940404314114/oCO9SlPF_400x400.jpg')
         await message.channel.send(message.author.mention)
         await message.channel.send(embed=insult)
 
-    if 'pong' in message.content.lower():
+    if 'bas is gay!' in message.content.lower():
         print(
-            'Command: pepeJs at it again \n',
+            'Command: PepeJs at it again \n',
             'User: ' + message.author.name + '\n',
             'Guild: ' + message.channel.guild.name + '\n',
             'Time: ' + time.strftime("%Y-%m-%d %H:%M")
         )
-        await message.channel.send(str(message.author.mention) + 'Shut up')
-        await bot.process_commands(message)
+        await message.channel.send(str(message.author.mention) + ' Ur gay')
+    if 'owo' in message.content.lower():
+        print(
+            'Command: PepeJs at it again \n',
+            'User: ' + message.author.name + '\n',
+            'Guild: ' + message.channel.guild.name + '\n',
+            'Time: ' + time.strftime("%Y-%m-%d %H:%M")
+        )
+        await message.channel.send('https://c.tenor.com/Ik-kENFloS0AAAAC/pepega-pepe-the-frog.gif')
+    await bot.process_commands(message)
 
 
 @bot.command(

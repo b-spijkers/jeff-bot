@@ -14,7 +14,7 @@ def el_gordo(author):
     )
     msg.set_author(name=author,
                    icon_url=author.avatar_url)
-    msg.set_image(url='https://img.iex.nl/uploads/2017/elgordo2_efc38044-abb2-4eda-82b0-477bae0e3303.jpg')
+    msg.set_image(url='https://pbs.twimg.com/profile_images/1452468940404314114/oCO9SlPF_400x400.jpg')
     msg.set_footer(text="Mucho grande")
     return msg
 
