@@ -85,7 +85,7 @@ async def on_ready():
 async def on_guild_join(guild):
     general = find(lambda x: x.name == 'general', guild.text_channels)
     if general and general.permissions_for(guild.me).send_messages:
-        await general.send("Sup' fuckers. Use //help to check my commands. Use //prefix to set a new prefix")
+        await general.send("Sup' fuckers. Use //help to check my commands. Use //prefix <new_prefix> to set a new prefix")
 
 
 @bot.event
@@ -227,6 +227,25 @@ async def blackjack_play(ctx):
     await ctx.channel.send('Blackjack is still being worked on. No idea when BaronVonBarron#7882 will be done.')
 
 
+@bot.command(
+    name='cf',
+    help='Play a round of blackjack (WIP)'
+)
+async def blackjack_coinflip(ctx, *args):
+    print(
+        'Command: Flipped a coin \n',
+        'User: ' + ctx.message.author.name + '\n',
+        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
+        'Time: ' + time.strftime(
+            "%Y-%m-%d %H:%M \n"
+        )
+    )
+    try:
+        blackjack.check_entry(ctx)
+        cf_result = blackjack.coinflip(ctx, args[0], args[1])
+        await ctx.channel.send(cf_result)
+    except:
+        await ctx.channel.send('First you must register yourself. Use <prefix>jc')
 # Blackjack commands END
 
 
