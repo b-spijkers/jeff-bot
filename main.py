@@ -960,6 +960,31 @@ async def find_show(ctx, *args):
     await ctx.channel.send(embed=msg)
 
 
+@bot.command(
+    name='rip',
+    brief='Someone died'
+)
+async def rest_in_peace(ctx):
+    if ctx.message.mentions:
+        msg = discord.Embed(
+            title='This man is fucking dead',
+            description='<@' + str(ctx.message.mentions[0].id) + '>' + ' fucking died',
+            color=discord.Color.orange()
+        )
+        msg.set_image(url='https://c.tenor.com/oUvaabzjR3gAAAAd/rip-coffin.gif')
+        msg.set_footer(text='He fucking died')
+        await ctx.send(embed=msg)
+    else:
+        msg = discord.Embed(
+            title='This man is fucking dead',
+            description=ctx.author.mention + ' fucking died',
+            color=discord.Color.orange()
+        )
+        msg.set_image(url='https://c.tenor.com/oUvaabzjR3gAAAAd/rip-coffin.gif')
+        msg.set_footer(text='He fucking died')
+        await ctx.send(embed=msg)
+
+
 # restart bot admin command
 
 def restart_bot():
