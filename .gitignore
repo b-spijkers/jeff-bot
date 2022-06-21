@@ -103,7 +103,7 @@ celerybeat.pid
 
 # Environments
 env
-.env
+botsettings/.env
 .venv
 env/
 venv/

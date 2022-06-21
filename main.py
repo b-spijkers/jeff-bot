@@ -1,1023 +1,503 @@
-import asyncio
 import datetime
 import os
-import random
 import sys
 import time
-
-from mysql.connector import connect, Error
 
 import discord
 from discord.ext import commands
 from discord.utils import find
-from dotenv import load_dotenv
 
-import apis
-import blackjack
-import foaas
-import funnies
-import jeffThings
-import uncyclopedia
-
-load_dotenv()
+from botsettings import prefix, botConsole
+from apicommands import apis, foaas, uncyclopedia
+from casinogames import casinoCommands
+from jeffcommands import jeffThings, jeffFun, jeffHelp
 
 DISCORD_TOKEN = os.getenv("TOKEN")
 
-#
-# DB connection START
-#
-DB_USER = os.getenv("USER")
-DB_PASSWORD = os.getenv("PASSWORD")
-DB_HOST = os.getenv("HOST")
-DB_DATABASE = os.getenv("DATABASE")
 
-try:
-    connection = connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_DATABASE
-    )
-    print('Connected to database')
-except Error as e:
-    print(e)
-
-
-#
-# DB connection END
-#
-
-
+# Get current date and time for console prints
 def date_time(self):
     current_time = datetime.datetime.date(self)
     return current_time
 
 
-def get_prefix(bot, message):  # first we define get_prefix
-    current_guild = str(message.guild.id)
-    select_prefix = f""" SELECT guild_prefix FROM prefixes WHERE guild_id = {current_guild} """
-    with connection.cursor() as cursor:
-        connection.reconnect()
-        cursor.execute(select_prefix)
-        guild_prefix = cursor.fetchall()[0]
-    return guild_prefix
+guild_prefix = prefix.get_prefix
+
+bot = commands.Bot(command_prefix=guild_prefix)
+bot.remove_command('help')
 
 
-bot = commands.Bot(command_prefix=get_prefix)
+# Jeff specific commands and listeners. Like specific words or to other really specific stuff
+class JeffThings(commands.Cog, name='Things Jeff does'):
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author == bot.user:
+            return
 
-
-@bot.event
-async def called_once_a_day(guild):
-    if datetime.date.today().weekday() == 0:
-        general = find(lambda x: x.name == 'general', guild.text_channels)
-        await general.channel.send("I hate mondays")
-
-
-@bot.event
-async def on_ready():
-    print('{0.user}'.format(bot) + ' is online and ready\n')
-    await bot.change_presence(
-        activity=discord.Activity(type=discord.ActivityType.watching, name='humans from his pond')
-    )
-
-
-@bot.event
-async def on_guild_join(guild):
-    general = find(lambda x: x.name == 'general', guild.text_channels)
-    if general and general.permissions_for(guild.me).send_messages:
-        await general.send("Sup' fuckers. Use //help to check my commands. Use //prefix <new_prefix> to set a new prefix")
-
-
-@bot.event
-async def on_guild_join(guild, message):  # when the bot joins the guild
-    current_guild = str(message.guild.id)
-    current_guild_name = str(message.guild.name)
-    add_guild = f""" INSERT INTO prefixes VALUES ({current_guild}, {current_guild_name}, '//') """
-    with connection.cursor() as cursor:
-        connection.reconnect()
-        cursor.execute(add_guild)
-        connection.commit()
-
-
-@bot.event
-async def on_guild_remove(guild, message):  # when the bot is removed from the guild
-    current_guild = str(message.guild.id)
-    delete_guild = f""" DELETE FROM prefixes WHERE guild_id = {current_guild} """
-    with connection.cursor() as cursor:
-        connection.reconnect()
-        cursor.execute(delete_guild)
-        connection.commit()
-
-
-@bot.command(
-    help='Show info about Jeff-bot',
-    name='jeffinfo'
-)
-async def jeff_info(ctx):
-    msg = discord.Embed(
-        title='Jeff-bot info',
-        description="Currently Jeff uses 7 API's to give you the best of random garbage. Use `<prefix>why` to figure out why",
-        color=discord.Color.blurple()
-    )
-
-    msg.set_footer(
-        text='Created by: BaronVonBarron#7882'
-    )
-    msg.set_author(
-        name=bot.user.display_name,
-        icon_url=bot.user.avatar_url
-    )
-
-    await ctx.channel.send(embed=msg)
-
-
-@bot.command(
-    pass_context=True,
-    help="Change Jeff's prefix",
-    brief="Type: <prefix> <new prefix>"
-)
-@commands.has_permissions(administrator=True)  # ensure that only administrators can use this command
-async def prefix(ctx, *, prefix: str = None):
-    if prefix is None:
-        print(
-            'Command: change prefix failed \n',
-            'User: ' + ctx.message.author.name + '\n',
-            'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-            'Time: ' + time.strftime(
-                "%Y-%m-%d %H:%M \n"
+        if 'el hefe' in message.content.lower():
+            print(
+                'Command: el hefe trigger \n',
+                'User: ' + message.author.name + '\n',
+                'Guild: ' + message.channel.guild.name + '\n',
+                'Time: ' + time.strftime("%Y-%m-%d %H:%M")
             )
-        )
-        return await ctx.send(f'Please set a new prefix by typing the new prefix after the command')
-    else:
-        print(
-            'Command: changed prefix \n',
-            'User: ' + ctx.message.author.name + '\n',
-            'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-            'Time: ' + time.strftime(
-                "%Y-%m-%d %H:%M \n"
+            mentioned = str(message.author.mention)
+            insult = jeffThings.spanish(mentioned)
+            await message.channel.send(insult)
+
+        if 'el gordo' in message.content.lower():
+            print(
+                'Command: el gordo trigger \n',
+                'User: ' + message.author.name + '\n',
+                'Guild: ' + message.channel.guild.name + '\n',
+                'Time: ' + time.strftime("%Y-%m-%d %H:%M")
             )
-        )
+            mentioned = message.author
+            insult = jeffThings.el_gordo(mentioned)
+            await message.channel.send(message.author.mention)
+            await message.channel.send(embed=insult)
 
-        current_guild = str(ctx.guild.id)
-        update_prefix = f""" UPDATE prefixes SET guild_prefix = '{prefix}' WHERE guild_id = {current_guild} """
-
-        with connection.cursor() as cursor:
-            connection.reconnect()
-            cursor.execute(update_prefix)
-            connection.commit()
-
-        await ctx.send(f'Prefix changed to: {prefix}')  # confirms the prefix it's been changed to
-
-
-@bot.command(
-    name='kingbas',
-    help='Be blessed'
-)
-async def kingbas(ctx):
-    print(
-        'Command: Somebody just got blessed by King Bas \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
-    )
-
-    message = await ctx.channel.send(file=discord.File('images/kingbas.png'))
-    heart_eyes = '\U0001F60D'
-    await message.add_reaction(heart_eyes)
-
-
-# Blackjack commands START
-@bot.command(
-    name='jc',
-    help='By joining you are allowed to play blackjack(WIP) and other casino games that will be added later'
-)
-async def blackjack_join(ctx):
-    print(
-        'Command: Tried joining the casino \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
-    )
-    try:
-        blackjack.join_casino(ctx)
-        await ctx.channel.send('You joined the casino! There is fuck all to do at the moment :D')
-    except Exception as e:
-        print(e)
-        await ctx.channel.send('Something went wrong')
-
-
-@bot.command(
-    name='bj',
-    help='Play a round of blackjack (WIP)'
-)
-async def blackjack_play(ctx):
-    print(
-        'Command: Tried to play blackjack \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
-    )
-
-    await ctx.channel.send('Blackjack is still being worked on. No idea when BaronVonBarron#7882 will be done.')
-
-
-@bot.command(
-    name='cf',
-    help='Play a round of blackjack (WIP)'
-)
-async def blackjack_coinflip(ctx, *args):
-    print(
-        'Command: Flipped a coin \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime(
-            "%Y-%m-%d %H:%M \n"
-        )
-    )
-    try:
-        blackjack.check_entry(ctx)
-        cf_result = blackjack.coinflip(ctx, args[0], args[1])
-        await ctx.channel.send(cf_result)
-    except:
-        await ctx.channel.send('First you must register yourself. Use <prefix>jc')
-# Blackjack commands END
-
-
-@bot.command(
-    name='random',
-    help='Random uncyclopedia article, which is probably horrible'
-)
-async def pedia(ctx):
-    print(
-        'Command: Uncyclopedia article \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-
-    title_of_post = uncyclopedia.wikilink()
-    embed = discord.Embed(
-        title="Title: " + title_of_post,
-        description="Want to view this article?",
-        color=discord.Color.blue()
-    )
-    embed.set_author(
-        name="Uncyclopedia", url="https://en.uncyclopedia.co/",
-        icon_url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png"
-    )
-    embed.set_thumbnail(url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png")
-    embed.add_field(
-        name="What do?", value="Sends a link on thumbs up. Removes the message on thumbs down.",
-        inline=False
-    )
-    embed.set_footer(
-        text="Requested by: {}".format(
-            ctx.author.display_name
-        ) + ". Jeff has worked very very hard to send you this message."
-    )
-
-    message = await ctx.send(embed=embed, delete_after=10)
-
-    thumb_up = '👍'
-    thumb_down = '👎'
-
-    await message.add_reaction(thumb_up)
-    await message.add_reaction(thumb_down)
-
-    def check(reaction, user):
-        return user == ctx.author and str(
-            reaction.emoji
-        ) in [thumb_up, thumb_down]
-
-    member = ctx.author
-
-    while True:
-        try:
-            reaction, user = await bot.wait_for("reaction_add", timeout=10.0, check=check)
-
-            if str(reaction.emoji) == thumb_up:
-                post = title_of_post.replace(" ", "_")
-                url = "https://en.uncyclopedia.co/wiki/%s" % post
-                embed = discord.Embed(
-                    title=title_of_post,
-                    description=url,
-                    color=discord.Color.blue()
-                )
-                embed.set_author(
-                    name="Uncyclopedia", url="https://en.uncyclopedia.co/",
-                    icon_url="https://images.uncyclomedia.co/uncyclopedia/en/b/bc/Wiki.png"
-                )
-                embed.set_footer(text="Stolen from Uncyclopedia for your entertainment")
-                await message.delete()
-                await ctx.send(embed=embed)
-            if str(reaction.emoji) == thumb_down:
-                await message.delete()
-                await ctx.send("Asshole", delete_after=10)
-        except asyncio.TimeoutError:
-            await ctx.send("I don't have all day....", delete_after=10)
-            break
-
-
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-
-    if 'el hefe' in message.content.lower():
-        print(
-            'Command: el hefe trigger \n',
-            'User: ' + message.author.name + '\n',
-            'Guild: ' + message.channel.guild.name + '\n',
-            'Time: ' + time.strftime("%Y-%m-%d %H:%M")
-        )
-        mentioned = str(message.author.mention)
-        insult = jeffThings.spanish(mentioned)
-        await message.channel.send(insult)
-
-    if 'el gordo' in message.content.lower():
-        print(
-            'Command: el gordo trigger \n',
-            'User: ' + message.author.name + '\n',
-            'Guild: ' + message.channel.guild.name + '\n',
-            'Time: ' + time.strftime("%Y-%m-%d %H:%M")
-        )
-        mentioned = message.author
-        insult = jeffThings.el_gordo(mentioned)
-        await message.channel.send(message.author.mention)
-        await message.channel.send(embed=insult)
-
-    if 'bas is gay!' in message.content.lower():
-        print(
-            'Command: PepeJs at it again \n',
-            'User: ' + message.author.name + '\n',
-            'Guild: ' + message.channel.guild.name + '\n',
-            'Time: ' + time.strftime("%Y-%m-%d %H:%M")
-        )
-        await message.channel.send(str(message.author.mention) + ' Ur gay')
-    if 'owo' in message.content.lower():
-        print(
-            'Command: PepeJs at it again \n',
-            'User: ' + message.author.name + '\n',
-            'Guild: ' + message.channel.guild.name + '\n',
-            'Time: ' + time.strftime("%Y-%m-%d %H:%M")
-        )
-        await message.channel.send('https://c.tenor.com/Ik-kENFloS0AAAAC/pepega-pepe-the-frog.gif')
-    await bot.process_commands(message)
-
-
-@bot.command(
-    help="Jeff",
-    brief="My name a Jeff"
-)
-async def jeff(ctx):
-    print(
-        'Command: my name a jeff \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    message = jeffThings.jeff()
-    await ctx.channel.send(message)
-
-
-# returns random joke
-@bot.command(
-    help="Random joke, most are dark. Always specify type of joke. Joke types are: Programming, Misc, Dark, Pun, Spooky, Christmas",
-    brief="Random joke, most are dark. And some are really racist"
-)
-async def joke(ctx, args):
-    print(
-        'Command: joke \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-
-    retrieve_joke = apis.joke_finder(args)
-    check_joke = retrieve_joke.__class__ is tuple
-    try:
-        if check_joke:
-            setup, delivery = apis.joke_finder(args)
-            msg = discord.Embed(
-                title=setup,
-                description=delivery,
-                color=0xFF5733,
+        if 'bas is gay!' in message.content.lower():
+            print(
+                'Command: PepeJs at it again \n',
+                'User: ' + message.author.name + '\n',
+                'Guild: ' + message.channel.guild.name + '\n',
+                'Time: ' + time.strftime("%Y-%m-%d %H:%M")
             )
-        else:
-            setup = apis.joke_finder(args)
-            msg = discord.Embed(
-                title=setup,
-                color=0xFF5733,
+            await message.channel.send(str(message.author.mention) + ' Ur gay')
+        if 'owo' in message.content.lower():
+            print(
+                'Command: PepeJs at it again \n',
+                'User: ' + message.author.name + '\n',
+                'Guild: ' + message.channel.guild.name + '\n',
+                'Time: ' + time.strftime("%Y-%m-%d %H:%M")
             )
-        msg.set_footer(
-            text="Requested by: {}".format(
-                ctx.author.display_name
-            )
-        )
-        msg.set_author(
-            name=bot.user.display_name,
-            icon_url=bot.user.avatar_url
-        )
-        await ctx.channel.send(embed=msg)
-    except Exception:
-        await ctx.channel.send("Something went wrong... I've no idea why... Try again")
+            await message.channel.send('https://c.tenor.com/Ik-kENFloS0AAAAC/pepega-pepe-the-frog.gif')
 
-
-@joke.error
-async def joke_handler(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):  # Check if the exception is what you want to handler
-        await ctx.send(f"Please specify a joke type. Use `<prefix>help joke` for more information")
-
-
-# Returns a dad joke
-@bot.command(
-    help="Random dad joke from a library with around 630 dad jokes",
-    brief="Random dad joke"
-)
-async def dad(ctx):
-    print(
-        'Command: dad \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
+    @commands.command(
+        help="Jeff",
+        brief="My name a Jeff"
     )
-    joke = funnies.dad()
-    msg = discord.Embed(
-        title="Hi, I'm dad",
-        description=joke,
-        color=0xFF5733,
+    async def jeff(self, ctx):
+        botConsole.log_command(ctx)
+        message = jeffThings.jeff()
+        await ctx.channel.send(message)
+
+    @commands.command(
+        help="Honk. Aliases are: `honk`",
+        brief="Honk [alias = `honk`]",
+        aliases=['honk']
     )
-    await ctx.channel.send(embed=msg)
+    async def jeff_honk(self, ctx):
+        botConsole.log_command(ctx)
+        await jeffThings.jeffhonk(ctx)
 
 
-# Returns a random insult
-@bot.command(
-    help="Returns a random insult which makes no sense pretty much all of the time",
-    brief="Returns a random insult which makes no sense"
-)
-async def beadick(ctx):
-    print(
-        'Command: be a dick \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    if ctx.message.mentions:
-        insult = funnies.insult()
-        await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + insult)
-    else:
-        insult = funnies.insult()
-        await ctx.channel.send(ctx.author.mention + ' ' + insult)
-
-
-# Because fuck you
-@bot.command(
-    name="why",
-    help="Why? Because fuck you, that's why.",
-    brief="Why? Because fuck you, that's why."
-)
-async def because(ctx):
-    print(
-        'Command: because \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    if ctx.message.mentions:
-        msg = foaas.because(str(ctx.author.mention))
-        await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
-    else:
-        msg = foaas.because(str(ctx.author.mention))
-        await ctx.channel.send(msg)
-
-
-@bot.command(
-    help="Honk",
-    brief="Honk"
-)
-async def honk(ctx):
-    print(
-        'Command: honk \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    msg = discord.Embed(color=0xFF5733)
-    msg.set_image(url='https://www.pngitem.com/pimgs/m/630-6301861_honk-honk-goose-hd-png-download.png')
-
-    await ctx.channel.send(embed=msg)
-
-
-@bot.command(
-    help="Like jeff gives a fuck",
-    brief="Jeff doesn't give a fuck"
-)
-async def give(ctx):
-    print(
-        'Command: give \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    if ctx.message.mentions:
-        msg = foaas.give(str(ctx.author.mention))
-        await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
-    else:
-        msg = foaas.give(str(ctx.author.mention))
-        await ctx.channel.send(msg)
-
-
-@bot.command(
-    help="Cool story, bro",
-    brief="Cool story, bro"
-)
-async def cool(ctx):
-    print(
-        'Command: cool \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    if ctx.message.mentions:
-        msg = foaas.cool(str(ctx.author.mention))
-        await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
-    else:
-        msg = foaas.cool(str(ctx.author.mention))
-        await ctx.channel.send(msg)
-
-
-@bot.command(
-    help="Too lazy to explain",
-    brief="Fascinating story",
-    name='fasc'
-)
-async def fascinating(ctx):
-    print(
-        'Command: fascinating \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    if ctx.message.mentions:
-        msg = foaas.fascinating(str(ctx.author.mention))
-        await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
-    else:
-        msg = foaas.fascinating(str(ctx.author.mention))
-        await ctx.channel.send(msg)
-
-
-@bot.command(
-    help="Too lazy to explain",
-    brief="Don't want to talk"
-)
-async def stop(ctx):
-    print(
-        'Command: stop \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    if ctx.message.mentions:
-        msg = foaas.stop(str(ctx.author.mention))
-        await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
-    else:
-        msg = foaas.stop(str(ctx.author.mention))
-        await ctx.channel.send(msg)
-
-
-@bot.command(
-    help="Too lazy to explain",
-    brief="Tells you to fuck off like he's yoda, must @mention someone"
-)
-async def yoda(ctx):
-    print(
-        'Command: yoda \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    if bot.user.mentioned_in(ctx.message):
-        await ctx.channel.send('Fuck you')
-    elif ctx.message.mentions:
-        mentioned = '<@' + str(ctx.message.mentions[0].id) + '>'
-        msg = funnies.yoda(mentioned)
-        await ctx.channel.send(msg)
-    else:
-        if '#yoda <@mention>' in ctx.message.content:
-            error = 'Very funny, asshole'
-        else:
-            error = 'Good job, idiot. Command is `#yoda <@mention>`'
-        await ctx.channel.send(error, delete_after=10)
-
-
-# Jewda
-@bot.command(
-    help="Jewda",
-    brief="Jewda",
-    name="jooda"
-)
-async def jewda(ctx):
-    print(
-        'Command: jewda \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    msg = discord.Embed(
-        title="Jewda",
-        color=0xFF5733
-    )
-    msg.set_image(url='https://pbs.twimg.com/profile_images/1223826538660974593/7Clo2xOB_400x400.jpg')
-    await ctx.channel.send(embed=msg)
-
-
-@bot.command(
-    help="Too lazy to explain",
-    brief="Too lazy to explain"
-)
-async def dum(ctx):
-    print(
-        'Command: dumbledore \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    dumble = funnies.dumbledore(str(ctx.author.mention))
-    await ctx.channel.send(dumble)
-
-
-@bot.command(
-    help="Too lazy to explain",
-    brief="Kill someone or everyone"
-)
-async def kill(ctx):
-    print(
-        'Command: kill \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    if ctx.message.mentions:
-        author_of_msg = str(ctx.author.mention)
-        victim = '<@!' + str(ctx.message.mentions[0].id) + '>'
-
-        if '!' not in author_of_msg:
-            author = author_of_msg[:2] + '!' + author_of_msg[2:]
-            author_of_msg = author
-
-        if bot.user.mentioned_in(ctx.message):
-            gif = 'https://c.tenor.com/N1eC5_O9KiAAAAAd/justketh-goose-attack.gif'
-            msg = discord.Embed(
-                description='Nice try, bitch!',
-                color=discord.Color.red()
-            )
-            msg.set_author(
-                name=bot.user.display_name,
-                icon_url=bot.user.avatar_url
-            )
-            msg.set_image(url=gif)
-        elif author_of_msg == victim:
-            suicide_messages = [
-                ' robloxed themselves',
-                ' committed neck rope',
-                ' game overed themselves',
-                ' wasted themselves'
-            ]
-            gif = funnies.kill(author_of_msg, str(ctx.message.mentions[0].id))
-            msg = discord.Embed(
-                description=str(ctx.author.mention) + random.choice(suicide_messages),
-                color=discord.Color.red()
-            )
-            msg.set_author(
-                name=ctx.author.display_name,
-                icon_url=ctx.author.avatar_url
-            )
-            msg.set_image(url=gif)
-        else:
-            killed_messages = [
-                ' brutalized ',
-                ' murdered ',
-                ' rekt ',
-                ' game overed ',
-                ' fucked up ',
-                ' terminated ',
-                ' killed ',
-                ' wasted ',
-                " KO'd "
-            ]
-            gif = funnies.kill(author_of_msg, str(ctx.message.mentions[0].id))
-            msg = discord.Embed(
-                description=str(ctx.author.mention) + random.choice(killed_messages) + '<@' + str(
-                    ctx.message.mentions[0].id
-                ) + '>',
-                color=discord.Color.blue()
-            )
-            msg.set_image(url=gif)
-    elif '@everyone' in ctx.message.content:
-        msg = discord.Embed(
-            description="Jeff is done with this planet",
-            color=discord.Color.blurple()
-        )
-        msg.set_footer(
-            text="Requested by: {}".format(
-                ctx.author.display_name
-            ) + ". Jeff has always wanted to do this"
-        )
-        msg.set_image(url='https://c.tenor.com/RjAxaS7VppAAAAAC/deathstar.gif')
-        msg.set_author(
-            name=bot.user.display_name,
-            icon_url=bot.user.avatar_url
-        )
-    else:
-        msg = discord.Embed(
-            title='Uh oh! Someone is retarded!',
-            description='Must @mention someone you egg!',
-            color=discord.Color.red()
-        )
-
-    await ctx.channel.send(embed=msg)
-
-
-@bot.command()
-async def nicht(ctx):
-    print(
-        'Command: nicht rijder \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    vid = funnies.nicht()
-    await ctx.channel.send(vid)
-
-
-@bot.command()
-async def b2ba(ctx):
-    print(
-        'Command: born 2 be alive \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    vid = funnies.b2ba()
-    await ctx.channel.send(vid)
-
-
-@bot.command(
-    help="Gives you a random useless fact",
-    brief="Gives you a random useless fact"
-)
-async def fact(ctx):
-    print(
-        'Command: fact \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-    useless_fact = apis.useless_fact()
-    useless_fact.replace('"', "'")
-    msg = discord.Embed(
-        title="Random bullshit, GO!",
-        description=useless_fact,
-        color=discord.Color.blurple()
-    )
-    msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-    msg.set_author(
-        name=bot.user.display_name,
-        icon_url=bot.user.avatar_url
-    )
-
-    await ctx.channel.send(embed=msg)
-
-
-@bot.command(
-    help="Shows when the next episode is supposed to air of given TV . Some show's might not me available",
-    brief="<prefix>ne <title_of_show>",
-    name="ne"
-)
-async def next_episode(ctx, *args):
-    try:
-        status = apis.check_next_episode_status(args)
-
-        if status != 'Canceled/Ended':
-            try:
-                name, countdown, next_day, next_month, next_year, prev_day, prev_month, prev_year = apis.next_episode(args)
-
-                print(
-                    'Command: next_episode \n',
-                    'User: ' + ctx.message.author.name + '\n',
-                    'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-                    'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-                )
-
-                msg = discord.Embed(
-                    title=name,
-                    description='Episode information',
-                    color=discord.Color.blurple()
-                )
-                msg.add_field(
-                    name="Prev. episode date:", value=str(prev_day) + ' ' + str(prev_month) + ' ' + str(prev_year),
-                    inline=False
-                )
-                msg.add_field(
-                    name="Next episode date: ", value=str(next_day) + ' ' + str(next_month) + ' ' + str(next_year),
-                    inline=False
-                )
-                msg.add_field(
-                    name="Countdown:", value=countdown,
-                    inline=False
-                )
-                msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-                msg.set_author(
-                    name=bot.user.display_name,
-                    icon_url=bot.user.avatar_url
-                )
-
-                await ctx.channel.send(embed=msg)
-            except Exception as e:
-                print(e, '\n')
-                await ctx.channel.send("Either i can't find the show or something else went wrong")
-        else:
-            try:
-                name, status = apis.next_episode(args)
-
-                print(
-                    'Command: next_episode \n',
-                    'User: ' + ctx.message.author.name + '\n',
-                    'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-                    'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-                )
-
-                msg = discord.Embed(
-                    title=name + ' - ' + status,
-                    description='Show has ended or has been cancelled',
-                    color=discord.Color.blurple()
-                )
-                msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-                msg.set_author(
-                    name=bot.user.display_name,
-                    icon_url=bot.user.avatar_url
-                )
-
-                await ctx.channel.send(embed=msg)
-            except Exception as e:
-                print(e, '\n')
-                await ctx.channel.send("Either i can't find the show or something else went wrong")
-    except Exception as ex:
-        print(ex, '\n')
-        await ctx.channel.send("API broke, this tends to happen A LOT")
-
-
-@bot.command(
-    help="<prefix>fm <title_of_movie>",
-    brief="Gets movie score",
-    name="fm"
-)
-async def find_movie(ctx, *args):
-    movieId, movieImg = apis.find_movie(args)
-    movieTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating = apis.movie_data(movieId)
-
-    print(
-        'Command: find_movie \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-
-    msg = discord.Embed(
-        title=movieTitle,
-        description='Movie ratings:',
-        color=discord.Color.orange()
-    )
-    msg.set_thumbnail(url=movieImg)
-    msg.add_field(
-        name="IMDb", value=imdbRating,
-        inline=True
-    )
-    msg.add_field(
-        name="Metacritic", value=metaRating,
-        inline=True
-    )
-    msg.add_field(
-        name="The Movie Db", value=tmdbRating,
-        inline=True
-    )
-    msg.add_field(
-        name="Rotten Tomatoes", value=rottRating,
-        inline=True
-    )
-    msg.add_field(
-        name="Film Affinity", value=filmRating,
-        inline=True
-    )
-    msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-    msg.set_author(
-        name='IMDb',
-        icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/640px-IMDB_Logo_2016.svg.png'
-    )
-
-    await ctx.channel.send(embed=msg)
-
-
-@bot.command(
-    help="<prefix>fs <title_of_show>",
-    brief="Gets show score",
-    name="fs"
-)
-async def find_show(ctx, *args):
-    showId, showImg = apis.find_show(args)
-    showTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating = apis.show_data(showId)
-
-    print(
-        'Command: find_show \n',
-        'User: ' + ctx.message.author.name + '\n',
-        'Guild: ' + ctx.channel.guild.name + '\n', 'Guild ID: ' + str(ctx.channel.guild.id) + '\n',
-        'Time: ' + time.strftime("%Y-%m-%d %H:%M \n")
-    )
-
-    msg = discord.Embed(
-        title=showTitle,
-        description='Show ratings:',
-        color=discord.Color.orange()
-    )
-    msg.set_thumbnail(url=showImg)
-    msg.add_field(
-        name="IMDb", value=imdbRating,
-        inline=True
-    )
-    msg.add_field(
-        name="Metacritic", value=metaRating,
-        inline=True
-    )
-    msg.add_field(
-        name="The Movie Db", value=tmdbRating,
-        inline=True
-    )
-    msg.add_field(
-        name="Rotten Tomatoes", value=rottRating,
-        inline=True
-    )
-    msg.add_field(
-        name="Film Affinity", value=filmRating,
-        inline=True
-    )
-    msg.set_footer(text="Data gathered from IMDb.")
-    msg.set_author(
-        name='IMDb',
-        icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/640px-IMDB_Logo_2016.svg.png'
-    )
-
-    await ctx.channel.send(embed=msg)
-
-
-@bot.command(
-    name='rip',
-    brief='Someone died'
-)
-async def rest_in_peace(ctx):
-    if ctx.message.mentions:
-        msg = discord.Embed(
-            title='This man is fucking dead',
-            description='<@' + str(ctx.message.mentions[0].id) + '>' + ' fucking died',
-            color=discord.Color.orange()
-        )
-        msg.set_image(url='https://c.tenor.com/oUvaabzjR3gAAAAd/rip-coffin.gif')
-        msg.set_footer(text='He fucking died')
-        await ctx.send(embed=msg)
-    else:
-        msg = discord.Embed(
-            title='This man is fucking dead',
-            description=ctx.author.mention + ' fucking died',
-            color=discord.Color.orange()
-        )
-        msg.set_image(url='https://c.tenor.com/oUvaabzjR3gAAAAd/rip-coffin.gif')
-        msg.set_footer(text='He fucking died')
-        await ctx.send(embed=msg)
-
-
-# restart bot admin command
-
+# restart bot admin command method
 def restart_bot():
     python = sys.executable
     os.execl(python, python, *sys.argv)
 
 
-@bot.command(
-    name='restart',
-    brief='Restarts the bot'
-)
-async def restart(ctx):
-    if ctx.message.author.id == 273898204960129025:
-        print('Restarting bot...\n')
-        await ctx.send("Restarting bot... should be back online in 5 sec. This message doesn't get removed or edited because i'm a dumbass")
-        restart_bot()
-    else:
-        await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO (i wanna die)")
+class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):  # Standard commands basically every bot has
+    def __init__(self, bot):
+        self.bot = bot
 
+    @commands.Cog.listener()
+    async def called_once_a_day(self, guild):
+        if datetime.date.today().weekday() == 0:
+            general = find(lambda x: x.name == 'general', guild.text_channels)
+            await general.channel.send("I hate mondays")
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print('{0.user}'.format(bot) + ' is online and ready\n')
+        await bot.change_presence(
+            activity=discord.Activity(type=discord.ActivityType.watching, name='humans from his pond')
+        )
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        general = find(lambda x: x.name == 'general', guild.text_channels)
+        if general and general.permissions_for(guild.me).send_messages:
+            await general.send("Sup' fuckers. Use //help to check my commands. Use //prefix <new_prefix> to set a new prefix")
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, message):  # when the bot joins the guild
+        prefix.add_guild(message)
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, message):  # when the bot is removed from the guild
+        prefix.remove_guild(message)
+
+    @commands.command(
+        help='Show info about Jeff-bot. Aliases are: `info`, `jeffinfo`',
+        brief='Show info about Jeff-bot [Aliases = `info`, `jeffinfo`]',
+        aliases=['info', 'jeffinfo']
+    )
+    async def jeff_info(self, ctx):
+        await jeffHelp.jeff_info(self, ctx, bot)
+
+    @commands.command()
+    async def help(self, ctx):
+        await jeffHelp.help(self, ctx, bot, guild_prefix)
+
+    @commands.command(
+        pass_context=True,
+        help="Change Jeff's prefix. Aliases are: `prefix`",
+        brief="Type: <prefix> <new prefix> [Alias",
+        aliases=['prefix']
+    )
+    @commands.has_permissions(administrator=True)  # ensure that only administrators can use this command
+    async def set_prefix(self, ctx, *, newprefix: str = None):
+        await prefix.new_prefix(ctx, newprefix)
+
+    @commands.command(
+        aliases=['restart', 'boop']
+    )
+    async def restart_bot(self, ctx):
+        if ctx.message.author.id == 273898204960129025:
+            print('Restarting bot...\n')
+            await ctx.send(
+                "Restarting bot... should be back online in 5 sec. This message doesn't get removed or edited because i'm a dumbass"
+            )
+            restart_bot()
+        else:
+            await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO (i wanna die)")
+
+
+class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showing bas at his prime. What a king
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(
+        help='Be blessed',
+        aliases=['kingbas', 'bas']
+    )
+    async def king_bas(self, ctx):
+        botConsole.log_command(ctx)
+        await jeffFun.kingbas(ctx)
+
+
+class Casino(commands.Cog, name='Casino commands'):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(
+        help='By joining you are allowed to play blackjack(WIP) and other casino games that will be added later',
+        aliases=['jc']
+    )
+    async def casino_join(self, ctx):
+        botConsole.log_command(ctx)
+        try:
+            casinoCommands.join_casino(ctx)
+            await ctx.channel.send('You joined the casino! There is fuck all to do at the moment :D')
+        except Exception as e:
+            print(e)
+            await ctx.channel.send('Something went wrong')
+
+    @commands.command(
+        help='Play a round of blackjack (WIP)',
+        aliases=['bj', 'blackjack']
+    )
+    async def blackjack_play(self, ctx):
+        botConsole.log_command(ctx)
+        await ctx.channel.send('Blackjack is still being worked on. No idea when BaronVonBarron#7882 will be done.')
+
+    @commands.command(
+        help='Flip a coin and win',
+        aliases=['cf', 'coinflip']
+    )
+    async def casino_coinflip(self, ctx, *args):
+        botConsole.log_command(ctx)
+        try:
+            casinoCommands.check_entry(ctx)
+            cf_result = casinoCommands.coinflip(ctx, args[0], args[1])
+            await ctx.channel.send(cf_result)
+        except Exception as e:
+            print(e)
+            await ctx.channel.send('First you must register yourself. Use <prefix>jc')
+
+
+class Api(commands.Cog, name='API commands'):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(
+        help='Random uncyclopedia article, which is probably horrible',
+        aliases=['random', 'uncy']
+    )
+    async def uncyclopedia(self, ctx):
+        botConsole.log_command(ctx)
+        await uncyclopedia.uncyclopedia_post(bot, ctx)
+
+    # returns random joke
+    @commands.command(
+        help="Random joke, most are dark. Always specify type of joke. Joke types are: Programming, Misc, Dark, Pun, Spooky, Christmas",
+        brief="Random joke, most are dark. And some are really racist",
+        aliases=['joke']
+    )
+    async def get_joke(self, ctx, args):
+        botConsole.log_command(ctx)
+        await apis.joke_finder(bot, ctx, args)
+
+    @get_joke.error
+    async def joke_handler(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):  # Check if the exception is what you want to handler
+            await ctx.send(f"Please specify a joke type. Use `<prefix>help joke` for more information")
+
+    # Returns a dad joke
+    @commands.command(
+        help="Random dad joke from a library with around 630 dad jokes",
+        brief="Random dad joke",
+        aliases=['dad', 'dadjoke', 'djoke']
+    )
+    async def dad_joke(self, ctx):
+        botConsole.log_command(ctx)
+        await jeffFun.dad(ctx)
+
+    # Returns air date of next episode of given show
+    @commands.command(
+        help="Shows when the next episode is supposed to air of given TV . Some show's might not me available",
+        brief="<prefix>ne <title_of_show>",
+        aliases=['ne', 'nextep', 'neep', 'nextepisode']
+    )
+    async def next_episode(self, ctx, *args):
+        await apis.next_episode(ctx, args, bot)
+
+    @commands.command(
+        help="<prefix>fm <title_of_movie> (TODO: put in cog)",
+        brief="Gets movie score",
+        aliases=['fm', 'findm', 'fmovie']
+    )
+    async def find_movie(self, ctx, *args):
+        await apis.find_movie_results(ctx, args)
+
+    @commands.command(
+        help="<prefix>fs <title_of_show> (TODO: put in cog)",
+        brief="Gets show score (TODO: put in cog)",
+        aliases=['fs', 'finds', 'fshow']
+    )
+    async def find_show(self, ctx, *args):
+        await apis.find_show_results(ctx, args)
+
+    @commands.command(
+        help="Gives you a random useless fact ",
+        brief="Gives you a random useless fact",
+        aliases=['fact']
+    )
+    async def give_fact(self, ctx):
+        botConsole.log_command(ctx)
+
+        useless_fact = apis.useless_fact()
+        useless_fact.replace('"', "'")
+        msg = discord.Embed(
+            title="Random bullshit, GO!",
+            description=useless_fact,
+            color=discord.Color.blurple()
+        )
+        msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+        msg.set_author(
+            name=bot.user.display_name,
+            icon_url=bot.user.avatar_url
+        )
+
+        await ctx.channel.send(embed=msg)
+
+
+class Fun(commands.Cog, name='Fun commands'):
+    def __init__(self, bot):
+        self.bot = bot
+
+    # Returns a random insult
+    @commands.command(
+        help="Returns a random insult which makes no sense pretty much all of the time",
+        brief="Returns a random insult which makes no sense",
+        aliases=['beadick', 'bad']
+    )
+    async def be_a_dick(self, ctx):
+        botConsole.log_command(ctx)
+        if ctx.message.mentions:
+            insult = jeffFun.insult()
+            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + insult)
+        else:
+            insult = jeffFun.insult()
+            await ctx.channel.send(ctx.author.mention + ' ' + insult)
+
+    # Because fuck you
+    @commands.command(
+        aliases=['why', '?'],
+        help="Why? Because fuck you, that's why.",
+        brief="Why? Because fuck you, that's why."
+    )
+    async def thats_why(self, ctx):
+        botConsole.log_command(ctx)
+        if ctx.message.mentions:
+            msg = foaas.because(str(ctx.author.mention))
+            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
+        else:
+            msg = foaas.because(str(ctx.author.mention))
+            await ctx.channel.send(msg)
+
+    @commands.command(
+        help="Like jeff gives a fuck",
+        brief="Jeff doesn't give a fuck",
+        aliases=['dc', 'dcare']
+    )
+    async def jeff_no_care(self, ctx):
+        botConsole.log_command(ctx)
+        if ctx.message.mentions:
+            msg = foaas.give(str(ctx.author.mention))
+            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
+        else:
+            msg = foaas.give(str(ctx.author.mention))
+            await ctx.channel.send(msg)
+
+    @commands.command(
+        help="Cool story, bro",
+        brief="Cool story, bro",
+        aliases=['cool', 'cs']
+    )
+    async def cool_story(self, ctx):
+        botConsole.log_command(ctx)
+        if ctx.message.mentions:
+            msg = foaas.cool(str(ctx.author.mention))
+            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
+        else:
+            msg = foaas.cool(str(ctx.author.mention))
+            await ctx.channel.send(msg)
+
+    @commands.command(
+        help="Too lazy to explain",
+        brief="Fascinating story",
+        aliases=['fasc']
+    )
+    async def fascinating(self, ctx):
+        botConsole.log_command(ctx)
+        if ctx.message.mentions:
+            msg = foaas.fascinating(str(ctx.author.mention))
+            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
+        else:
+            msg = foaas.fascinating(str(ctx.author.mention))
+            await ctx.channel.send(msg)
+
+    @commands.command(
+        help="Too lazy to explain",
+        brief="Don't want to talk"
+    )
+    async def stop(self, ctx):
+        botConsole.log_command(ctx)
+        if ctx.message.mentions:
+            msg = foaas.stop(str(ctx.author.mention))
+            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
+        else:
+            msg = foaas.stop(str(ctx.author.mention))
+            await ctx.channel.send(msg)
+
+    @commands.command(
+        help="Too lazy to explain",
+        brief="Tells you to fuck off like he's yoda, must @mention someone",
+        aliases=['yoda']
+    )
+    async def yoda_fuckoff(self, ctx):
+        botConsole.log_command(ctx)
+        if bot.user.mentioned_in(ctx.message):
+            await ctx.channel.send('Fuck you')
+        elif ctx.message.mentions:
+            mentioned = '<@' + str(ctx.message.mentions[0].id) + '>'
+            msg = jeffFun.yoda(mentioned)
+            await ctx.channel.send(msg)
+        else:
+            if '#yoda <@mention>' in ctx.message.content:
+                error = 'Very funny, asshole'
+            else:
+                error = 'Good job, idiot. Command is `#yoda <@mention>`'
+            await ctx.channel.send(error, delete_after=10)
+
+    # Jewda
+    @commands.command(
+        help="Jewda",
+        brief="Jewda",
+        aliases=['jooda', 'jewda']
+    )
+    async def yoda_jew(self, ctx):
+        botConsole.log_command(ctx)
+        await jeffFun.jewda(ctx)
+
+    @commands.command(
+        help="Too lazy to explain",
+        brief="Too lazy to explain",
+        aliases=['dumble', 'dumbledore']
+    )
+    async def wise_dumbledore(self, ctx):
+        botConsole.log_command(ctx)
+        await jeffFun.dumbledore(ctx)
+
+    @commands.command(
+        help="Too lazy to explain",
+        brief="Kill someone or everyone",
+        aliases=['kill']
+    )
+    async def kill_user(self, ctx):
+        botConsole.log_command(ctx)
+        if ctx.message.mentions:
+            await jeffFun.kill(bot, ctx)
+        elif '@everyone' in ctx.message.content:
+            await jeffFun.kill_everyone(bot, ctx)
+        else:
+            await jeffFun.kill_none(ctx)
+
+    @commands.command()
+    async def nicht(self, ctx):
+        botConsole.log_command(ctx)
+        vid = jeffFun.nicht()
+        await ctx.channel.send(vid)
+
+    @commands.command()
+    async def b2ba(self, ctx):
+        botConsole.log_command(ctx)
+        vid = jeffFun.b2ba()
+        await ctx.channel.send(vid)
+
+    @commands.command()
+    async def king(self, ctx):
+        botConsole.log_command(ctx)
+        if ctx.message.mentions:
+            await ctx.channel.send('Hey! <@' + str(ctx.message.mentions[0].id) + '> ...')
+            await jeffFun.king(bot, ctx)
+        else:
+            await jeffFun.king(bot, ctx)
+
+    @commands.command(
+        aliases=['rip']
+    )
+    async def rest_in_peace(self, ctx):
+        botConsole.log_command(ctx)
+        if ctx.message.mentions:
+            msg = discord.Embed(
+                title='This man is fucking dead',
+                description='<@' + str(ctx.message.mentions[0].id) + '>' + ' fucking died',
+                color=discord.Color.orange()
+            )
+            msg.set_image(url='https://c.tenor.com/oUvaabzjR3gAAAAd/rip-coffin.gif')
+            msg.set_footer(text='He fucking died')
+            await ctx.send(embed=msg)
+        else:
+            msg = discord.Embed(
+                title='This man is fucking dead',
+                description=ctx.author.mention + ' fucking died',
+                color=discord.Color.orange()
+            )
+            msg.set_image(url='https://c.tenor.com/oUvaabzjR3gAAAAd/rip-coffin.gif')
+            msg.set_footer(text='He fucking died')
+            await ctx.send(embed=msg)
+
+
+bot.add_cog(StandardBotCommands(bot))
+bot.add_cog(Api(bot))
+bot.add_cog(Daddy(bot))
+bot.add_cog(JeffThings(bot))
+bot.add_cog(Casino(bot))
+bot.add_cog(Fun(bot))
 
 bot.run(DISCORD_TOKEN)
