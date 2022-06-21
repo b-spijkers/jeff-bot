@@ -104,12 +104,6 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):  # Standard 
         self.bot = bot
 
     @commands.Cog.listener()
-    async def called_once_a_day(self, guild):
-        if datetime.date.today().weekday() == 0:
-            general = find(lambda x: x.name == 'general', guild.text_channels)
-            await general.channel.send("I hate mondays")
-
-    @commands.Cog.listener()
     async def on_ready(self):
         print('{0.user}'.format(bot) + ' is online and ready\n')
         await bot.change_presence(
@@ -156,6 +150,7 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):  # Standard 
         aliases=['restart', 'boop']
     )
     async def restart_bot(self, ctx):
+        botConsole.log_command(ctx)
         if ctx.message.author.id == 273898204960129025:
             print('Restarting bot...\n')
             await ctx.send(
