@@ -1,4 +1,4 @@
-# jeff-bot, Discord bot
+# jeff-bot, Discord bot. Current version 2.0
 
 This is purely for my entertainment. And I also learn a bit of Python.
 
