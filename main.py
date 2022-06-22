@@ -1,3 +1,8 @@
+#
+#
+# Note to self: Always update the help command if new commands are added. And always use OOP!
+#
+#
 import datetime
 import os
 import sys
@@ -27,7 +32,9 @@ bot = commands.Bot(command_prefix=guild_prefix)
 bot.remove_command('help')
 
 
-# Jeff specific commands and listeners. Like specific words or to other really specific stuff
+################################################################################################
+#  Jeff specific commands and listeners. Like specific words or to other really specific stuff #
+################################################################################################
 class JeffThings(commands.Cog, name='Things Jeff does'):
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -99,6 +106,9 @@ def restart_bot():
     os.execl(python, python, *sys.argv)
 
 
+##############################################################################
+#  Standard bot commands, most bots have these commands so mine does as well #
+##############################################################################
 class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):  # Standard commands basically every bot has
     def __init__(self, bot):
         self.bot = bot
@@ -154,13 +164,16 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):  # Standard 
         if ctx.message.author.id == 273898204960129025:
             print('Restarting bot...\n')
             await ctx.send(
-                "Restarting bot... should be back online in 5 sec. This message doesn't get removed or edited because i'm a dumbass"
+                "Restarting bot... should be back online in 5 sec. This message doesn't get removed or edited because I'm a dumbass..."
             )
             restart_bot()
         else:
-            await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO (i wanna die)")
+            await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO (Dev note: I wanna die)")
 
 
+#########################
+#  King Bas in da house #
+#########################
 class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showing bas at his prime. What a king
     def __init__(self, bot):
         self.bot = bot
@@ -174,6 +187,9 @@ class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showin
         await jeffFun.kingbas(ctx)
 
 
+#################
+#  Casino games #
+#################
 class Casino(commands.Cog, name='Casino commands'):
     def __init__(self, bot):
         self.bot = bot
@@ -214,6 +230,9 @@ class Casino(commands.Cog, name='Casino commands'):
             await ctx.channel.send('First you must register yourself. Use <prefix>jc')
 
 
+##############################################################
+#  Jeff's API commands, relates to all commands using an API #
+##############################################################
 class Api(commands.Cog, name='API commands'):
     def __init__(self, bot):
         self.bot = bot
@@ -300,6 +319,9 @@ class Api(commands.Cog, name='API commands'):
         await ctx.channel.send(embed=msg)
 
 
+###########################################################################
+#  Commands I think are pretty funny, so they fall under the Fun category #
+###########################################################################
 class Fun(commands.Cog, name='Fun commands'):
     def __init__(self, bot):
         self.bot = bot

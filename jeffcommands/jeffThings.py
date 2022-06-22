@@ -4,7 +4,7 @@ import discord
 # just some random jeff commands/interactions
 
 def spanish(author):
-    insult = 'Fuck you in spanish' + author
+    insult = 'Fuck you in spanish 🌵🌮🌵' + author
     return insult
 
 

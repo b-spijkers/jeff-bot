@@ -40,7 +40,7 @@ def insult():
 
 async def kill_none(ctx):
     msg = discord.Embed(
-        title='Uh oh! Someone is retarded!',
+        title='Uh oh! Someone is a poopie head!',
         description='Must @mention someone you egg!',
         color=discord.Color.red()
     )
