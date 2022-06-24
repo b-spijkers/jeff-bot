@@ -111,7 +111,7 @@ def restart_bot():
 ##############################################################################
 #  Standard bot commands, most bots have these commands so mine does as well #
 ##############################################################################
-class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):  # Standard commands basically every bot has
+class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
     def __init__(self, bot):
         self.bot = bot
 
@@ -215,7 +215,7 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def blackjack_play(self, ctx):
         botConsole.log_command(ctx)
-        await ctx.channel.send('Blackjack is still being worked on. No idea when BaronVonBarron#7882 will be done.')
+        await ctx.channel.send('Blackjack is still being worked on (Not Actively). No idea when BaronVonBarron#7882 will be done...')
 
     @commands.command(
         help='Flip a coin and win',
@@ -259,7 +259,7 @@ class Api(commands.Cog, name='API commands'):
 
     @get_joke.error
     async def joke_handler(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):  # Check if the exception is what you want to handler
+        if isinstance(error, commands.MissingRequiredArgument):  # Check if the exception is Missing Required Argument
             await ctx.send(f"Please specify a joke type. Use `<prefix>help joke` for more information")
 
     # Returns a dad joke
@@ -307,21 +307,7 @@ class Api(commands.Cog, name='API commands'):
     )
     async def give_fact(self, ctx):
         botConsole.log_command(ctx)
-
-        useless_fact = apis.useless_fact()
-        useless_fact.replace('"', "'")
-        msg = discord.Embed(
-            title="Random bullshit, GO!",
-            description=useless_fact,
-            color=discord.Color.blurple()
-        )
-        msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
-        msg.set_author(
-            name=bot.user.display_name,
-            icon_url=bot.user.avatar_url
-        )
-
-        await ctx.channel.send(embed=msg)
+        await apis.useless_fact(ctx, bot)
 
 
 ###########################################################################
@@ -490,6 +476,7 @@ class Fun(commands.Cog, name='Fun commands'):
             await ctx.channel.send('Hey! <@' + str(ctx.message.mentions[0].id) + '> ...')
             await jeffFun.king(bot, ctx)
         else:
+            await ctx.channel.send('Hey! ' + str(ctx.author.mention) + '...')
             await jeffFun.king(bot, ctx)
 
     @commands.command(

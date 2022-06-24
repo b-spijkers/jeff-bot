@@ -7,11 +7,22 @@ import discord
 from botsettings import botConsole
 
 
-def useless_fact():
+async def useless_fact(ctx, bot):
     response = requests.get('https://uselessfacts.jsph.pl/random.json?language=en')
     json_data = json.loads(response.text)
     fact = json_data['text']
-    return fact
+    fact.replace('"', "'")
+    msg = discord.Embed(
+        title="Random bullshit, GO!",
+        description=fact,
+        color=discord.Color.blurple()
+    )
+    msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
+    msg.set_author(
+        name=bot.user.display_name,
+        icon_url=bot.user.avatar_url
+    )
+    await ctx.channel.send(embed=msg)
 
 
 def check_next_episode_status(name):
