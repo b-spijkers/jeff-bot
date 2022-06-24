@@ -47,7 +47,7 @@ async def uncyclopedia_post(bot, ctx):
 
     while True:
         try:
-            reaction, user = await bot.wait_for("reaction_add", timeout=10.0, check=check)
+            reaction, user = await bot.wait_for("reaction_add", timeout=15.0, check=check)
 
             if str(reaction.emoji) == thumb_up:
                 post = title_of_post.replace(" ", "_")
