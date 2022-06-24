@@ -28,7 +28,9 @@ def date_time(self):
 
 guild_prefix = prefix.get_prefix
 
-bot = commands.Bot(command_prefix=guild_prefix)
+intents = discord.Intents.default()
+
+bot = commands.Bot(command_prefix=guild_prefix, intents=intents)
 bot.remove_command('help')
 
 
@@ -277,23 +279,26 @@ class Api(commands.Cog, name='API commands'):
         aliases=['ne', 'nextep', 'neep', 'nextepisode']
     )
     async def next_episode(self, ctx, *args):
-        await apis.next_episode(ctx, args, bot)
+        async with ctx.typing():
+            await apis.next_episode(ctx, args, bot)
 
     @commands.command(
-        help="<prefix>fm <title_of_movie> (TODO: put in cog)",
+        help="<prefix>fm <title_of_movie>",
         brief="Gets movie score",
         aliases=['fm', 'findm', 'fmovie']
     )
     async def find_movie(self, ctx, *args):
-        await apis.find_movie_results(ctx, args)
+        async with ctx.typing():
+            await apis.find_movie_results(ctx, args)
 
     @commands.command(
-        help="<prefix>fs <title_of_show> (TODO: put in cog)",
-        brief="Gets show score (TODO: put in cog)",
+        help="<prefix>fs <title_of_show>",
+        brief="Gets show score",
         aliases=['fs', 'finds', 'fshow']
     )
     async def find_show(self, ctx, *args):
-        await apis.find_show_results(ctx, args)
+        async with ctx.typing():
+            await apis.find_show_results(ctx, args)
 
     @commands.command(
         help="Gives you a random useless fact ",
@@ -336,10 +341,12 @@ class Fun(commands.Cog, name='Fun commands'):
         botConsole.log_command(ctx)
         if ctx.message.mentions:
             insult = jeffFun.insult()
-            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + insult)
+            async with ctx.typing():
+                await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + insult)
         else:
             insult = jeffFun.insult()
-            await ctx.channel.send(ctx.author.mention + ' ' + insult)
+            async with ctx.typing():
+                await ctx.channel.send(ctx.author.mention + ' ' + insult)
 
     # Because fuck you
     @commands.command(

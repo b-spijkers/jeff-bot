@@ -1,7 +1,6 @@
 import requests
 import json
 import discord
-import time
 
 # Random API functions, most of the time just 1 or 2 functions per API
 # It would seem unnecessary to split it up in multiple files
@@ -93,7 +92,6 @@ async def next_episode(ctx, args, bot):
                     name=bot.user.display_name,
                     icon_url=bot.user.avatar_url
                 )
-
                 await ctx.channel.send(embed=msg)
             except Exception as e:
                 print(e, '\n')
@@ -114,7 +112,6 @@ async def next_episode(ctx, args, bot):
                     name=bot.user.display_name,
                     icon_url=bot.user.avatar_url
                 )
-
                 await ctx.channel.send(embed=msg)
             except Exception as e:
                 print(e, '\n')
