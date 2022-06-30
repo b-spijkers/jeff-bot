@@ -203,8 +203,7 @@ class Casino(commands.Cog, name='Casino commands'):
     async def casino_join(self, ctx):
         botConsole.log_command(ctx)
         try:
-            casinoCommands.join_casino(ctx)
-            await ctx.channel.send('You joined the casino! There is fuck all to do at the moment :D')
+            await casinoCommands.join_casino(ctx)
         except Exception as e:
             print(e)
             await ctx.channel.send('Something went wrong')
@@ -224,12 +223,36 @@ class Casino(commands.Cog, name='Casino commands'):
     async def casino_coinflip(self, ctx, *args):
         botConsole.log_command(ctx)
         try:
-            casinoCommands.check_entry(ctx)
+            try:
+                casinoCommands.check_entry(ctx.author.id)
+            except Exception as e:
+                print(e)
+                return await ctx.channel.send('First you must register yourself. Use <prefix>jc')
             cf_result = casinoCommands.coinflip(ctx, args[0], args[1])
             await ctx.channel.send(cf_result)
         except Exception as e:
             print(e)
-            await ctx.channel.send('First you must register yourself. Use <prefix>jc')
+            await ctx.channel.send('Something went wrong, no idea what')
+
+    @commands.command(
+        help='Receive some help from the casino',
+        aliases=['gib']
+    )
+    @commands.cooldown(1, 600, commands.BucketType.user)
+    async def casino_chip_gib(self, ctx):
+        botConsole.log_command(ctx)
+        await casinoCommands.casino_contribution(ctx)
+
+    @casino_chip_gib.error
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.channel.send(f'Casino is done giving you free chips. Ask again in {round(error.retry_after, 0)} seconds')
+
+    @commands.command(
+        aliases=['chips', 'ch', 'c']
+    )
+    async def check_chips(self, ctx):
+        await casinoCommands.check_user_chips(ctx)
 
 
 ##############################################################

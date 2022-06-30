@@ -89,16 +89,14 @@ async def kill(bot, ctx):
         'https://c.tenor.com/2gIn6DLSTOcAAAAd/general-grievous-star-wars.gif'
     ]
 
-    victim = '<@!' + victim + '>'
+    if '!' not in author_of_msg:
+        author = author_of_msg[:2] + '!' + author_of_msg[2:]
+        author_of_msg = author
 
     if author_of_msg == victim:
         gif = random.choice(suicide_gifs)
     else:
         gif = random.choice(kill_gifs)
-
-    if '!' not in author_of_msg:
-        author = author_of_msg[:2] + '!' + author_of_msg[2:]
-        author_of_msg = author
 
     if bot.user.mentioned_in(ctx.message):
         gif = 'https://c.tenor.com/N1eC5_O9KiAAAAAd/justketh-goose-attack.gif'
