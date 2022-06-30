@@ -34,9 +34,18 @@ bot = commands.Bot(command_prefix=guild_prefix, intents=intents)
 bot.remove_command('help')
 
 
-################################################################################################
-#  Jeff specific commands and listeners. Like specific words or to other really specific stuff #
-################################################################################################
+##################
+# Error handlers #
+##################
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        return await ctx.channel.send('No such command. Fucker.')
+
+
+###############################################################################################
+# Jeff specific commands and listeners. Like specific words or to other really specific stuff #
+###############################################################################################
 class JeffThings(commands.Cog, name='Things Jeff does'):
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -108,9 +117,9 @@ def restart_bot():
     os.execl(python, python, *sys.argv)
 
 
-##############################################################################
-#  Standard bot commands, most bots have these commands so mine does as well #
-##############################################################################
+#############################################################################
+# Standard bot commands, most bots have these commands so mine does as well #
+#############################################################################
 class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
     def __init__(self, bot):
         self.bot = bot
@@ -173,9 +182,9 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
             await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO (Dev note: I wanna die)")
 
 
-#########################
-#  King Bas in da house #
-#########################
+########################
+# King Bas in da house #
+########################
 class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showing bas at his prime. What a king
     def __init__(self, bot):
         self.bot = bot
@@ -189,9 +198,9 @@ class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showin
         await jeffFun.kingbas(ctx)
 
 
-#################
-#  Casino games #
-#################
+################
+# Casino games #
+################
 class Casino(commands.Cog, name='Casino commands'):
     def __init__(self, bot):
         self.bot = bot
@@ -255,9 +264,9 @@ class Casino(commands.Cog, name='Casino commands'):
         await casinoCommands.check_user_chips(ctx)
 
 
-##############################################################
-#  Jeff's API commands, relates to all commands using an API #
-##############################################################
+#############################################################
+# Jeff's API commands, relates to all commands using an API #
+#############################################################
 class Api(commands.Cog, name='API commands'):
     def __init__(self, bot):
         self.bot = bot
@@ -333,9 +342,9 @@ class Api(commands.Cog, name='API commands'):
         await apis.useless_fact(ctx, bot)
 
 
-###########################################################################
-#  Commands I think are pretty funny, so they fall under the Fun category #
-###########################################################################
+##########################################################################
+# Commands I think are pretty funny, so they fall under the Fun category #
+##########################################################################
 class Fun(commands.Cog, name='Fun commands'):
     def __init__(self, bot):
         self.bot = bot
