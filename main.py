@@ -121,8 +121,8 @@ def restart_bot():
 # Standard bot commands, most bots have these commands so mine does as well #
 #############################################################################
 class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, botClient):
+        self.bot = botClient
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -186,8 +186,8 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
 # King Bas in da house #
 ########################
 class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showing bas at his prime. What a king
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, botClient):
+        self.bot = botClient
 
     @commands.command(
         help='Be blessed',
@@ -202,8 +202,8 @@ class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showin
 # Casino games #
 ################
 class Casino(commands.Cog, name='Casino commands'):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, botClient):
+        self.bot = botClient
 
     @commands.command(
         help='By joining you are allowed to play blackjack(WIP) and other casino games that will be added later',
@@ -268,8 +268,8 @@ class Casino(commands.Cog, name='Casino commands'):
 # Jeff's API commands, relates to all commands using an API #
 #############################################################
 class Api(commands.Cog, name='API commands'):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, botClient):
+        self.bot = botClient
 
     @commands.command(
         help='Random uncyclopedia article, which is probably horrible',
@@ -346,8 +346,8 @@ class Api(commands.Cog, name='API commands'):
 # Commands I think are pretty funny, so they fall under the Fun category #
 ##########################################################################
 class Fun(commands.Cog, name='Fun commands'):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, botClient):
+        self.bot = botClient
 
     # Returns a random insult
     @commands.command(
