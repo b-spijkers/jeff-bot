@@ -1,35 +1,12 @@
-import os
-
-from dotenv import load_dotenv
-from mysql.connector import connect, Error
 from botsettings import botConsole
-
-load_dotenv()
-
-DB_USER = os.getenv("USER")
-DB_PASSWORD = os.getenv("PASSWORD")
-DB_HOST = os.getenv("HOST")
-DB_DATABASE = os.getenv("DATABASE")
-
-try:
-    connection = connect(
-        host=DB_HOST,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_DATABASE
-    )
-    print('Connected to database')
-except Error as e:
-    print(e)
+from botsettings.databaseCalls import insert_db, update_db, select_one_db, delete_db
 
 
 def get_prefix(bot, message):  # first we define get_prefix
     current_guild = str(message.guild.id)
     select_prefix = f""" SELECT guild_prefix FROM prefixes WHERE guild_id = {current_guild} """
-    with connection.cursor() as cursor:
-        connection.reconnect()
-        cursor.execute(select_prefix)
-        guild_prefix = cursor.fetchall()[0]
+    guild_prefix = select_one_db(select_prefix)
+
     return guild_prefix
 
 
@@ -37,19 +14,13 @@ def add_guild(message):
     current_guild = str(message.guild.id)
     current_guild_name = str(message.guild.name)
     add_to_db = f""" INSERT INTO prefixes VALUES ({current_guild}, {current_guild_name}, '//') """
-    with connection.cursor() as cursor:
-        connection.reconnect()
-        cursor.execute(add_to_db)
-        connection.commit()
+    insert_db(add_to_db)
 
 
 def remove_guild(message):
     current_guild = str(message.guild.id)
     delete_guild = f""" DELETE FROM prefixes WHERE guild_id = {current_guild} """
-    with connection.cursor() as cursor:
-        connection.reconnect()
-        cursor.execute(delete_guild)
-        connection.commit()
+    delete_db(delete_guild)
 
 
 async def new_prefix(ctx, prefix):
@@ -61,9 +32,6 @@ async def new_prefix(ctx, prefix):
         current_guild = str(ctx.guild.id)
         update_prefix = f""" UPDATE prefixes SET guild_prefix = '{prefix}' WHERE guild_id = {current_guild} """
 
-        with connection.cursor() as cursor:
-            connection.reconnect()
-            cursor.execute(update_prefix)
-            connection.commit()
+        update_db(update_prefix)
 
         return await ctx.send(f'Prefix changed to: {prefix}')  # confirms the prefix it's been changed to
