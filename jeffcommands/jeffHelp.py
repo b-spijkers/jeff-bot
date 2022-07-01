@@ -3,7 +3,7 @@ import discord
 
 async def jeff_info(self, ctx, bot):
     msg = discord.Embed(
-        title='Jeff-bot info [current version: 2.0]',
+        title='Jeff-bot info [current version: 3.0]',
         description="Currently Jeff uses 7 APIs to give you the best of random garbage. Use `<prefix>why` to figure out why",
         color=discord.Color.blurple()
     )
