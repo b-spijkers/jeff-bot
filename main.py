@@ -3,6 +3,7 @@
 # Note to self: Always update the help command if new commands are added. And always use OOP!
 #
 #
+import asyncio
 import datetime
 import os
 import sys
@@ -29,9 +30,9 @@ def date_time(self):
 guild_prefix = prefix.get_prefix
 
 intents = discord.Intents.default()
+intents.message_content = True
 
-bot = commands.Bot(command_prefix=guild_prefix, intents=intents)
-bot.remove_command('help')
+bot = commands.Bot(command_prefix=guild_prefix, intents=intents, help_command=None)
 
 
 ##################
@@ -153,14 +154,16 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
     async def jeff_info(self, ctx):
         await jeffHelp.jeff_info(self, ctx, bot)
 
-    @commands.command()
-    async def help(self, ctx):
-        await jeffHelp.help(self, ctx, bot, guild_prefix)
+    @commands.command(
+        aliases=['help']
+    )
+    async def halp(self, ctx):
+        await jeffHelp.halp(self, ctx, bot)
 
     @commands.command(
         pass_context=True,
         help="Change Jeff's prefix. Aliases are: `prefix`",
-        brief="Type: <prefix> <new prefix> [Alias",
+        brief="Type: <prefix> <new prefix>",
         aliases=['prefix']
     )
     @commands.has_permissions(administrator=True)  # ensure that only administrators can use this command
@@ -179,7 +182,7 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
             )
             restart_bot()
         else:
-            await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO (Dev note: I wanna die)")
+            await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO")
 
 
 ########################
@@ -453,7 +456,7 @@ class Fun(commands.Cog, name='Fun commands'):
             if '#yoda <@mention>' in ctx.message.content:
                 error = 'Very funny, asshole'
             else:
-                error = 'Good job, idiot. Command is `#yoda <@mention>`'
+                error = 'Good job, idiot. Command is `<prefix>yoda <@mention>`'
             await ctx.channel.send(error, delete_after=10)
 
     # Jewda
@@ -536,11 +539,14 @@ class Fun(commands.Cog, name='Fun commands'):
             await ctx.send(embed=msg)
 
 
-bot.add_cog(StandardBotCommands(bot))
-bot.add_cog(Api(bot))
-bot.add_cog(Daddy(bot))
-bot.add_cog(JeffThings(bot))
-bot.add_cog(Casino(bot))
-bot.add_cog(Fun(bot))
+async def main():
+    async with bot:
+        await bot.add_cog(StandardBotCommands(bot))
+        await bot.add_cog(Api(bot))
+        await bot.add_cog(Daddy(bot))
+        await bot.add_cog(JeffThings(bot))
+        await bot.add_cog(Casino(bot))
+        await bot.add_cog(Fun(bot))
+        await bot.start(os.getenv('TOKEN'))
 
-bot.run(DISCORD_TOKEN)
+asyncio.run(main())

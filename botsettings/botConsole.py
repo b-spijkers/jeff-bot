@@ -3,7 +3,6 @@ import time
 
 def log_command(ctx):
     """
-
     :param ctx: context of discord bot
     :return: prints Command name to console with User, Guild, GuildID and time as additional info
     """
