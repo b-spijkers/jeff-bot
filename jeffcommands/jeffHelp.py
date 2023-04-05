@@ -44,8 +44,8 @@ async def help(self, ctx, bot):
               '➡ [joke]: `Random joke, categories are: Programming, Misc, Dark, Pun, Spooky, Christmas`\n'
               '➡ [random, uncy]: `Gives a random Uncyclopedia article`\n'
               '➡ [fact]: `Gives a random fact which is probably true, some are really out there or just old`\n'
-              '➡ [fm, findm]: `Takes a movie name as argument. Gives back ratings of that movie. Ex: <prefix>fm <moviename>`\n'
-              '➡ [fs, finds]: `Takes a show/series name as argument. Gives back ratings of that show/series. Ex: <prefix>fm <showname>`\n'
+              '➡ [fm, findm]: `Checks IMDB. Takes a movie name as argument. Gives back ratings of that movie. Ex: <prefix>fm <moviename>`\n'
+              '➡ [fs, finds]: `Checks IMDB. Takes a show/series name as argument. Gives back ratings of that show/series. Ex: <prefix>fm <showname>`\n'
               '➡ [ne, nextep, neep, nextepisode]: `Shows when next episode is aired of given show. Ex: <prefix>ne stranger things`\n',
         inline=False
     )

@@ -106,7 +106,7 @@ async def next_episode(ctx, args, bot):
                 await ctx.channel.send(embed=msg)
             except Exception as e:
                 print(e, '\n')
-                await ctx.channel.send("Either i can't find the show or something else went wrong")
+                await ctx.channel.send("Either I can't find the show or something else went wrong")
         else:
             try:
                 name, status = show_details(args)
@@ -126,7 +126,7 @@ async def next_episode(ctx, args, bot):
                 await ctx.channel.send(embed=msg)
             except Exception as e:
                 print(e, '\n')
-                await ctx.channel.send("Either i can't find the show or something else went wrong")
+                await ctx.channel.send("Either I can't find the show or something else went wrong")
     except Exception as ex:
         print(ex, '\n')
         await ctx.channel.send("API broke, this tends to happen A LOT")

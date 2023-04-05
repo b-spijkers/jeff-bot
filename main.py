@@ -3,11 +3,9 @@
 # Note to self: Always update the help command if new commands are added. And always use OOP!
 #
 #
-import logging
 import asyncio
 import datetime
 import os
-import sys
 import time
 
 import discord
@@ -78,22 +76,22 @@ class JeffThings(commands.Cog, name='Things Jeff does'):
             await message.channel.send(message.author.mention)
             await message.channel.send(embed=insult)
 
-        if 'bas is gay!' in message.content.lower():
-            print(
-                'Command: PepeJs at it again \n',
-                'User: ' + message.author.name + '\n',
-                'Guild: ' + message.channel.guild.name + '\n',
-                'Time: ' + time.strftime("%Y-%m-%d %H:%M")
-            )
-            await message.channel.send(str(message.author.mention) + ' Ur gay')
-        if 'owo' in message.content.lower():
-            print(
-                'Command: PepeJs at it again \n',
-                'User: ' + message.author.name + '\n',
-                'Guild: ' + message.channel.guild.name + '\n',
-                'Time: ' + time.strftime("%Y-%m-%d %H:%M")
-            )
-            await message.channel.send('https://c.tenor.com/Ik-kENFloS0AAAAC/pepega-pepe-the-frog.gif')
+        # if 'bas is gay!' in message.content.lower():
+        #     print(
+        #         'Command: PepeJs at it again \n',
+        #         'User: ' + message.author.name + '\n',
+        #         'Guild: ' + message.channel.guild.name + '\n',
+        #         'Time: ' + time.strftime("%Y-%m-%d %H:%M")
+        #     )
+        #     await message.channel.send(str(message.author.mention) + ' Ur gay')
+        # if 'owo' in message.content.lower():
+        #     print(
+        #         'Command: PepeJs at it again \n',
+        #         'User: ' + message.author.name + '\n',
+        #         'Guild: ' + message.channel.guild.name + '\n',
+        #         'Time: ' + time.strftime("%Y-%m-%d %H:%M")
+        #     )
+        #     await message.channel.send('https://c.tenor.com/Ik-kENFloS0AAAAC/pepega-pepe-the-frog.gif')
 
     @commands.command(
         help="Jeff",
@@ -115,9 +113,14 @@ class JeffThings(commands.Cog, name='Things Jeff does'):
 
 
 # restart bot admin command method
-def restart_bot():
-    python = sys.executable
-    os.execl(python, python, *sys.argv)
+def restart_bot(self):
+    # python = sys.executable
+    # os.execl(python, python, *sys.argv)
+    try:
+        self.bot.logout()
+    except EnvironmentError as e:
+        print(e)
+        self.bot.clear()
 
 
 #############################################################################
@@ -131,7 +134,7 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
     async def on_ready(self):
         print('{0.user}'.format(bot) + ' is online and ready\n')
         await bot.change_presence(
-            activity=discord.Activity(type=discord.ActivityType.watching, name='humans from his pond')
+            activity=discord.Activity(type=discord.ActivityType.listening, name='the screams of the damned')
         )
 
     @commands.Cog.listener()
@@ -170,6 +173,7 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
     async def set_prefix(self, ctx, *, newprefix: str = None):
         await prefix.new_prefix(ctx, newprefix)
 
+    #Currently not working
     @commands.command(
         aliases=['restart', 'boop']
     )
@@ -295,7 +299,7 @@ class Api(commands.Cog, name='API commands'):
     @get_joke.error
     async def joke_handler(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):  # Check if the exception is Missing Required Argument
-            await ctx.send(f"Please specify a joke type. Use `<prefix>help joke` for more information")
+            await ctx.send(f"Please specify a joke type. Like: <prefix>joke <joke_type>. Joke types are: Programming, Misc, Dark, Pun, Spooky, Christmas")
 
     # Returns a dad joke
     @commands.command(
