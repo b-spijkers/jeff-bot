@@ -20,7 +20,7 @@ async def useless_fact(ctx, bot):
     msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
     msg.set_author(
         name=bot.user.display_name,
-        icon_url=bot.user.avatar_url
+        icon_url=bot.user.avatar
     )
     await ctx.channel.send(embed=msg)
 
@@ -101,7 +101,7 @@ async def next_episode(ctx, args, bot):
                 msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
                 msg.set_author(
                     name=bot.user.display_name,
-                    icon_url=bot.user.avatar_url
+                    icon_url=bot.user.avatar
                 )
                 await ctx.channel.send(embed=msg)
             except Exception as e:
@@ -121,7 +121,7 @@ async def next_episode(ctx, args, bot):
                 msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
                 msg.set_author(
                     name=bot.user.display_name,
-                    icon_url=bot.user.avatar_url
+                    icon_url=bot.user.avatar
                 )
                 await ctx.channel.send(embed=msg)
             except Exception as e:
@@ -289,7 +289,7 @@ async def joke_finder(bot, ctx, jokeType):
         )
         msg.set_author(
             name=bot.user.display_name,
-            icon_url=bot.user.avatar_url
+            icon_url=bot.user.avatar
         )
         await ctx.channel.send(embed=msg)
     except Exception:

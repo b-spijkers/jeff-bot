@@ -15,7 +15,7 @@ def el_gordo(author):
     )
     msg.set_author(
         name=author,
-        icon_url=author.avatar_url
+        icon_url=author.avatar
     )
     msg.set_image(url='https://pbs.twimg.com/profile_images/1452468940404314114/oCO9SlPF_400x400.jpg')
     msg.set_footer(text="Mucho grande")

@@ -60,7 +60,7 @@ async def kill_everyone(bot, ctx):
     msg.set_image(url='https://c.tenor.com/RjAxaS7VppAAAAAC/deathstar.gif')
     msg.set_author(
         name=bot.user.display_name,
-        icon_url=bot.user.avatar_url
+        icon_url=bot.user.avatar
     )
     await ctx.channel.send(embed=msg)
 
@@ -106,7 +106,7 @@ async def kill(bot, ctx):
         )
         msg.set_author(
             name=bot.user.display_name,
-            icon_url=bot.user.avatar_url
+            icon_url=bot.user.avatar
         )
         msg.set_image(url=gif)
         await ctx.channel.send(embed=msg)
@@ -124,7 +124,7 @@ async def kill(bot, ctx):
         )
         msg.set_author(
             name=ctx.author.display_name,
-            icon_url=ctx.author.avatar_url
+            icon_url=ctx.author.avatar
         )
         msg.set_image(url=gif)
         await ctx.channel.send(embed=msg)
@@ -182,9 +182,9 @@ async def king(bot, ctx):
     )
     msg.set_author(
         name=ctx.bot.user.display_name,
-        icon_url=ctx.bot.user.avatar_url
+        icon_url=ctx.bot.user.avatar
     )
     file = discord.File("images/heyking.gif", filename='king.gif')
     msg.set_image(url='attachment://king.gif')
     msg.set_footer(text='So handsome and smart. Look at that great smile! 👑')
-    return await ctx.channel.send(file=file , embed=msg)
+    return await ctx.channel.send(file=file, embed=msg)

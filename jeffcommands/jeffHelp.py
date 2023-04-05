@@ -3,8 +3,9 @@ import discord
 
 async def jeff_info(self, ctx, bot):
     msg = discord.Embed(
-        title='Jeff-bot info [current version: 3.0]',
-        description="Currently Jeff uses 7 APIs to give you the best of random garbage. 1 of the API's is kaput. Use `<prefix>why` to figure out why",
+        title='Jeff-bot info [current version: 3.1]',
+        description="Currently Jeff uses 7 APIs to give you the best of random garbage. 1 of the APIs is kaput. "
+                    "Use `<prefix>why` to figure out why",
         color=discord.Color.blurple()
     )
 
@@ -13,13 +14,13 @@ async def jeff_info(self, ctx, bot):
     )
     msg.set_author(
         name=bot.user.display_name,
-        icon_url=bot.user.avatar_url
+        icon_url=bot.user.avatar
     )
 
     return await ctx.channel.send(embed=msg)
 
 
-async def halp(self, ctx, bot):
+async def help(self, ctx, bot):
     msg = discord.Embed(
         title='List of commands and what the hell they do',
         description="This servers prefix is: Idk, something. You just used it, fuck you.\n"
@@ -84,7 +85,7 @@ async def halp(self, ctx, bot):
 
     msg.set_author(
         name=bot.user.display_name,
-        icon_url=bot.user.avatar_url
+        icon_url=bot.user.avatar
     )
 
     return await ctx.channel.send(embed=msg)

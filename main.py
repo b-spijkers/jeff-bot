@@ -3,6 +3,7 @@
 # Note to self: Always update the help command if new commands are added. And always use OOP!
 #
 #
+import logging
 import asyncio
 import datetime
 import os
@@ -33,6 +34,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 bot = commands.Bot(command_prefix=guild_prefix, intents=intents, help_command=None)
+bot.remove_command('help')
 
 
 ##################
@@ -154,11 +156,9 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
     async def jeff_info(self, ctx):
         await jeffHelp.jeff_info(self, ctx, bot)
 
-    @commands.command(
-        aliases=['help']
-    )
-    async def halp(self, ctx):
-        await jeffHelp.halp(self, ctx, bot)
+    @commands.command()
+    async def help(self, ctx):
+        await jeffHelp.help(self, ctx, bot)
 
     @commands.command(
         pass_context=True,
@@ -548,5 +548,6 @@ async def main():
         await bot.add_cog(Casino(bot))
         await bot.add_cog(Fun(bot))
         await bot.start(os.getenv('TOKEN'))
+
 
 asyncio.run(main())
