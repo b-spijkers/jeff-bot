@@ -173,7 +173,7 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
     async def set_prefix(self, ctx, *, newprefix: str = None):
         await prefix.new_prefix(ctx, newprefix)
 
-    #Currently not working
+    # Currently not working
     @commands.command(
         aliases=['restart', 'boop']
     )
@@ -184,7 +184,7 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
             await ctx.send(
                 "Restarting bot... should be back online in 5 sec. This message doesn't get removed or edited because I'm a dumbass..."
             )
-            restart_bot()
+            restart_bot(self)
         else:
             await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO")
 
@@ -299,7 +299,9 @@ class Api(commands.Cog, name='API commands'):
     @get_joke.error
     async def joke_handler(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):  # Check if the exception is Missing Required Argument
-            await ctx.send(f"Please specify a joke type. Like: <prefix>joke <joke_type>. Joke types are: Programming, Misc, Dark, Pun, Spooky, Christmas")
+            await ctx.send(
+                f"Please specify joke type. Like:<prefix>joke <joke_type>. Joke types are: Programming, Misc, Dark, Pun, Spooky, Christmas"
+            )
 
     # Returns a dad joke
     @commands.command(
