@@ -61,10 +61,12 @@ def join_casino(ctx):
 # function for getting cards needs to be added, and coinflips
 def coinflip(ctx, side, amount):
     userId = str(ctx.author.id)
-    if side == 'h':
+    if side == 'h' or side == 'heads':
         side = 'heads'
-    if side == 't':
+    elif side == 't' or side == 'tails':
         side = 'tails'
+    else:
+        return "First heads(h)/tails(t) then the amount..."
     try:
         get_chips = f'''SELECT user_chips FROM user_chips WHERE user_id = {userId}'''
         amount_chips = select_one_db(get_chips)
@@ -73,27 +75,31 @@ def coinflip(ctx, side, amount):
     except Exception as e:
         print(e)
         return 'Where them chips at homie?!'
+
     if amount == 'a':
         amount = amount_chips
     elif amount == 'h':
         amount = amount_chips / 2
-    if amount_chips >= int(amount):
-        luck = random.randint(0, 100)
+    if isinstance(amount, int):
+        if amount_chips >= int(amount):
+            luck = random.randint(0, 100)
 
-        if luck != 100:
-            amount_chips = amount_chips + int(amount)
-            update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_id = {userId} """
-            update_db(update_chips)
-            return 'Wow! it was ' + side + "! You're amazing 🎉. You now have: " + str('{:,}'.format(amount_chips)) + ' chips'
+            if luck != 100:
+                amount_chips = amount_chips + int(amount)
+                update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_id = {userId} """
+                update_db(update_chips)
+                return 'Wow! It was ' + side + "! You're amazing 🎉. You now have: " + str('{:,}'.format(amount_chips)) + ' chips'
+            else:
+                amount_chips = amount_chips - int(amount)
+                update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_id = {userId} """
+                update_db(update_chips)
+                opposite_side = ''
+                if side == 'heads':
+                    opposite_side = 'tails'
+                elif side == 'tails':
+                    opposite_side = 'heads'
+                return 'Wow! it was ' + opposite_side + "! You suck 🎉. You now have: " + str('{:,}'.format(amount_chips)) + ' chips'
         else:
-            amount_chips = amount_chips - int(amount)
-            update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_id = {userId} """
-            update_db(update_chips)
-            opposite_side = ''
-            if side == 'heads':
-                opposite_side = 'tails'
-            elif side == 'tails':
-                opposite_side = 'heads'
-            return 'Wow! it was ' + opposite_side + "! You suck 🎉. You now have: " + str('{:,}'.format(amount_chips)) + ' chips'
+            return "Nice, you're broke 🤣"
     else:
-        return "Nice, you're broke 🤣"
+        return "That's either, not a number or you're broke 🤣"
