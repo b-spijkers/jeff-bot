@@ -13,7 +13,7 @@ from discord.ext import commands
 from discord.utils import find
 
 from botsettings import prefix, botConsole
-from apicommands import apis, foaas, uncyclopedia
+from apicommands import apis, foaas, uncyclopedia, tweakers
 from casinogames import casinoCommands
 from jeffcommands import jeffThings, jeffFun, jeffHelp
 
@@ -285,6 +285,16 @@ class Api(commands.Cog, name='API commands'):
     async def uncyclopedia(self, ctx):
         botConsole.log_command(ctx)
         await uncyclopedia.uncyclopedia_post(bot, ctx)
+
+
+    @commands.command(
+        help='Most recent tweakers article, doesnt really work atm',
+        aliases=['tweak']
+    )
+    async def tweakers(self, ctx):
+        botConsole.log_command(ctx)
+        await tweakers.tweakers_new_post(bot, ctx)
+
 
     # returns random joke
     @commands.command(

@@ -14,6 +14,7 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="str.response" />
+          <option value="requests.models.Response.__mod__" />
         </list>
       </option>
     </inspection_tool>
