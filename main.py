@@ -272,7 +272,7 @@ class Casino(commands.Cog, name='Casino commands'):
 
 
 #############################################################
-# Jeff's API commands, relates to all commands using an API #
+# Jeff's API commands, relates to all commands using an API bleh #
 #############################################################
 class Api(commands.Cog, name='API commands'):
     def __init__(self, botClient):
