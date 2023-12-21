@@ -54,20 +54,21 @@ def show_details(name):
         previous_episode_year = json_data['previousEpisode']['date']['year']
 
         months = {
-            1 : 'Jan',
-            2 : 'Feb',
-            3 : 'Mar',
-            4 : 'Apr',
-            5 : 'May',
-            6 : 'Jun',
-            7 : 'Jul',
-            8 : 'Aug',
-            9 : 'Sep',
+            1: 'Jan',
+            2: 'Feb',
+            3: 'Mar',
+            4: 'Apr',
+            5: 'May',
+            6: 'Jun',
+            7: 'Jul',
+            8: 'Aug',
+            9: 'Sep',
             10: 'Okt',
             11: 'Nov',
             12: 'Dec'
         }
-        return show_name, next_episode_countdown, next_episode_day, months[next_episode_month], next_episode_year, previous_episode_day, \
+        return show_name, next_episode_countdown, next_episode_day, months[
+            next_episode_month], next_episode_year, previous_episode_day, \
             months[previous_episode_month], previous_episode_year
 
 
@@ -134,34 +135,31 @@ async def next_episode(ctx, args, bot):
 
 def find_movie(name):
     name = '%20'.join(name)
-    response = requests.get('https://imdb-api.com/en/API/SearchMovie/k_e4301r8z/' + name)
+    response = requests.get('https://search.imdbot.workers.dev/?q=' + name)
     json_data = json.loads(response.text)
-    movieId = json_data['results'][0]['id']
-    movieImg = json_data['results'][0]['image']
+    print(json_data)
+    movieId = json_data['description'][0]['#IMDB_ID']
+    movieImg = json_data['description'][0]['#IMG_POSTER']
     return movieId, movieImg
 
 
 def movie_data(movieId):
-    response = requests.get('https://imdb-api.com/en/API/Ratings/k_e4301r8z/' + movieId)
+    response = requests.get('https://search.imdbot.workers.dev/?tt=' + movieId)
     json_data = json.loads(response.text)
-    movieTitle = json_data['fullTitle']
-    imdbRating = json_data['imDb']
-    metaRating = json_data['metacritic']
-    tmdbRating = json_data['theMovieDb']
-    rottRating = json_data['rottenTomatoes']
-    filmRating = json_data['filmAffinity']
-    return movieTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating
+    movieTitle = json_data['short']['name']
+    imdbRating = json_data['short']['aggregateRating']['ratingValue']
+    imdbTrailer = json_data['short']['trailer']['embedUrl']
+    return movieTitle, imdbRating, imdbTrailer
 
 
 async def find_movie_results(ctx, args):
     movieId, movieImg = find_movie(args)
-    movieTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating = movie_data(movieId)
+    movieTitle, imdbRating, imdbTrailer = movie_data(movieId)
 
     botConsole.log_command(ctx)
 
     msg = discord.Embed(
         title=movieTitle,
-        description='Movie ratings:',
         color=discord.Color.orange()
     )
     msg.set_thumbnail(url=movieImg)
@@ -170,19 +168,7 @@ async def find_movie_results(ctx, args):
         inline=True
     )
     msg.add_field(
-        name="Metacritic", value=metaRating,
-        inline=True
-    )
-    msg.add_field(
-        name="The Movie Db", value=tmdbRating,
-        inline=True
-    )
-    msg.add_field(
-        name="Rotten Tomatoes", value=rottRating,
-        inline=True
-    )
-    msg.add_field(
-        name="Film Affinity", value=filmRating,
+        name="Trailer", value=imdbTrailer,
         inline=True
     )
     msg.set_footer(text="Requested by: {}".format(ctx.author.display_name))
@@ -194,15 +180,17 @@ async def find_movie_results(ctx, args):
     await ctx.channel.send(embed=msg)
 
 
+# deprecated
 def find_show(name):
     name = '%20'.join(name)
-    response = requests.get('https://imdb-api.com/en/API/SearchSeries/k_e4301r8z/' + name)
+    response = requests.get('https://search.imdbot.workers.dev/?q=' + name)
     json_data = json.loads(response.text)
     showId = json_data['results'][0]['id']
     showImg = json_data['results'][0]['image']
     return showId, showImg
 
 
+# deprecated
 def show_data(movieId):
     response = requests.get('https://imdb-api.com/en/API/Ratings/k_e4301r8z/' + movieId)
     json_data = json.loads(response.text)
@@ -215,6 +203,7 @@ def show_data(movieId):
     return showTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating
 
 
+# deprecated
 async def find_show_results(ctx, args):
     showId, showImg = find_show(args)
     showTitle, imdbRating, metaRating, tmdbRating, rottRating, filmRating = show_data(showId)
@@ -256,6 +245,7 @@ async def find_show_results(ctx, args):
     await ctx.channel.send(embed=msg)
 
 
+# deprecated
 async def joke_finder(bot, ctx, jokeType):
     msg = discord.Embed()
     if jokeType == 'misc':

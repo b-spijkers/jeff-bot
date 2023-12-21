@@ -26,7 +26,7 @@ def date_time(self):
     return current_time
 
 
-guild_prefix = prefix.get_prefix
+guild_prefix = '//'
 
 intents = discord.Intents.default()
 intents.message_content = True
