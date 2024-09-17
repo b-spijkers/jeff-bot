@@ -10,16 +10,17 @@ def get_prefix(bot, message):  # first we define get_prefix
     return guild_prefix
 
 
-def add_guild(message):
-    current_guild = str(message.guild.id)
-    current_guild_name = str(message.guild.name)
-    add_to_db = f""" INSERT INTO prefixes VALUES ({current_guild}, {current_guild_name}, '//') """
+def add_guild(guild):
+    current_guild = str(guild.id)
+    current_guild_name = str(guild.name)
+
+    add_to_db = f""" INSERT INTO prefixes VALUES ('{current_guild}', '//') """
     insert_db(add_to_db)
 
 
 def remove_guild(message):
     current_guild = str(message.guild.id)
-    delete_guild = f""" DELETE FROM prefixes WHERE guild_id = {current_guild} """
+    delete_guild = f""" DELETE FROM prefixes WHERE guild_id = '{current_guild}' """
     delete_db(delete_guild)
 
 

@@ -13,7 +13,7 @@ from discord.ext import commands
 from discord.utils import find
 
 from botsettings import prefix, botConsole
-from apicommands import apis, foaas, uncyclopedia, tweakers
+from apicommands import apis, uncyclopedia, tweakers
 from casinogames import casinoCommands
 from jeffcommands import jeffThings, jeffFun, jeffHelp
 
@@ -26,10 +26,11 @@ def date_time(self):
     return current_time
 
 
-guild_prefix = '//'
+guild_prefix = prefix.get_prefix
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.guilds = True
 
 bot = commands.Bot(command_prefix=guild_prefix, intents=intents, help_command=None)
 bot.remove_command('help')
@@ -140,12 +141,17 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         general = find(lambda x: x.name == 'general', guild.text_channels)
-        if general and general.permissions_for(guild.me).send_messages:
+        if general:
             await general.send("Sup' fuckers. Use //help to check my commands. Use //prefix <new_prefix> to set a new prefix")
 
     @commands.Cog.listener()
-    async def on_guild_join(self, message):  # when the bot joins the guild
-        prefix.add_guild(message)
+    async def on_guild_join(self, guild):  # when the bot joins the guild
+        print(f"Joined guild: {guild.name}")
+        try:
+            prefix.add_guild(guild)
+            print(f"Added guild: {guild.name} to prefix system.")
+        except Exception as e:
+            print(f"Error adding guild to prefix system: {e}")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, message):  # when the bot is removed from the guild
@@ -240,7 +246,7 @@ class Casino(commands.Cog, name='Casino commands'):
         botConsole.log_command(ctx)
         try:
             try:
-                casinoCommands.check_entry(ctx.author.id)
+                casinoCommands.check_entry(ctx.author.name)
             except Exception as e:
                 print(e)
                 return await ctx.channel.send('First you must register yourself. Use <prefix>jc')
@@ -386,74 +392,7 @@ class Fun(commands.Cog, name='Fun commands'):
                 await ctx.channel.send(ctx.author.mention + ' ' + insult)
 
     # Because fuck you
-    @commands.command(
-        aliases=['why', '?'],
-        help="Why? Because fuck you, that's why.",
-        brief="Why? Because fuck you, that's why."
-    )
-    async def thats_why(self, ctx):
-        botConsole.log_command(ctx)
-        if ctx.message.mentions:
-            msg = foaas.because(str(ctx.author.mention))
-            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
-        else:
-            msg = foaas.because(str(ctx.author.mention))
-            await ctx.channel.send(msg)
 
-    @commands.command(
-        help="Like jeff gives a fuck",
-        brief="Jeff doesn't give a fuck",
-        aliases=['dc', 'dcare']
-    )
-    async def jeff_no_care(self, ctx):
-        botConsole.log_command(ctx)
-        if ctx.message.mentions:
-            msg = foaas.give(str(ctx.author.mention))
-            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
-        else:
-            msg = foaas.give(str(ctx.author.mention))
-            await ctx.channel.send(msg)
-
-    @commands.command(
-        help="Cool story, bro",
-        brief="Cool story, bro",
-        aliases=['cool', 'cs']
-    )
-    async def cool_story(self, ctx):
-        botConsole.log_command(ctx)
-        if ctx.message.mentions:
-            msg = foaas.cool(str(ctx.author.mention))
-            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
-        else:
-            msg = foaas.cool(str(ctx.author.mention))
-            await ctx.channel.send(msg)
-
-    @commands.command(
-        help="Too lazy to explain",
-        brief="Fascinating story",
-        aliases=['fasc']
-    )
-    async def fascinating(self, ctx):
-        botConsole.log_command(ctx)
-        if ctx.message.mentions:
-            msg = foaas.fascinating(str(ctx.author.mention))
-            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
-        else:
-            msg = foaas.fascinating(str(ctx.author.mention))
-            await ctx.channel.send(msg)
-
-    @commands.command(
-        help="Too lazy to explain",
-        brief="Don't want to talk"
-    )
-    async def stop(self, ctx):
-        botConsole.log_command(ctx)
-        if ctx.message.mentions:
-            msg = foaas.stop(str(ctx.author.mention))
-            await ctx.channel.send('<@' + str(ctx.message.mentions[0].id) + '> ' + msg)
-        else:
-            msg = foaas.stop(str(ctx.author.mention))
-            await ctx.channel.send(msg)
 
     @commands.command(
         help="Too lazy to explain",

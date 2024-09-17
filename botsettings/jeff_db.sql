@@ -54,11 +54,11 @@ INSERT INTO `prefixes` (`guild_id`, `guild_name`, `guild_prefix`) VALUES
 
 DROP TABLE IF EXISTS `user_chips`;
 CREATE TABLE IF NOT EXISTS `user_chips` (
-  `user_id` int NOT NULL,
+  `user_name_fr` int NOT NULL,
   `user_name` varchar(45) DEFAULT NULL,
   `user_chips` int DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
-  UNIQUE KEY `user_id_UNIQUE` (`user_id`)
+  PRIMARY KEY (`user_name_fr`),
+  UNIQUE KEY `user_name_fr_UNIQUE` (`user_name_fr`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 COMMIT;
 

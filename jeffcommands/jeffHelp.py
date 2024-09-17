@@ -63,14 +63,8 @@ async def help(self, ctx, bot):
     msg.add_field(
         name="Funny commands, or at least I think they're funny",
         value='➡ [beadick, bad]: `Throws a random insult a person mentioned. Insult will be pretty bad`\n'
-              '➡ [why, ?]: `Why?`\n'
-              "➡ [dc, dcare]: `Tell someone you don't care`\n"
-              '➡ [cool, cs]: `Tell someone how cool his story is`\n'
-              '➡ [fasc]: `Tell someone how fascinating his story is`\n'
-              "➡ [stop]: `Tell someone you don't want to talk`\n"
               '➡ [yoda]: `Fuck off Yoda says`\n'
               '➡ [jooda, jewda]: `Give gold you must, Jewda says`\n'
-              '➡ [dumble, dumbledore]: `Some wise words Dumbledore once said. True story`\n'
               '➡ [kill]: `Kill someone, Kill yourself or Kill everyone. Ex: <prefix>kill @mention`\n'
               '➡ [nicht]: `If you know you know`\n'
               '➡ [b2ba]: `Same for this one`\n'

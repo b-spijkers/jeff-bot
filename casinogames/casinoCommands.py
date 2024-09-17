@@ -6,17 +6,17 @@ from botsettings.databaseCalls import insert_db, update_db, select_one_db
 # Casino functions/actions #
 ############################
 def check_entry(user):
-    userId = user
-    find_user = f''' SELECT user_id FROM user_chips WHERE user_id = {userId} '''
-    user_id = select_one_db(find_user)
-    return user_id
+    user_name = user
+    find_user = f''' SELECT user_name_fr FROM user_chips WHERE user_name_fr = '{user_name}' '''
+    user_name_fr = select_one_db(find_user)
+    return user_name_fr
 
 
 async def check_user_chips(ctx):
-    userId = str(ctx.author.id)
-    check_entry(userId)
+    user_name_fr = str(ctx.author.name)
+    check_entry(user_name_fr)
 
-    get_chips = f'''SELECT user_chips FROM user_chips WHERE user_id = {userId}'''
+    get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
     amount_chips = select_one_db(get_chips)
 
     return await ctx.channel.send(ctx.author.mention + ' You have: ' + str('{:,}'.format(amount_chips)) + ' chips')
@@ -26,13 +26,13 @@ async def check_user_chips(ctx):
 # Casino games #
 ################
 async def casino_contribution(ctx):
-    userId = str(ctx.author.id)
-    check_entry(userId)
+    user_name_fr = str(ctx.author.name)
+    check_entry(user_name_fr)
 
-    get_chips = f'''SELECT user_chips FROM user_chips WHERE user_id = {userId}'''
+    get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
     amount_chips = select_one_db(get_chips)
     amount_chips += 5000
-    add_user = f''' UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_id = {userId}'''
+    add_user = f''' UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_name_fr = '{user_name_fr}' '''
     try:
         update_db(add_user)
     except Exception as e:
@@ -42,13 +42,13 @@ async def casino_contribution(ctx):
 
 
 def join_casino(ctx):
-    userId = str(ctx.author.id)
-    entry = check_entry(userId)
+    user_name_fr = str(ctx.author.name)
+    entry = check_entry(user_name_fr)
 
     # Can't be empty string or false otherwise it won't work
     if entry == 'bleh':
-        userName = str(ctx.author.name)
-        add_user = f''' INSERT INTO user_chips VALUES ({int(userId)}, '{userName}', {5000}) '''
+        userName_global = str(ctx.author.global_name)
+        add_user = f''' INSERT INTO user_chips VALUES ('{user_name_fr}', '{userName_global}', {5000}) '''
         try:
             insert_db(add_user)
         except Exception as e:
@@ -60,7 +60,7 @@ def join_casino(ctx):
 
 # function for getting cards needs to be added, and coinflips
 def coinflip(ctx, side, amount):
-    userId = str(ctx.author.id)
+    user_name_fr = str(ctx.author.name)
     if side == 'h' or side == 'heads':
         side = 'heads'
     elif side == 't' or side == 'tails':
@@ -68,7 +68,7 @@ def coinflip(ctx, side, amount):
     else:
         return "First heads(h)/tails(t) then the amount..."
     try:
-        get_chips = f'''SELECT user_chips FROM user_chips WHERE user_id = {userId}'''
+        get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
         amount_chips = select_one_db(get_chips)
         if amount_chips == 0:
             return 'Where them chips at homie?!'
@@ -86,12 +86,12 @@ def coinflip(ctx, side, amount):
 
             if luck != 100:
                 amount_chips = amount_chips + int(amount)
-                update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_id = {userId} """
+                update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_name_fr = '{user_name_fr}' """
                 update_db(update_chips)
                 return 'Wow! It was ' + side + "! You're amazing 🎉. You now have: " + str('{:,}'.format(amount_chips)) + ' chips'
             else:
                 amount_chips = amount_chips - int(amount)
-                update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_id = {userId} """
+                update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_name_fr = '{user_name_fr}' """
                 update_db(update_chips)
                 opposite_side = ''
                 if side == 'heads':
