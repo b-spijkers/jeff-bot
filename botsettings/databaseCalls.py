@@ -9,7 +9,6 @@ DB_USER = os.getenv("USER")
 DB_PASSWORD = os.getenv("PASSWORD")
 DB_HOST = os.getenv("HOST")
 DB_DATABASE = os.getenv("DATABASE")
-print(DB_USER, DB_PASSWORD, DB_HOST, DB_DATABASE)
 
 
 try:

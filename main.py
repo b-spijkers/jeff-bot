@@ -337,16 +337,6 @@ class Api(commands.Cog, name='API commands'):
         botConsole.log_command(ctx)
         await jeffFun.dad(ctx)
 
-    # Returns air date of next episode of given show
-    @commands.command(
-        help="Shows when the next episode is supposed to air of given TV . Some show's might not me available",
-        brief="<prefix>ne <title_of_show>",
-        aliases=['ne', 'nextep', 'neep', 'nextepisode']
-    )
-    async def next_episode(self, ctx, *args):
-        async with ctx.typing():
-            await apis.next_episode(ctx, args, bot)
-
     @commands.command(
         help="<prefix>fm <title_of_movie>",
         brief="Gets movie score",
