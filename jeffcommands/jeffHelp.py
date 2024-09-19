@@ -56,7 +56,7 @@ async def help(self, ctx, bot):
               '➡ [coinflip, cf]: `Toss a coin, maybe get lucky. Ex: <prefix>>cf <sideOfCoin>(heads, h, tails, t) <amount>(h=half, a=all)`\n'
               '➡ [jc]: `Register at the casino, basically just adds you to the database so you can gamble.`\n'
               '➡ [gib]: `Ask the casino if you could please get some chips for your gambling addiction`\n'
-              '➡ [chips, ch, c]: `See how many chips you currently have`\n',
+              '➡ [sjekkels, sj, s]: `See how many chips you currently have`\n',
         inline=False
     )
 

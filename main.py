@@ -142,7 +142,8 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
     async def on_guild_join(self, guild):
         general = find(lambda x: x.name == 'general', guild.text_channels)
         if general:
-            await general.send("Sup' fuckers. Use //help to check my commands. Use //prefix <new_prefix> to set a new prefix")
+            await general.send(
+                "Sup' fuckers. Use //help to check my commands. Use //prefix <new_prefix> to set a new prefix")
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):  # when the bot joins the guild
@@ -219,7 +220,7 @@ class Casino(commands.Cog, name='Casino commands'):
         self.bot = botClient
 
     @commands.command(
-        help='By joining you are allowed to play blackjack(WIP) and other casino games that will be added later',
+        help='By joining you are allowed to play blackjack(Disabled) and other casino games that will be added later',
         aliases=['jc']
     )
     async def casino_join(self, ctx):
@@ -236,12 +237,14 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def blackjack_play(self, ctx):
         botConsole.log_command(ctx)
-        await ctx.channel.send('Blackjack is still being worked on (Not Actively). No idea when BaronVonBarron#7882 will be done...')
+        await ctx.channel.send(
+            'Blackjack is still being worked on (Not Actively). No idea when it will be done...')
 
     @commands.command(
         help='Flip a coin and win',
         aliases=['cf', 'coinflip']
     )
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def casino_coinflip(self, ctx, *args):
         botConsole.log_command(ctx)
         try:
@@ -256,6 +259,12 @@ class Casino(commands.Cog, name='Casino commands'):
             print(e)
             await ctx.channel.send('Something went wrong, no idea what')
 
+    @casino_coinflip.error
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.channel.send(
+                f'Calm the fuck down.')
+
     @commands.command(
         help='Receive some help from the casino',
         aliases=['gib']
@@ -268,10 +277,11 @@ class Casino(commands.Cog, name='Casino commands'):
     @casino_chip_gib.error
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.channel.send(f'Casino is done giving you free chips. Ask again in {round(error.retry_after, 0)} seconds')
+            await ctx.channel.send(
+                f'Casino is done giving you free chips. Ask again in {round(error.retry_after, 0)} seconds')
 
     @commands.command(
-        aliases=['chips', 'ch', 'c']
+        aliases=['sjekkels', 'sj', 's']
     )
     async def check_chips(self, ctx):
         await casinoCommands.check_user_chips(ctx)
@@ -292,7 +302,6 @@ class Api(commands.Cog, name='API commands'):
         botConsole.log_command(ctx)
         await uncyclopedia.uncyclopedia_post(bot, ctx)
 
-
     @commands.command(
         help='Most recent tweakers article, doesnt really work atm',
         aliases=['tweak']
@@ -300,7 +309,6 @@ class Api(commands.Cog, name='API commands'):
     async def tweakers(self, ctx):
         botConsole.log_command(ctx)
         await tweakers.tweakers_new_post(bot, ctx)
-
 
     # returns random joke
     @commands.command(
@@ -392,7 +400,6 @@ class Fun(commands.Cog, name='Fun commands'):
                 await ctx.channel.send(ctx.author.mention + ' ' + insult)
 
     # Because fuck you
-
 
     @commands.command(
         help="Too lazy to explain",

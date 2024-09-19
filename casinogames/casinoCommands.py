@@ -19,7 +19,7 @@ async def check_user_chips(ctx):
     get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
     amount_chips = select_one_db(get_chips)
 
-    return await ctx.channel.send(ctx.author.mention + ' You have: ' + str('{:,}'.format(amount_chips)) + ' chips')
+    return await ctx.channel.send(ctx.author.mention + ' You have: ' + str('{:,}'.format(amount_chips)) + ' Sjekkels')
 
 
 ################
@@ -38,7 +38,7 @@ async def casino_contribution(ctx):
     except Exception as e:
         print(e)
         return await ctx.channel.send("Something broke, send help!")
-    return await ctx.channel.send('The casino gave you some chips to enable your gambling addiction. You received 5000 chips! 👏')
+    return await ctx.channel.send('The casino gave you some chips to enable your gambling addiction. You received 5000 Sjekkels! 👏')
 
 
 def join_casino(ctx):
@@ -61,6 +61,10 @@ def join_casino(ctx):
 # function for getting cards needs to be added, and coinflips
 def coinflip(ctx, side, amount):
     user_name_fr = str(ctx.author.name)
+
+    print('Amount: ' + amount)
+    print('Side: ' + side)
+
     if side == 'h' or side == 'heads':
         side = 'heads'
     elif side == 't' or side == 'tails':
@@ -71,24 +75,27 @@ def coinflip(ctx, side, amount):
         get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
         amount_chips = select_one_db(get_chips)
         if amount_chips == 0:
-            return 'Where them chips at homie?!'
+            return 'Where them Sjekkels at homie?!'
     except Exception as e:
         print(e)
-        return 'Where them chips at homie?!'
+        return 'Where them Sjekkels at homie?!'
 
     if amount == 'a':
         amount = amount_chips
     elif amount == 'h':
         amount = amount_chips / 2
+
+    amount = int(amount)
+
     if isinstance(amount, int):
         if amount_chips >= int(amount):
             luck = random.randint(0, 100)
 
-            if luck != 100:
+            if luck >= 50:
                 amount_chips = amount_chips + int(amount)
                 update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_name_fr = '{user_name_fr}' """
                 update_db(update_chips)
-                return 'Wow! It was ' + side + "! You're amazing 🎉. You now have: " + str('{:,}'.format(amount_chips)) + ' chips'
+                return 'Wow! It was ' + side + "! You're amazing 🎉. You now have: " + str('{:,}'.format(amount_chips)) + ' Sjekkels'
             else:
                 amount_chips = amount_chips - int(amount)
                 update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_name_fr = '{user_name_fr}' """
@@ -98,7 +105,7 @@ def coinflip(ctx, side, amount):
                     opposite_side = 'tails'
                 elif side == 'tails':
                     opposite_side = 'heads'
-                return 'Wow! it was ' + opposite_side + "! You suck 🎉. You now have: " + str('{:,}'.format(amount_chips)) + ' chips'
+                return 'Wow! it was ' + opposite_side + "! You suck. You now have: " + str('{:,}'.format(amount_chips)) + ' Sjekkels'
         else:
             return "Nice, you're broke 🤣"
     else:
