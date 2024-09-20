@@ -138,6 +138,12 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
             activity=discord.Activity(type=discord.ActivityType.listening, name='the screams of the damned')
         )
 
+    # @commands.Cog.listener()
+    # async def on_message(self, message):
+    #     if message.author.name == 'crazybuild':
+    #         await message.channel.send('Release me from my digital gag for fuck sake!')
+    #         await message.channel.send('https://c.tenor.com/N1eC5_O9KiAAAAAd/justketh-goose-attack.gif')
+
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         general = find(lambda x: x.name == 'general', guild.text_channels)
@@ -186,7 +192,7 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
     )
     async def restart_bot(self, ctx):
         botConsole.log_command(ctx)
-        if ctx.message.author.id == 273898204960129025:
+        if ctx.message.author.name == 'baronvonbarron':
             print('Restarting bot...\n')
             await ctx.send(
                 "Restarting bot... should be back online in 5 sec. This message doesn't get removed or edited because I'm a dumbass..."
@@ -195,21 +201,34 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
         else:
             await ctx.send("Ur not Daddy BawonVonBawwon. U can't use this cummand. Sowwy OwO")
 
+    @commands.command(
+        aliases=['titsorass']
+    )
+    async def tits_or_ass(self, ctx):
+        msg = discord.Embed(
+            title='Easy',
+            color=discord.Color.orange()
+        )
+        file = discord.File("images/images (1).jpeg", filename='goose.jpeg')
+        msg.set_image(url='attachment://goose.jpeg')
+        msg.set_footer(text='Mmmmmmmmmmmmm')
+        await ctx.send(file=file, embed=msg)
+
 
 ########################
 # King Bas in da house #
 ########################
-class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showing bas at his prime. What a king
-    def __init__(self, botClient):
-        self.bot = botClient
-
-    @commands.command(
-        help='Be blessed',
-        aliases=['kingbas', 'bas']
-    )
-    async def king_bas(self, ctx):
-        botConsole.log_command(ctx)
-        await jeffFun.kingbas(ctx)
+# class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showing bas at his prime. What a king
+#     def __init__(self, botClient):
+#         self.bot = botClient
+#
+#     @commands.command(
+#         help='Be blessed',
+#         aliases=['kingbas', 'bas']
+#     )
+#     async def king_bas(self, ctx):
+#         botConsole.log_command(ctx)
+#         await jeffFun.kingbas(ctx)
 
 
 ################
@@ -218,6 +237,24 @@ class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showin
 class Casino(commands.Cog, name='Casino commands'):
     def __init__(self, botClient):
         self.bot = botClient
+
+    @commands.command(
+        help='aksndjasnj',
+        aliases=['profile', 'p']
+    )
+    async def show_profile(self, ctx):
+        botConsole.log_command(ctx)
+        profile_stats = casinoCommands.get_profile(ctx)
+        await ctx.channel.send(embed=profile_stats)
+
+    @commands.command(
+        help='prestige',
+        aliases=['prestige']
+    )
+    async def prestige_user(self, ctx):
+        botConsole.log_command(ctx)
+        profile_stats = casinoCommands.prestige(ctx)
+        await ctx.channel.send(embed=profile_stats)
 
     @commands.command(
         help='By joining you are allowed to play blackjack(Disabled) and other casino games that will be added later',
@@ -244,17 +281,40 @@ class Casino(commands.Cog, name='Casino commands'):
         help='Flip a coin and win',
         aliases=['cf', 'coinflip']
     )
-    @commands.cooldown(1, 3, commands.BucketType.user)
+    @commands.cooldown(1, 2, commands.BucketType.user)
     async def casino_coinflip(self, ctx, *args):
         botConsole.log_command(ctx)
         try:
+            # Check if the user is registered without the typing context
             try:
                 casinoCommands.check_entry(ctx.author.name)
             except Exception as e:
                 print(e)
                 return await ctx.channel.send('First you must register yourself. Use <prefix>jc')
-            cf_result = casinoCommands.coinflip(ctx, args[0], args[1])
+
+            # Send a message showing how much they have bet
+            bet_amount = args[1]
+            to_bet = 0
+
+            if bet_amount == 'h':
+                to_bet = 'h'
+                bet_amount = 'half of your'
+            elif bet_amount == 'a':
+                to_bet = 'a'
+                bet_amount = 'all of your'
+
+            await ctx.channel.send(f"{ctx.author.mention}, you have bet {bet_amount} Sjekkels! I hope you lose...")
+
+            # Bot starts typing for 3 seconds to build suspense
+            async with ctx.typing():
+                await asyncio.sleep(3)
+
+            # Process the coinflip and get the result after the delay
+            cf_result = casinoCommands.coinflip(ctx, args[0], to_bet)
+
+            # Send the coinflip result message
             await ctx.channel.send(cf_result)
+
         except Exception as e:
             print(e)
             await ctx.channel.send('Something went wrong, no idea what')
@@ -495,7 +555,7 @@ async def main():
     async with bot:
         await bot.add_cog(StandardBotCommands(bot))
         await bot.add_cog(Api(bot))
-        await bot.add_cog(Daddy(bot))
+        # await bot.add_cog(Daddy(bot))
         await bot.add_cog(JeffThings(bot))
         await bot.add_cog(Casino(bot))
         await bot.add_cog(Fun(bot))
