@@ -15,6 +15,7 @@ from discord.utils import find
 from botsettings import prefix, botConsole
 from apicommands import apis, uncyclopedia, tweakers
 from casinogames import casinoCommands
+from casinogames.casinoCommands import update_rank
 from jeffcommands import jeffThings, jeffFun, jeffHelp
 
 DISCORD_TOKEN = os.getenv("TOKEN")
@@ -256,6 +257,18 @@ class Casino(commands.Cog, name='Casino commands'):
         profile_stats = casinoCommands.prestige(ctx)
         await ctx.channel.send(embed=profile_stats)
 
+
+    @commands.command(
+        help='Flip a coin and win',
+        aliases=['rank']
+    )
+    async def user_rank(self, ctx):
+        botConsole.log_command(ctx)
+        profile_rank = casinoCommands.send_rank_info(ctx)
+
+        await ctx.channel.send(embed=profile_rank)
+
+
     @commands.command(
         help='By joining you are allowed to play blackjack(Disabled) and other casino games that will be added later',
         aliases=['jc']
@@ -302,8 +315,10 @@ class Casino(commands.Cog, name='Casino commands'):
             elif bet_amount == 'a':
                 to_bet = 'a'
                 bet_amount = 'all of your'
+            else:
+                to_bet = bet_amount
 
-            await ctx.channel.send(f"{ctx.author.mention}, you have bet {bet_amount} Sjekkels! I hope you lose...")
+            await ctx.channel.send(f"{ctx.author.mention}, you have bet {bet_amount} <:Shekel:1286655809098354749> Sjekkels! I hope you lose...")
 
             # Bot starts typing for 3 seconds to build suspense
             async with ctx.typing():
@@ -311,6 +326,11 @@ class Casino(commands.Cog, name='Casino commands'):
 
             # Process the coinflip and get the result after the delay
             cf_result = casinoCommands.coinflip(ctx, args[0], to_bet)
+
+            # Check for rank updates
+            rank_up_message = await update_rank(ctx.author.name, ctx.author.global_name)
+            if rank_up_message:
+                await ctx.channel.send(rank_up_message)
 
             # Send the coinflip result message
             await ctx.channel.send(cf_result)
