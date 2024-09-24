@@ -104,14 +104,12 @@ PRESTIGE_XP_CAP_BASE = 10000000  # Base XP cap for prestige
 
 
 def calculate_prestige_xp_cap(user_prestige):
-    """Calculate the XP required for prestige based on the user's current prestige level."""
     return math.ceil(PRESTIGE_XP_CAP_BASE * (user_prestige * 0.25 + 1))
 
 
 async def prestige(ctx):
     user_name_fr = str(ctx.author.name)
 
-    # Fetch user XP and prestige level from the database
     get_xp = f'''SELECT user_xp FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
     user_xp = select_one_db(get_xp)
 
@@ -143,12 +141,11 @@ async def prestige(ctx):
         )
         embed.set_footer(text="React with 👍 to prestige, or 👎 to cancel.")
 
-        # Send the embed and prompt for confirmation
         prestige_message = await ctx.send(embed=embed)
+
         await prestige_message.add_reaction('👍')
         await prestige_message.add_reaction('👎')
 
-        # Check if the user reacts with thumbs-up or thumbs-down
         def check(reaction, user):
             return user == ctx.author and str(reaction.emoji) in ['👍',
                                                                   '👎'] and reaction.message.id == prestige_message.id
@@ -157,13 +154,10 @@ async def prestige(ctx):
             # Wait for the user's reaction (60 seconds timeout)
             reaction, user = await ctx.bot.wait_for('reaction_add', timeout=60.0, check=check)
             if str(reaction.emoji) == '👍':
-                # User confirmed to prestige
                 await apply_prestige(ctx, user_name_fr, new_prestige_level, reward_chips)
             else:
-                # User canceled the prestige process
                 await ctx.send(f"Bitch.")
         except asyncio.TimeoutError:
-            # Handle timeout if the user doesn't react in time
             await ctx.send(f"{ctx.author.mention}, hurry up next time!. Fucking hell.")
     else:
         # User is not eligible to prestige
@@ -188,7 +182,6 @@ async def prestige(ctx):
 
 
 async def apply_prestige(ctx, user_name_fr, new_prestige_level, reward_chips):
-    """Apply the prestige process, increase the prestige level, reset XP, and give rewards."""
     try:
         # Reset user XP and increase prestige level
         update_prestige = f'''UPDATE user_chips SET user_prestige = {new_prestige_level}, user_xp = 0 WHERE user_name_fr = '{user_name_fr}' '''
@@ -227,7 +220,7 @@ async def update_rank(user_name_fr, user_name_global):
 
     for i in range(current_rank, len(RANK_STEPS)):
         if user_xp >= required_xp[i]:
-            # Rank up the user
+
             new_rank = i + 1
             update_rank_query = f'''UPDATE user_chips SET user_rank = {new_rank} WHERE user_name_fr = '{user_name_fr}' '''
             update_db(update_rank_query)
@@ -242,27 +235,24 @@ DAILY_REWARD_AMOUNT = 250  # Define the reward amount (customize as needed)
 def daily_reward(ctx):
     user_name_fr = str(ctx.author.name)
 
-    # Fetch the last time the user claimed the daily reward
     get_last_claim = f'''SELECT daily_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
     last_claim = select_one_db(get_last_claim)
 
+    # TODO: Change this to an embed message or make an embed message function so I can use it in more places
     # if last_claim == 'bleh':  # If user doesn't exist in the database
     #     return await ctx.send("You need to register first by joining the casino!")
 
+    # Keep in case it is needed
     # Convert `last_claim` to a datetime object
     # last_claim_time = datetime.strptime(last_claim, '%Y-%m-%d %H:%M:%S')
 
-    # Get the current time
     current_time = datetime.now()
 
-    # Check if 24 hours (1 day) have passed since the last claim
     time_since_last_claim = current_time - last_claim
     if time_since_last_claim >= timedelta(days=1):
-        print("Eligible")
-        # Eligible for daily reward
+
         reward_chips = DAILY_REWARD_AMOUNT
 
-        # Update the user's chips
         get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
         user_chips = select_one_db(get_chips)
 
@@ -271,7 +261,6 @@ def daily_reward(ctx):
         update_chips = f'''UPDATE user_chips SET user_chips = {new_chip_amount}, daily_chips = '{current_time}' WHERE user_name_fr = '{user_name_fr}' '''
         update_db(update_chips)
 
-        # Send reward message
         embed = discord.Embed(
             title="🎉 Daily Reward Claimed!",
             description=f"{ctx.author.mention}, you have received **{reward_chips}** <:Shekel:1286655809098354749> Sjekkels! Go out and lose it all!",
@@ -285,7 +274,6 @@ def daily_reward(ctx):
         embed.set_footer(text="Now fuck off")
         return embed
     else:
-        print('Not eligible')
         # Not yet eligible for daily reward
         time_left = timedelta(days=1) - time_since_last_claim
         hours, remainder = divmod(time_left.seconds, 3600)
