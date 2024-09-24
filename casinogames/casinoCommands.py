@@ -120,7 +120,6 @@ async def prestige(ctx):
     prestige_xp_cap = calculate_prestige_xp_cap(user_prestige)
 
     if user_xp >= prestige_xp_cap:
-        # User is eligible to prestige
         new_prestige_level = user_prestige + 1
         reward_chips = 500 * new_prestige_level  # Example: Rewards scale with prestige level
 
@@ -183,15 +182,12 @@ async def prestige(ctx):
 
 async def apply_prestige(ctx, user_name_fr, new_prestige_level, reward_chips):
     try:
-        # Reset user XP and increase prestige level
         update_prestige = f'''UPDATE user_chips SET user_prestige = {new_prestige_level}, user_xp = 0 WHERE user_name_fr = '{user_name_fr}' '''
         update_db(update_prestige)
 
-        # Give reward chips for prestige
         update_chips = f'''UPDATE user_chips SET user_chips = {reward_chips} WHERE user_name_fr = '{user_name_fr}' '''
         update_db(update_chips)
 
-        # Notify the user of successful prestige
         await ctx.send(
             f"🎉 Congratulations {ctx.author.mention}! You have prestiged to **level {new_prestige_level}** and received **{reward_chips:,}** <:Shekel:1286655809098354749> **Sjekkels**!")
     except Exception as e:
