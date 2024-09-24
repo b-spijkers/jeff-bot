@@ -254,8 +254,19 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def prestige_user(self, ctx):
         botConsole.log_command(ctx)
-        profile_stats = casinoCommands.prestige(ctx)
+        profile_stats = await casinoCommands.prestige(ctx)
         await ctx.channel.send(embed=profile_stats)
+
+
+    @commands.command(
+        help="Claim your daily reward.",
+        aliases=['daily']
+    )
+    async def daily_chips(self, ctx):
+        botConsole.log_command(ctx)
+        daily_message = casinoCommands.daily_reward(ctx)
+
+        await ctx.channel.send(embed=daily_message)
 
 
     @commands.command(
