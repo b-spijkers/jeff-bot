@@ -1,4 +1,5 @@
 import math
+import secrets
 from datetime import datetime, timedelta
 import random
 
@@ -299,7 +300,7 @@ async def casino_contribution(ctx):
 
     get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
     amount_chips = select_one_db(get_chips)
-    amount_chips += 5000
+    amount_chips += 50
     add_user = f''' UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_name_fr = '{user_name_fr}' '''
     try:
         update_db(add_user)
@@ -307,7 +308,7 @@ async def casino_contribution(ctx):
         print(e)
         return await ctx.channel.send("Something broke, send help!")
     return await ctx.channel.send(
-        'The casino gave you some chips to enable your gambling addiction. You received **5000** <:Shekel:1286655809098354749> **Sjekkels**! 👏')
+        'The casino gave you some chips to enable your gambling addiction. You received **50** <:Shekel:1286655809098354749> **Sjekkels**! 👏')
 
 
 def join_casino(ctx):
@@ -387,6 +388,84 @@ def coinflip(ctx, side, amount):
     else:
         return "That's either, not a number or you're broke 🤣"
 
+
+#########################################
+############# Dice Roll Game#############
+#########################################
+
+# Constants for dice roll
+XP_MULTIPLIER = 1  # Example multiplier for XP
+WIN_MULTIPLIER = 5  # The multiplier for the winning amount on a 6 roll
+
+async def casino_diceroll(ctx, amount: int):
+    user_name_fr = str(ctx.author.name)
+
+    # Check if user is registered
+    try:
+        check_entry(user_name_fr)
+    except Exception as e:
+        print(e)
+        return await ctx.send('First you must register yourself. Use <prefix>jc')
+
+    # Fetch user chips
+    get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
+    user_chips = select_one_db(get_chips)
+
+    if user_chips < amount:
+        return await ctx.send(f"You don't have enough chips to bet that amount, {ctx.author.mention}.")
+
+    # Step 2: Show the "good luck" message with a spinning thumbnail
+    embed = discord.Embed(
+        title="<a:spin:1288783602636685394> Rolling the Dice... <a:spin:1288783602636685394>",
+        description=f"<:theman:1286723740880732210> What will it be... <:theman:1286723740880732210>",
+        color=discord.Color.blue()
+    )
+    initial_message = await ctx.send(embed=embed)
+
+    # Step 3: Wait 3 seconds (using asyncio.sleep)
+    await asyncio.sleep(3)
+
+    # Roll the dice (random number between 1 and 6)
+    dice_roll = secrets.randbelow(6) + 1
+
+    # Step 4: Check if the result is 6
+    if dice_roll == 6:
+        reward = amount * WIN_MULTIPLIER
+        new_chip_amount = user_chips + reward
+        update_chips = f'''UPDATE user_chips SET user_chips = {new_chip_amount} WHERE user_name_fr = '{user_name_fr}' '''
+        update_db(update_chips)
+
+        # Add XP based on the reward
+        xp_earned = reward * XP_MULTIPLIER
+        update_xp = f'''UPDATE user_chips SET user_xp = user_xp + {xp_earned} WHERE user_name_fr = '{user_name_fr}' '''
+        update_db(update_xp)
+
+        # Step 4: Edit the initial message to show the dice result (win)
+        embed = discord.Embed(
+            title="🎉 You rolled a 6!",
+            description=f"Yippie.. {ctx.author.mention}, you rolled a 6 and won {reward:,} <:Shekel:1286655809098354749> **Sjekkels**",
+            color=discord.Color.green()
+        )
+        embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"{new_chip_amount:,} <:Shekel:1286655809098354749> **Sjekkels**", inline=True)
+        embed.add_field(name="🏅 XP Earned", value=f"{xp_earned:,} XP", inline=True)
+        embed.set_footer(text="You'll lose the next one, don't worry...")
+        await initial_message.edit(embed=embed)
+
+    else:
+        # Player loses the bet, subtract chips
+        new_chip_amount = user_chips - amount
+        update_chips = f'''UPDATE user_chips SET user_chips = {new_chip_amount} WHERE user_name_fr = '{user_name_fr}' '''
+        update_db(update_chips)
+
+        # Step 4: Edit the initial message to show the dice result (loss)
+        embed = discord.Embed(
+            title=f"🎲 You rolled a {dice_roll}",
+            description=f"Unlucky, {ctx.author.mention}. You rolled a {dice_roll} and lost {amount:,} <:Shekel:1286655809098354749> **Sjekkels**.",
+            color=discord.Color.red()
+        )
+        embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"{new_chip_amount:,} <:Shekel:1286655809098354749> **Sjekkels**", inline=True)
+        embed.set_footer(text="Loser")
+        await initial_message.edit(embed=embed)
 
 def send_rank_info(ctx):
     user_name_fr = str(ctx.author.name)

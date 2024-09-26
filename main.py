@@ -15,7 +15,7 @@ from discord.utils import find
 from botsettings import prefix, botConsole
 from apicommands import apis, uncyclopedia, tweakers
 from casinogames import casinoCommands
-from casinogames.casinoCommands import update_rank
+from casinogames.casinoCommands import update_rank, casino_diceroll
 from jeffcommands import jeffThings, jeffFun, jeffHelp
 
 DISCORD_TOKEN = os.getenv("TOKEN")
@@ -355,6 +355,17 @@ class Casino(commands.Cog, name='Casino commands'):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.channel.send(
                 f'Calm the fuck down.')
+
+    @commands.command(
+        name="diceroll",  # Name of the command
+        help="Roll a dice and bet an amount to win!",  # Help description
+        aliases=['dr', 'dice']  # Optional: Shorter aliases
+    )
+    @commands.cooldown(1, 5, commands.BucketType.user)  # 5-second cooldown
+    async def dice_roll(self, ctx, amount: int):
+        botConsole.log_command(ctx)
+        # Call the dice roll function from casinoCommands.py
+        await casino_diceroll(ctx, amount)
 
     @commands.command(
         help='Receive some help from the casino',
