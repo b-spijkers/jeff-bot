@@ -18,11 +18,11 @@ DAILY_REWARD_AMOUNT = 250
 MONTHLY_REWARD_AMOUNT = 1000
 
 # Rank and Prestige XP Base
+# reward * (user_prestige * (PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER)
 PRESTIGE_XP_CAP_BASE = 10000000  # Base XP cap for prestige
 RANK_STEPS = [1000, 10000, 100000, 1000000, 10000000]
 PRESTIGE_MULTIPLIER = 0.25
 RANK_MULTIPLIER = 1
-# (reward * (user_prestige * (PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
 
 # Constants for dice roll
 WIN_MULTIPLIER = 5  # The multiplier for the winning amount on a 6 roll
