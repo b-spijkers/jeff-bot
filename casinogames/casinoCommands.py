@@ -5,7 +5,7 @@ import random
 import asyncio
 import discord
 
-from botsettings.databaseCalls import insert_db, update_db, select_one_db
+from botsettings.databaseCalls import update_db, select_one_db, insert_db
 
 #######################################
 # Casino Getter and Setter Functions. #
@@ -47,8 +47,8 @@ def get_chips(user_name):
 
 def add_new_user(user_name, nickname):
     datetime_minus_one = datetime.now() - timedelta(days=1)
-    add_user = f''' INSERT INTO user_chips VALUES ('{user_name}', '{nickname}', {CASINO_GIFT_AMOUNT}, 0, 0, '{datetime_minus_one}', '{datetime_minus_one}') '''
-    update_db(add_user)
+    add_user = f''' INSERT INTO user_chips VALUES ('{user_name}', '{nickname}', {CASINO_GIFT_AMOUNT}, 0, 0, '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}') '''
+    insert_db(add_user)
 
 def get_xp(user_name):
     user_xp = f'''SELECT user_xp FROM user_chips WHERE user_name_fr = '{user_name}' '''
@@ -456,7 +456,7 @@ def daily_reward(ctx):
         )
         embed.add_field(
             name="Time Remaining",
-            value=f"You can claim again in {time_left.days} days, {hours} hours, and {minutes} minutes.",
+            value=f"You can claim again in {hours} hours, and {minutes} minutes.",
             inline=False
         )
         embed.set_footer(text="Come back when the timer expires! Shithead!")
