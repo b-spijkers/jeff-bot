@@ -1,7 +1,6 @@
 import math
 import secrets
 from datetime import datetime, timedelta
-import random
 import asyncio
 import discord
 
@@ -685,7 +684,7 @@ def coinflip(ctx, side, amount):
 
     if isinstance(amount, int):
         if amount_chips >= int(amount):
-            luck = random.randint(0, 100)
+            luck = secrets.randbelow(100) + 1
 
             if luck >= 50:
                 amount_chips = int(amount_chips) + int(amount)
@@ -750,7 +749,7 @@ async def casino_diceroll(ctx, amount: int):
 
         # Add XP based on the reward
         xp_earned = reward
-        update_user_xp(user_name_fr, xp_earned)
+        add_xp(user_name_fr, xp_earned)
 
         # Step 4: Edit the initial message to show the dice result (win)
         embed = discord.Embed(
