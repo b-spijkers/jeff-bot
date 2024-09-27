@@ -21,12 +21,12 @@ MONTHLY_REWARD_AMOUNT = 1000
 # Rank and Prestige XP Base
 PRESTIGE_XP_CAP_BASE = 10000000  # Base XP cap for prestige
 RANK_STEPS = [1000, 10000, 100000, 1000000, 10000000]
-
-# Constants for dice roll
-XP_MULTIPLIER = 1  # Example multiplier for XP
-WIN_MULTIPLIER = 5  # The multiplier for the winning amount on a 6 roll
 PRESTIGE_MULTIPLIER = 0.25
 RANK_MULTIPLIER = 1
+# (reward * (user_prestige * (PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
+
+# Constants for dice roll
+WIN_MULTIPLIER = 5  # The multiplier for the winning amount on a 6 roll
 
 def calculate_rank_xp(user_prestige, user_rank):
     return [math.ceil(rank_step * (user_prestige * PRESTIGE_MULTIPLIER + 1)) for rank_step in RANK_STEPS]
@@ -749,7 +749,7 @@ async def casino_diceroll(ctx, amount: int):
         update_user_chips(user_name_fr, new_chip_amount)
 
         # Add XP based on the reward
-        xp_earned = reward * XP_MULTIPLIER
+        xp_earned = reward
         update_user_xp(user_name_fr, xp_earned)
 
         # Step 4: Edit the initial message to show the dice result (win)
