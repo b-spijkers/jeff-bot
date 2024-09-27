@@ -10,22 +10,29 @@ from botsettings.databaseCalls import insert_db, update_db, select_one_db
 #######################################
 # Casino Getter and Setter Functions. #
 #######################################
-CASINO_GIFT_AMOUNT = 5000
-PRESTIGE_XP_CAP_BASE = 10000000  # Base XP cap for prestige
-RANK_STEPS = [1000, 10000, 100000, 1000000, 10000000]
+
+# Reward Base values
+CASINO_GIFT_AMOUNT = 1500
 GIB_REWARD_AMOUNT = secrets.randbelow(125) + 25
+HOURLY_REWARD_AMOUNT = 100
 DAILY_REWARD_AMOUNT = 250
 MONTHLY_REWARD_AMOUNT = 1000
+
+# Rank and Prestige XP Base
+PRESTIGE_XP_CAP_BASE = 10000000  # Base XP cap for prestige
+RANK_STEPS = [1000, 10000, 100000, 1000000, 10000000]
 
 # Constants for dice roll
 XP_MULTIPLIER = 1  # Example multiplier for XP
 WIN_MULTIPLIER = 5  # The multiplier for the winning amount on a 6 roll
+PRESTIGE_MULTIPLIER = 0.25
+RANK_MULTIPLIER = 1
 
-def calculate_rank_xp(user_prestige):
-    return [math.ceil(rank_step * (user_prestige * 0.25 + 1)) for rank_step in RANK_STEPS]
+def calculate_rank_xp(user_prestige, user_rank):
+    return [math.ceil(rank_step * (user_prestige * PRESTIGE_MULTIPLIER + 1)) for rank_step in RANK_STEPS]
 
-def calculate_prestige_xp_cap(user_prestige):
-    return math.ceil(PRESTIGE_XP_CAP_BASE * (user_prestige * 0.25 + 1))
+def calculate_prestige_xp_cap(user_prestige, user_rank):
+    return math.ceil(PRESTIGE_XP_CAP_BASE * (user_prestige * PRESTIGE_MULTIPLIER + 1))
 
 #TODO: Get this to work so you can't use decimal amount of chips to bet
 def is_round_number(num):
@@ -64,6 +71,13 @@ def get_rank(user_name):
 
     return rank
 
+def get_hourly_date(user_name):
+    get_user_hourly_date = f'''SELECT hourly_time FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    hourly_date = select_one_db(get_user_hourly_date)
+
+    return hourly_date
+
 def get_daily_date(user_name):
     get_user_daily_date = f'''SELECT daily_chips FROM user_chips WHERE user_name_fr = '{user_name}' '''
 
@@ -89,6 +103,14 @@ def update_user_chips(user_name, chips):
     update_chips = f'''UPDATE user_chips SET user_chips = {chips} WHERE user_name_fr = '{user_name}' '''
     update_db(update_chips)
 
+def update_gib_time(user_name, gib_time):
+    update_gib_date = f'''UPDATE user_chips SET gib_time = '{gib_time}' WHERE user_name_fr = '{user_name}' '''
+    update_db(update_gib_date)
+
+def update_user_chips_hourly(user_name, chips, current_datetime):
+    update_chips_hourly = f'''UPDATE user_chips SET user_chips = {chips}, hourly_time = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
+    update_db(update_chips_hourly)
+
 def update_user_chips_daily(user_name, chips, current_datetime):
     update_chips_daily = f'''UPDATE user_chips SET user_chips = {chips}, daily_chips = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
     update_db(update_chips_daily)
@@ -96,10 +118,6 @@ def update_user_chips_daily(user_name, chips, current_datetime):
 def update_user_chips_monthly(user_name, chips, current_datetime):
     update_chips_monthly = f'''UPDATE user_chips SET user_chips = {chips}, monthly_chips = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
     update_db(update_chips_monthly)
-
-def update_gib_time(user_name, gib_time):
-    update_gib_date = f'''UPDATE user_chips SET gib_time = '{gib_time}' WHERE user_name_fr = '{user_name}' '''
-    update_db(update_gib_date)
 
 def update_user_xp(user_name, xp):
     update_xp = f'''UPDATE user_chips SET user_xp = {xp} WHERE user_name_fr = '{user_name}' '''
@@ -222,22 +240,16 @@ def get_profile(ctx):
     return embed
 
 
-def reward_user_with_chips(user_name_fr, amount):
-    user_chips = get_chips(user_name_fr)
-    user_chips += amount
-
-    update_user_chips(user_name_fr, user_chips)
-
-
 async def prestige(ctx):
     user_name_fr = str(ctx.author.name)
 
     user_xp = get_xp(user_name_fr)
 
     user_prestige = get_prestige(user_name_fr)
+    user_rank = get_rank(user_name_fr)
 
     # Calculate XP required to prestige
-    prestige_xp_cap = calculate_prestige_xp_cap(user_prestige)
+    prestige_xp_cap = calculate_prestige_xp_cap(user_prestige, user_rank)
 
     if user_xp >= prestige_xp_cap:
         new_prestige_level = user_prestige + 1
@@ -321,7 +333,7 @@ def send_rank_info(ctx):
     user_prestige = get_prestige(user_name_fr)
     current_rank = get_rank(user_name_fr)
 
-    required_xp = calculate_rank_xp(user_prestige)
+    required_xp = calculate_rank_xp(user_prestige, current_rank)
 
     embed = discord.Embed(title=f"{user_name_global}'s Rank Information", color=discord.Color.blue())
     embed.add_field(name="Current XP", value=f"**{user_xp:,}**", inline=False)
@@ -340,8 +352,9 @@ async def update_rank(user_name_fr, user_name_global):
     user_xp = get_xp(user_name_fr)
     current_rank = get_rank(user_name_fr)
     user_prestige = get_prestige(user_name_fr)
+    user_rank = get_rank(user_name_fr)
 
-    required_xp = calculate_rank_xp(user_prestige)
+    required_xp = calculate_rank_xp(user_prestige, user_rank)
 
     for i in range(current_rank, len(RANK_STEPS)):
         if user_xp >= required_xp[i]:
@@ -353,10 +366,59 @@ async def update_rank(user_name_fr, user_name_global):
 
     return None  # No rank up
 
+def hourly_reward(ctx):
+    user_name_fr = str(ctx.author.name)
+    user_prestige = get_prestige(user_name_fr)
+    user_rank = get_rank(user_name_fr)
+    last_claim = get_hourly_date(user_name_fr)
+
+    current_time_stamp = datetime.now()
+
+    time_since_last_claim = current_time_stamp - last_claim
+    if time_since_last_claim >= timedelta(hours=1):
+
+        reward_chips = math.ceil(HOURLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
+        user_chips = get_chips(user_name_fr)
+        new_chip_amount = user_chips + reward_chips
+        update_user_chips_hourly(user_name_fr, new_chip_amount, current_time_stamp)
+
+        embed = discord.Embed(
+            title="🎉 Hourly Reward Claimed!",
+            description=f"{ctx.author.mention}, you have received **{reward_chips}** <:Shekel:1286655809098354749> Sjekkels! Go out and lose it all!",
+            color=discord.Color.green()
+        )
+        embed.add_field(
+            name="Current **Sjekkels**",
+            value=f"**{new_chip_amount:,}** <:Shekel:1286655809098354749> **Sjekkels**",
+            inline=True
+        )
+        embed.set_footer(text="Now fuck off")
+        return embed
+    else:
+        # Not yet eligible for daily reward
+        time_left = timedelta(hours=1) - time_since_last_claim
+        hours, remainder = divmod(time_left.seconds, 3600)
+        minutes, _ = divmod(remainder, 60)
+
+        embed = discord.Embed(
+            title="⏳ Nope. An hour hasn't passed since last time. Dumbass.",
+            description=f"{ctx.author.mention}, you have already claimed your hourly <:Shekel:1286655809098354749> **Sjekkels**.",
+            color=discord.Color.red()
+        )
+        embed.add_field(
+            name="Time Remaining",
+            value=f"You can claim again in {minutes} minutes.",
+            inline=False
+        )
+        embed.set_footer(text="Come back when the timer expires! Shithead!")
+
+        return embed
+
 
 def daily_reward(ctx):
     user_name_fr = str(ctx.author.name)
-
+    user_prestige = get_prestige(user_name_fr)
+    user_rank = get_rank(user_name_fr)
     last_claim = get_daily_date(user_name_fr)
 
     current_time_stamp = datetime.now()
@@ -364,7 +426,7 @@ def daily_reward(ctx):
     time_since_last_claim = current_time_stamp - last_claim
     if time_since_last_claim >= timedelta(days=1):
 
-        reward_chips = DAILY_REWARD_AMOUNT
+        reward_chips = math.ceil(DAILY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
         user_chips = get_chips(user_name_fr)
         new_chip_amount = user_chips + reward_chips
         update_user_chips_daily(user_name_fr, new_chip_amount, current_time_stamp)
@@ -404,7 +466,8 @@ def daily_reward(ctx):
 
 def monthly_reward(ctx):
     user_name_fr = str(ctx.author.name)
-
+    user_prestige = get_prestige(user_name_fr)
+    user_rank = get_rank(user_name_fr)
     last_claim = get_monthly_date(user_name_fr)
 
     current_time_stamp = datetime.now()
@@ -412,7 +475,7 @@ def monthly_reward(ctx):
     time_since_last_claim = current_time_stamp - last_claim
 
     if time_since_last_claim >= timedelta(days=30):
-        reward_chips = MONTHLY_REWARD_AMOUNT
+        reward_chips = math.ceil(MONTHLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
         user_chips = get_chips(user_name_fr)
         new_chip_amount = user_chips + reward_chips
 
@@ -455,7 +518,10 @@ def monthly_reward(ctx):
 def combined_rewards(ctx):
     # Get the user's name
     user_name_fr = str(ctx.author.name)
+    user_prestige = get_prestige(user_name_fr)
+    user_rank = get_rank(user_name_fr)
 
+    hourly_result = hourly_reward(ctx)
     gib_result = casino_contribution(ctx)
 
     # Call the daily reward function
@@ -471,11 +537,36 @@ def combined_rewards(ctx):
         color=discord.Color.blue()
     )
 
-    # Add field for daily reward result
+    if "Casino Charity Claimed!" in gib_result.title:
+        embed.add_field(
+            name="<:Shekel:1286655809098354749> Gib Reward",
+            value=f"Successfully claimed **{math.ceil(GIB_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))}** <:Shekel:1286655809098354749> Sjekkels.",
+            inline=False
+        )
+    else:
+        embed.add_field(
+            name="❌ Gib Reward",
+            value=f"Already claimed. {gib_result.fields[0].value}",
+            inline=False
+        )
+
+    if "Hourly Reward Claimed!" in hourly_result.title:
+        embed.add_field(
+            name="⏳ Hourly Reward",
+            value=f"Successfully claimed **{math.ceil(HOURLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))}** <:Shekel:1286655809098354749> Sjekkels.",
+            inline=False
+        )
+    else:
+        embed.add_field(
+            name="❌ Hourly Reward",
+            value=f"Already claimed. {hourly_result.fields[0].value}",
+            inline=False
+        )
+
     if "Daily Reward Claimed!" in daily_result.title:
         embed.add_field(
             name="🎁 Daily Reward",
-            value=f"Successfully claimed **{DAILY_REWARD_AMOUNT}** <:Shekel:1286655809098354749> Sjekkels.",
+            value=f"Successfully claimed **{math.ceil(DAILY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))}** <:Shekel:1286655809098354749> Sjekkels.",
             inline=False
         )
     else:
@@ -485,29 +576,16 @@ def combined_rewards(ctx):
             inline=False
         )
 
-    # Add field for monthly reward result
     if "Monthly Reward Claimed!" in monthly_result.title:
         embed.add_field(
             name="📅 Monthly Reward",
-            value=f"Successfully claimed **{MONTHLY_REWARD_AMOUNT}** <:Shekel:1286655809098354749> Sjekkels.",
+            value=f"Successfully claimed **{math.ceil(MONTHLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))}** <:Shekel:1286655809098354749> Sjekkels.",
             inline=False
         )
     else:
         embed.add_field(
             name="❌ Monthly Reward",
             value=f"Already claimed. {monthly_result.fields[0].value}",
-            inline=False
-        )
-
-    if "Casino Charity Claimed!" in gib_result.title:
-        embed.add_field(
-            name="<:Shekel:1286655809098354749> Gib Reward",
-            value=f"Successfully claimed **{GIB_REWARD_AMOUNT}** <:Shekel:1286655809098354749> Sjekkels.",
-        )
-    else:
-        embed.add_field(
-            name="❌ Gib Reward",
-            value=f"Already claimed. {gib_result.fields[0].value}",
             inline=False
         )
 
@@ -519,6 +597,9 @@ def combined_rewards(ctx):
 ################
 def casino_contribution(ctx):
     user_name_fr = str(ctx.author.name)
+    user_prestige = get_prestige(user_name_fr)
+    user_rank = get_rank(user_name_fr)
+    
     check_entry(user_name_fr)
 
     # Get current time
@@ -550,7 +631,7 @@ def casino_contribution(ctx):
 
     # 10 minutes have passed, give reward
     amount_chips = get_chips(user_name_fr)
-    reward = GIB_REWARD_AMOUNT
+    reward = math.ceil(GIB_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
     amount_chips += reward
 
     update_user_chips(user_name_fr, amount_chips)
