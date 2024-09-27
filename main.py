@@ -7,6 +7,7 @@ import asyncio
 import datetime
 import os
 import time
+from shutil import chown
 
 import discord
 from discord.ext import commands
@@ -260,7 +261,7 @@ class Casino(commands.Cog, name='Casino commands'):
 
     @commands.command(
         help="Claim your daily reward.",
-        aliases=['daily']
+        aliases=['daily', 'cd']
     )
     async def daily_chips(self, ctx):
         botConsole.log_command(ctx)
@@ -268,6 +269,24 @@ class Casino(commands.Cog, name='Casino commands'):
 
         await ctx.channel.send(embed=daily_message)
 
+    @commands.command(
+        help="Claim your monthly reward.",
+        aliases=['monthly', 'cm']
+    )
+    async def monthly_chips(self, ctx):
+        botConsole.log_command(ctx)
+        monthly_message = casinoCommands.monthly_reward(ctx)
+
+        await ctx.channel.send(embed=monthly_message)
+
+    @commands.command(
+        help='Claim both daily and monthly rewards',
+        aliases=['claimall', 'ca']
+    )
+    async def claim_all(self, ctx):
+        botConsole.log_command(ctx)
+        embed = casinoCommands.combined_rewards(ctx)
+        await ctx.channel.send(embed=embed)
 
     @commands.command(
         help='Flip a coin and win',
@@ -371,10 +390,10 @@ class Casino(commands.Cog, name='Casino commands'):
         help='Receive some help from the casino',
         aliases=['gib']
     )
-    @commands.cooldown(1, 600, commands.BucketType.user)
     async def casino_chip_gib(self, ctx):
         botConsole.log_command(ctx)
-        await casinoCommands.casino_contribution(ctx)
+        gib_message = casinoCommands.casino_contribution(ctx)
+        await ctx.channel.send(embed=gib_message)
 
     @casino_chip_gib.error
     async def on_command_error(self, ctx, error):
@@ -386,7 +405,8 @@ class Casino(commands.Cog, name='Casino commands'):
         aliases=['sjekkels', 'sj', 's']
     )
     async def check_chips(self, ctx):
-        await casinoCommands.check_user_chips(ctx)
+        chip_balance = casinoCommands.check_user_chips(ctx)
+        await ctx.channel.send(embed=chip_balance)
 
 
 #############################################################

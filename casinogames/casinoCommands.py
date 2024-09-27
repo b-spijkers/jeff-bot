@@ -2,16 +2,147 @@ import math
 import secrets
 from datetime import datetime, timedelta
 import random
-
 import asyncio
 import discord
 
 from botsettings.databaseCalls import insert_db, update_db, select_one_db
 
+#######################################
+# Casino Getter and Setter Functions. #
+#######################################
+CASINO_GIFT_AMOUNT = 5000
+PRESTIGE_XP_CAP_BASE = 10000000  # Base XP cap for prestige
+RANK_STEPS = [1000, 10000, 100000, 1000000, 10000000]
+GIB_REWARD_AMOUNT = secrets.randbelow(125) + 25
+DAILY_REWARD_AMOUNT = 250
+MONTHLY_REWARD_AMOUNT = 1000
 
-############################
-# Casino functions/actions #
-############################
+# Constants for dice roll
+XP_MULTIPLIER = 1  # Example multiplier for XP
+WIN_MULTIPLIER = 5  # The multiplier for the winning amount on a 6 roll
+
+def calculate_rank_xp(user_prestige):
+    return [math.ceil(rank_step * (user_prestige * 0.25 + 1)) for rank_step in RANK_STEPS]
+
+def calculate_prestige_xp_cap(user_prestige):
+    return math.ceil(PRESTIGE_XP_CAP_BASE * (user_prestige * 0.25 + 1))
+
+#TODO: Get this to work so you can't use decimal amount of chips to bet
+def is_round_number(num):
+    return num % 1 == 0
+
+def get_chips(user_name):
+    user_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    chips = select_one_db(user_chips)
+
+    return chips
+
+def add_new_user(user_name, nickname):
+    datetime_minus_one = datetime.now() - timedelta(days=1)
+    add_user = f''' INSERT INTO user_chips VALUES ('{user_name}', '{nickname}', {CASINO_GIFT_AMOUNT}, 0, 0, '{datetime_minus_one}', '{datetime_minus_one}') '''
+    update_db(add_user)
+
+def get_xp(user_name):
+    user_xp = f'''SELECT user_xp FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    xp = select_one_db(user_xp)
+
+    return xp
+
+def get_prestige(user_name):
+    user_prestige = f'''SELECT user_prestige FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    prestige = select_one_db(user_prestige)
+
+    return prestige
+
+def get_rank(user_name):
+    user_rank = f'''SELECT user_rank FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    rank = select_one_db(user_rank)
+
+    return rank
+
+def get_daily_date(user_name):
+    get_user_daily_date = f'''SELECT daily_chips FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    daily_date = select_one_db(get_user_daily_date)
+
+    return daily_date
+
+def get_monthly_date(user_name):
+    get_user_monthly_date = f'''SELECT monthly_chips FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    monthly_date = select_one_db(get_user_monthly_date)
+
+    return monthly_date
+
+def get_gib_time(user_name):
+    get_user_gib_date = f'''SELECT gib_time FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    gib_time = select_one_db(get_user_gib_date)
+
+    return gib_time
+
+def update_user_chips(user_name, chips):
+    update_chips = f'''UPDATE user_chips SET user_chips = {chips} WHERE user_name_fr = '{user_name}' '''
+    update_db(update_chips)
+
+def update_user_chips_daily(user_name, chips, current_datetime):
+    update_chips_daily = f'''UPDATE user_chips SET user_chips = {chips}, daily_chips = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
+    update_db(update_chips_daily)
+
+def update_user_chips_monthly(user_name, chips, current_datetime):
+    update_chips_monthly = f'''UPDATE user_chips SET user_chips = {chips}, monthly_chips = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
+    update_db(update_chips_monthly)
+
+def update_gib_time(user_name, gib_time):
+    update_gib_date = f'''UPDATE user_chips SET gib_time = '{gib_time}' WHERE user_name_fr = '{user_name}' '''
+    update_db(update_gib_date)
+
+def update_user_xp(user_name, xp):
+    update_xp = f'''UPDATE user_chips SET user_xp = {xp} WHERE user_name_fr = '{user_name}' '''
+    update_db(update_xp)
+
+def update_user_prestige(user_name, prestige):
+    update_prestige = f'''UPDATE user_chips SET user_prestige = {prestige}, user_xp = 0 WHERE user_name_fr = '{user_name}' '''
+    update_db(update_prestige)
+
+def update_user_rank(user_name, rank):
+    update_rank = f'''UPDATE user_cgips SET user_rank = {rank} WHERE user_name_fr = '{user_name}' '''
+    update_db(update_rank)
+
+def reset_xp(user_name, prestige):
+    reset_xp = f'''UPDATE user_chips SET user_xp = 0, user_prestige = {prestige} WHERE user_name_fr = '{user_name}' '''
+    update_db(reset_xp)
+
+def add_xp(user_name_fr, xp_gain):
+    user_xp = get_xp(user_name_fr)
+    user_xp += xp_gain
+
+    update_user_xp(user_name_fr, user_xp)
+
+####################################
+# Casino profile functions/actions #
+####################################
+
+def join_casino(ctx):
+    user_name_fr = str(ctx.author.name)
+    entry = check_entry(user_name_fr)
+
+    # Can't be empty string or false otherwise it won't work
+    if entry == 'bleh':
+        userName_global = str(ctx.author.global_name)
+        try:
+            add_new_user(user_name_fr, userName_global)
+        except Exception as e:
+            print(e)
+        return ctx.channel.send('You joined the casino! There is fuck all to do at the moment besides coinflips :D')
+    else:
+        return ctx.channel.send("You've already joined the casino")
+
+
 def check_entry(user):
     user_name = user
     find_user = f''' SELECT user_name_fr FROM user_chips WHERE user_name_fr = '{user_name}' '''
@@ -19,28 +150,42 @@ def check_entry(user):
     return user_name_fr
 
 
-async def check_user_chips(ctx):
+def check_user_chips(ctx):
     user_name_fr = str(ctx.author.name)
+
+    # Check if the user is in the database
     check_entry(user_name_fr)
 
-    get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    amount_chips = select_one_db(get_chips)
+    # Retrieve the user's chip amount
+    amount_chips = get_chips(user_name_fr)
 
-    return await ctx.channel.send(ctx.author.mention + ' You have: **' + str(
-        '{:,}'.format(amount_chips)) + '** <:Shekel:1286655809098354749> **Sjekkels**')
+    # Create an embed message to display the user's chip balance
+    embed = discord.Embed(
+        title="<:Shekel:1286655809098354749> Sjekkel Balance",
+        color=discord.Color.blue()
+    )
+
+    # Add a field to show the number of chips in a formatted manner
+    embed.add_field(
+        name=f"**{amount_chips:,}** <:Shekel:1286655809098354749> **Sjekkels**",
+        value='',
+        inline=False
+    )
+
+    # Add a footer for extra context
+    embed.set_footer(text="Wow! I have way more than that. Loser!")
+
+    # Send the embed message to the channel
+    return embed
 
 
 def get_profile(ctx):
     user_name_fr = str(ctx.author.name)
 
-    get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_chips = select_one_db(get_chips)
-
-    get_xp = f'''SELECT user_xp FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_xp = select_one_db(get_xp)
-
-    get_prestige = f'''SELECT user_prestige FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_prestige = select_one_db(get_prestige)
+    user_chips = get_chips(user_name_fr)
+    user_xp = get_xp(user_name_fr)
+    user_prestige = get_prestige(user_name_fr)
+    user_rank = get_rank(user_name_fr)
 
     # Create an embed object
     embed = discord.Embed(
@@ -50,9 +195,9 @@ def get_profile(ctx):
     )
 
     embed.add_field(
-        name="<:Shekel:1286655809098354749> Sjekkel Amount",
-        value=f"**{user_chips:,}** <:Shekel:1286655809098354749> **Sjekkels**",
-        inline=False
+        name="🎖️ Rank",
+        value=f"Rank **{user_rank:,}**",
+        inline=True
     )
 
     embed.add_field(
@@ -67,55 +212,29 @@ def get_profile(ctx):
         inline=True
     )
 
-    embed.set_footer(text="Keep gambling and gain more **XP** to prestige!")
+    embed.add_field(
+        name="<:Shekel:1286655809098354749> Sjekkel Amount",
+        value=f"**{user_chips:,}** <:Shekel:1286655809098354749> **Sjekkels**",
+        inline=False
+    )
+
+    embed.set_footer(text="Keep gambling and gain more **XP** to prestige! And most of all to give me more money!")
     return embed
 
 
 def reward_user_with_chips(user_name_fr, amount):
-    get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_chips = select_one_db(get_chips)
-
+    user_chips = get_chips(user_name_fr)
     user_chips += amount
-    update_chips = f'''UPDATE user_chips SET user_chips = {user_chips} WHERE user_name_fr = '{user_name_fr}' '''
-    update_db(update_chips)
 
-
-def prestige_user(user_name_fr):
-    get_prestige = f'''SELECT user_prestige FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_prestige = select_one_db(get_prestige)
-
-    reset_xp = f'''UPDATE user_chips SET user_xp = 0, user_prestige = {user_prestige} WHERE user_name_fr = '{user_name_fr}' '''
-    update_db(reset_xp)
-
-    reward_chips = 10000 * user_prestige
-    reward_user_with_chips(user_name_fr, reward_chips)
-
-
-def add_xp(user_name_fr, xp_gain):
-    get_xp = f'''SELECT user_xp FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_xp = select_one_db(get_xp)
-
-    user_xp += xp_gain
-
-    update_xp = f'''UPDATE user_chips SET user_xp = {user_xp} WHERE user_name_fr = '{user_name_fr}' '''
-    update_db(update_xp)
-
-
-PRESTIGE_XP_CAP_BASE = 10000000  # Base XP cap for prestige
-
-
-def calculate_prestige_xp_cap(user_prestige):
-    return math.ceil(PRESTIGE_XP_CAP_BASE * (user_prestige * 0.25 + 1))
+    update_user_chips(user_name_fr, user_chips)
 
 
 async def prestige(ctx):
     user_name_fr = str(ctx.author.name)
 
-    get_xp = f'''SELECT user_xp FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_xp = select_one_db(get_xp)
+    user_xp = get_xp(user_name_fr)
 
-    get_prestige = f'''SELECT user_prestige FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_prestige = select_one_db(get_prestige)
+    user_prestige = get_prestige(user_name_fr)
 
     # Calculate XP required to prestige
     prestige_xp_cap = calculate_prestige_xp_cap(user_prestige)
@@ -183,11 +302,8 @@ async def prestige(ctx):
 
 async def apply_prestige(ctx, user_name_fr, new_prestige_level, reward_chips):
     try:
-        update_prestige = f'''UPDATE user_chips SET user_prestige = {new_prestige_level}, user_xp = 0 WHERE user_name_fr = '{user_name_fr}' '''
-        update_db(update_prestige)
-
-        update_chips = f'''UPDATE user_chips SET user_chips = {reward_chips} WHERE user_name_fr = '{user_name_fr}' '''
-        update_db(update_chips)
+        update_user_prestige(user_name_fr, new_prestige_level)
+        update_user_chips(user_name_fr, reward_chips)
 
         await ctx.send(
             f"🎉 Congratulations {ctx.author.mention}! You have prestiged to **level {new_prestige_level}** and received **{reward_chips:,}** <:Shekel:1286655809098354749> **Sjekkels**!")
@@ -195,23 +311,35 @@ async def apply_prestige(ctx, user_name_fr, new_prestige_level, reward_chips):
         await ctx.send("Something went wrong with the prestige process.")
         print(e)
 
+def send_rank_info(ctx):
+    user_name_fr = str(ctx.author.name)
+    user_name_global = str(ctx.author.global_name)
 
-RANK_STEPS = [1000, 10000, 100000, 1000000, 10000000]
+    check_entry(user_name_fr)
+
+    user_xp = get_xp(user_name_fr)
+    user_prestige = get_prestige(user_name_fr)
+    current_rank = get_rank(user_name_fr)
+
+    required_xp = calculate_rank_xp(user_prestige)
+
+    embed = discord.Embed(title=f"{user_name_global}'s Rank Information", color=discord.Color.blue())
+    embed.add_field(name="Current XP", value=f"**{user_xp:,}**", inline=False)
+    embed.add_field(name="Current Rank", value=f"**Rank {current_rank}**", inline=False)
 
 
-def calculate_rank_xp(user_prestige):
-    return [math.ceil(rank_step * (user_prestige * 0.25 + 1)) for rank_step in RANK_STEPS]
+
+    for i, xp in enumerate(required_xp, start=1):
+        status = "Reached" if current_rank >= i else "Next"
+        embed.add_field(name= f"Rank {i} (**Unlocks Prestige**)" if i == 5 else f"Rank {i}", value=f"**{xp:,} XP** (**{status}**)", inline=False)
+
+    return embed
 
 
 async def update_rank(user_name_fr, user_name_global):
-    get_user_xp = f'''SELECT user_xp FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_xp = select_one_db(get_user_xp)
-
-    get_rank = f'''SELECT user_rank FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    current_rank = select_one_db(get_rank)
-
-    get_prestige = f'''SELECT user_prestige FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_prestige = select_one_db(get_prestige)
+    user_xp = get_xp(user_name_fr)
+    current_rank = get_rank(user_name_fr)
+    user_prestige = get_prestige(user_name_fr)
 
     required_xp = calculate_rank_xp(user_prestige)
 
@@ -219,44 +347,27 @@ async def update_rank(user_name_fr, user_name_global):
         if user_xp >= required_xp[i]:
 
             new_rank = i + 1
-            update_rank_query = f'''UPDATE user_chips SET user_rank = {new_rank} WHERE user_name_fr = '{user_name_fr}' '''
-            update_db(update_rank_query)
+            update_user_rank(user_name_global, new_rank)
 
-            return f"Congratulations {user_name_global}! You've ranked up to **Rank {new_rank}**!"
+            return f"{user_name_global}. You've ranked up to **Rank {new_rank}**. Don't get too excited"
 
     return None  # No rank up
 
 
-DAILY_REWARD_AMOUNT = 250  # Define the reward amount (customize as needed)
-
 def daily_reward(ctx):
     user_name_fr = str(ctx.author.name)
 
-    get_last_claim = f'''SELECT daily_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    last_claim = select_one_db(get_last_claim)
+    last_claim = get_daily_date(user_name_fr)
 
-    # TODO: Change this to an embed message or make an embed message function so I can use it in more places
-    # if last_claim == 'bleh':  # If user doesn't exist in the database
-    #     return await ctx.send("You need to register first by joining the casino!")
+    current_time_stamp = datetime.now()
 
-    # Keep in case it is needed
-    # Convert `last_claim` to a datetime object
-    # last_claim_time = datetime.strptime(last_claim, '%Y-%m-%d %H:%M:%S')
-
-    current_time = datetime.now()
-
-    time_since_last_claim = current_time - last_claim
+    time_since_last_claim = current_time_stamp - last_claim
     if time_since_last_claim >= timedelta(days=1):
 
         reward_chips = DAILY_REWARD_AMOUNT
-
-        get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-        user_chips = select_one_db(get_chips)
-
+        user_chips = get_chips(user_name_fr)
         new_chip_amount = user_chips + reward_chips
-
-        update_chips = f'''UPDATE user_chips SET user_chips = {new_chip_amount}, daily_chips = '{current_time}' WHERE user_name_fr = '{user_name_fr}' '''
-        update_db(update_chips)
+        update_user_chips_daily(user_name_fr, new_chip_amount, current_time_stamp)
 
         embed = discord.Embed(
             title="🎉 Daily Reward Claimed!",
@@ -291,45 +402,177 @@ def daily_reward(ctx):
         return embed
 
 
+def monthly_reward(ctx):
+    user_name_fr = str(ctx.author.name)
+
+    last_claim = get_monthly_date(user_name_fr)
+
+    current_time_stamp = datetime.now()
+
+    time_since_last_claim = current_time_stamp - last_claim
+
+    if time_since_last_claim >= timedelta(days=30):
+        reward_chips = MONTHLY_REWARD_AMOUNT
+        user_chips = get_chips(user_name_fr)
+        new_chip_amount = user_chips + reward_chips
+
+        update_user_chips_monthly(user_name_fr, new_chip_amount, current_time_stamp)
+
+        embed = discord.Embed(
+            title="🎉 Monthly Reward Claimed!",
+            description=f"{ctx.author.mention}, you have received **{reward_chips}** <:Shekel:1286655809098354749> Sjekkels! Go out and lose it all!",
+            color=discord.Color.green()
+        )
+        embed.add_field(
+            name="Current **Sjekkels**",
+            value=f"**{new_chip_amount:,}** <:Shekel:1286655809098354749> **Sjekkels**",
+            inline=True
+        )
+        embed.set_footer(text="Now fuck off")
+        return embed
+    else:
+        # Not yet eligible for monthly reward
+        time_left = timedelta(days=30) - time_since_last_claim
+        days = time_left.days
+        hours, remainder = divmod(time_left.seconds, 3600)
+        minutes, _ = divmod(remainder, 60)
+
+        embed = discord.Embed(
+            title="⏳Better luck, tomorrow or something",
+            description=f"{ctx.author.mention}, you have already claimed your monthly <:Shekel:1286655809098354749> **Sjekkels**.",
+            color=discord.Color.red()
+        )
+        embed.add_field(
+            name="Time Remaining",
+            value=f"You can claim again in {days} days, {hours} hours, and {minutes} minutes.",
+            inline=False
+        )
+        embed.set_footer(text="Come back when the timer expires! Shithead!")
+
+        return embed
+
+
+def combined_rewards(ctx):
+    # Get the user's name
+    user_name_fr = str(ctx.author.name)
+
+    gib_result = casino_contribution(ctx)
+
+    # Call the daily reward function
+    daily_result = daily_reward(ctx)
+
+    # Call the monthly reward function
+    monthly_result = monthly_reward(ctx)
+
+    # Create the embed for combined rewards
+    embed = discord.Embed(
+        title="<:Shekel:1286655809098354749> Rewards Status",
+        description=f"{ctx.author.mention}, here's your reward status for today:",
+        color=discord.Color.blue()
+    )
+
+    # Add field for daily reward result
+    if "Daily Reward Claimed!" in daily_result.title:
+        embed.add_field(
+            name="🎁 Daily Reward",
+            value=f"Successfully claimed **{DAILY_REWARD_AMOUNT}** <:Shekel:1286655809098354749> Sjekkels.",
+            inline=False
+        )
+    else:
+        embed.add_field(
+            name="❌ Daily Reward",
+            value=f"Already claimed. {daily_result.fields[0].value}",
+            inline=False
+        )
+
+    # Add field for monthly reward result
+    if "Monthly Reward Claimed!" in monthly_result.title:
+        embed.add_field(
+            name="📅 Monthly Reward",
+            value=f"Successfully claimed **{MONTHLY_REWARD_AMOUNT}** <:Shekel:1286655809098354749> Sjekkels.",
+            inline=False
+        )
+    else:
+        embed.add_field(
+            name="❌ Monthly Reward",
+            value=f"Already claimed. {monthly_result.fields[0].value}",
+            inline=False
+        )
+
+    if "Casino Charity Claimed!" in gib_result.title:
+        embed.add_field(
+            name="<:Shekel:1286655809098354749> Gib Reward",
+            value=f"Successfully claimed **{GIB_REWARD_AMOUNT}** <:Shekel:1286655809098354749> Sjekkels.",
+        )
+    else:
+        embed.add_field(
+            name="❌ Gib Reward",
+            value=f"Already claimed. {gib_result.fields[0].value}",
+            inline=False
+        )
+
+    # Return the embed message
+    return embed
+
 ################
 # Casino games #
 ################
-async def casino_contribution(ctx):
+def casino_contribution(ctx):
     user_name_fr = str(ctx.author.name)
     check_entry(user_name_fr)
 
-    get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    amount_chips = select_one_db(get_chips)
-    amount_chips += 50
-    add_user = f''' UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_name_fr = '{user_name_fr}' '''
-    try:
-        update_db(add_user)
-    except Exception as e:
-        print(e)
-        return await ctx.channel.send("Something broke, send help!")
-    return await ctx.channel.send(
-        'The casino gave you some chips to enable your gambling addiction. You received **50** <:Shekel:1286655809098354749> **Sjekkels**! 👏')
+    # Get current time
+    current_time = datetime.now()
 
+    # Get the last claim time (gib_time) from the database
+    gib_time = get_gib_time(user_name_fr)  # You should have a function to retrieve gib_time from the database
 
-def join_casino(ctx):
-    user_name_fr = str(ctx.author.name)
-    entry = check_entry(user_name_fr)
+    # Calculate time difference
+    time_since_last_claim = current_time - gib_time
 
-    # Can't be empty string or false otherwise it won't work
-    if entry == 'bleh':
-        userName_global = str(ctx.author.global_name)
-        add_user = f''' INSERT INTO user_chips VALUES ('{user_name_fr}', '{userName_global}', {5000}) '''
-        try:
-            insert_db(add_user)
-        except Exception as e:
-            print(e)
-        return ctx.channel.send('You joined the casino! There is fuck all to do at the moment besides coinflips :D')
-    else:
-        return ctx.channel.send("You've already joined the casino")
+    # Check if 10 minutes have passed
+    if time_since_last_claim < timedelta(minutes=5):
+        # Time hasn't passed yet
+        time_left = timedelta(minutes=5) - time_since_last_claim
+        minutes, seconds = divmod(time_left.seconds, 60)
 
+        embed = discord.Embed(
+            title="⏳ Hold the fuck on!",
+            color=discord.Color.red()
+        )
 
-def is_round_number(num):
-    return num % 1 == 0
+        embed.add_field(
+            name="Time Remaining",
+            value=f"You can claim again in {minutes} minute(s) and {seconds} second(s)",
+            inline=False
+        )
+        return embed
+
+    # 10 minutes have passed, give reward
+    amount_chips = get_chips(user_name_fr)
+    reward = GIB_REWARD_AMOUNT
+    amount_chips += reward
+
+    update_user_chips(user_name_fr, amount_chips)
+    update_gib_time(user_name_fr, current_time)
+
+    # Create an embed message for a successful reward claim
+    embed = discord.Embed(
+        title="🎲 Casino Charity Claimed!",
+        description=f"Take you <:Shekel:1286655809098354749> **Sjekkels** and fuck off!. You received **{reward}** <:Shekel:1286655809098354749> **Sjekkels**! 👏",
+        color=discord.Color.green()
+    )
+
+    # Add fields to display additional info
+    embed.add_field(
+        name="Current Balance",
+        value=f"You now have **{amount_chips:,}** <:Shekel:1286655809098354749> **Sjekkels**!",
+        inline=False
+    )
+
+    embed.set_footer(text="It's only because of some legal bullshit you got this...")
+
+    return embed
 
 
 # function for getting cards needs to be added, and coinflips
@@ -343,8 +586,7 @@ def coinflip(ctx, side, amount):
     else:
         return "First heads(h)/tails(t) then the <:Shekel:1286655809098354749> amount..."
     try:
-        get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-        amount_chips = select_one_db(get_chips)
+        amount_chips = get_chips(user_name_fr)
         if amount_chips == 0:
             return 'Where them <:Shekel:1286655809098354749> **Sjekkels** at homie?!'
     except Exception as e:
@@ -365,11 +607,8 @@ def coinflip(ctx, side, amount):
             luck = random.randint(0, 100)
 
             if luck >= 50:
-                print(int(amount_chips))
-                print(int(amount))
                 amount_chips = int(amount_chips) + int(amount)
-                update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_name_fr = '{user_name_fr}' """
-                update_db(update_chips)
+                update_user_chips(user_name_fr, amount_chips)
                 xp_earned = amount
                 add_xp(user_name_fr, xp_earned)
 
@@ -378,8 +617,7 @@ def coinflip(ctx, side, amount):
                     xp_earned) + 'XP**!'
             else:
                 amount_chips = int(amount_chips) - int(amount)
-                update_chips = f""" UPDATE user_chips SET user_chips = '{amount_chips}' WHERE user_name_fr = '{user_name_fr}' """
-                update_db(update_chips)
+                update_user_chips(user_name_fr, amount_chips)
                 opposite_side = 'tails' if side == 'heads' else 'heads'
                 return 'Wow! it was ' + opposite_side + "! You **lost** <:theman:1286723740880732210>. You now have: **" + str(
                     '{:,}'.format(amount_chips)) + '** <:Shekel:1286655809098354749> **Sjekkels**.'
@@ -393,10 +631,6 @@ def coinflip(ctx, side, amount):
 ############# Dice Roll Game#############
 #########################################
 
-# Constants for dice roll
-XP_MULTIPLIER = 1  # Example multiplier for XP
-WIN_MULTIPLIER = 5  # The multiplier for the winning amount on a 6 roll
-
 async def casino_diceroll(ctx, amount: int):
     user_name_fr = str(ctx.author.name)
 
@@ -408,8 +642,7 @@ async def casino_diceroll(ctx, amount: int):
         return await ctx.send('First you must register yourself. Use <prefix>jc')
 
     # Fetch user chips
-    get_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_chips = select_one_db(get_chips)
+    user_chips = get_chips(user_name_fr)
 
     if user_chips < amount:
         return await ctx.send(f"You don't have enough chips to bet that amount, {ctx.author.mention}.")
@@ -432,13 +665,11 @@ async def casino_diceroll(ctx, amount: int):
     if dice_roll == 6:
         reward = amount * WIN_MULTIPLIER
         new_chip_amount = user_chips + reward
-        update_chips = f'''UPDATE user_chips SET user_chips = {new_chip_amount} WHERE user_name_fr = '{user_name_fr}' '''
-        update_db(update_chips)
+        update_user_chips(user_name_fr, new_chip_amount)
 
         # Add XP based on the reward
         xp_earned = reward * XP_MULTIPLIER
-        update_xp = f'''UPDATE user_chips SET user_xp = user_xp + {xp_earned} WHERE user_name_fr = '{user_name_fr}' '''
-        update_db(update_xp)
+        update_user_xp(user_name_fr, xp_earned)
 
         # Step 4: Edit the initial message to show the dice result (win)
         embed = discord.Embed(
@@ -454,8 +685,7 @@ async def casino_diceroll(ctx, amount: int):
     else:
         # Player loses the bet, subtract chips
         new_chip_amount = user_chips - amount
-        update_chips = f'''UPDATE user_chips SET user_chips = {new_chip_amount} WHERE user_name_fr = '{user_name_fr}' '''
-        update_db(update_chips)
+        update_user_chips(user_name_fr, new_chip_amount)
 
         # Step 4: Edit the initial message to show the dice result (loss)
         embed = discord.Embed(
@@ -466,33 +696,3 @@ async def casino_diceroll(ctx, amount: int):
         embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"{new_chip_amount:,} <:Shekel:1286655809098354749> **Sjekkels**", inline=True)
         embed.set_footer(text="Loser")
         await initial_message.edit(embed=embed)
-
-def send_rank_info(ctx):
-    user_name_fr = str(ctx.author.name)
-    user_name_global = str(ctx.author.global_name)
-
-    check_entry(user_name_fr)
-    """Send an embed showing the user's rank and XP required for the next rank."""
-
-    get_xp = f'''SELECT user_xp FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_xp = select_one_db(get_xp)
-
-    get_prestige = f'''SELECT user_prestige FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    user_prestige = select_one_db(get_prestige)
-
-    get_rank = f'''SELECT user_rank FROM user_chips WHERE user_name_fr = '{user_name_fr}' '''
-    current_rank = select_one_db(get_rank)
-
-    required_xp = calculate_rank_xp(user_prestige)
-
-    embed = discord.Embed(title=f"{user_name_global}'s Rank Information", color=discord.Color.blue())
-    embed.add_field(name="Current XP", value=f"**{user_xp:,}**", inline=False)
-    embed.add_field(name="Current Rank", value=f"**Rank {current_rank}**", inline=False)
-
-
-
-    for i, xp in enumerate(required_xp, start=1):
-        status = "Reached" if current_rank >= i else "Next"
-        embed.add_field(name= f"Rank {i} (**Unlocks Prestige**)" if i == 5 else f"Rank {i}", value=f"**{xp:,} XP** (**{status}**)", inline=False)
-
-    return embed
