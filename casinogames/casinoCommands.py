@@ -12,7 +12,7 @@ from botsettings.databaseCalls import update_db, select_one_db, insert_db
 
 # Reward Base values
 CASINO_GIFT_AMOUNT = 1500
-GIB_REWARD_AMOUNT = secrets.randbelow(125) + 25
+GIB_REWARD_AMOUNT = 25
 HOURLY_REWARD_AMOUNT = 100
 DAILY_REWARD_AMOUNT = 250
 MONTHLY_REWARD_AMOUNT = 1000
@@ -535,7 +535,6 @@ def combined_rewards(ctx):
         description=f"{ctx.author.mention}, here's your reward status for today:",
         color=discord.Color.blue()
     )
-
     if "Casino Charity Claimed!" in gib_result.title:
         embed.add_field(
             name="<:Shekel:1286655809098354749> Gib Reward",
@@ -776,3 +775,80 @@ async def casino_diceroll(ctx, amount: int):
         embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"{new_chip_amount:,} <:Shekel:1286655809098354749> **Sjekkels**", inline=True)
         embed.set_footer(text="Loser")
         await initial_message.edit(embed=embed)
+
+
+ROULETTE_WHEEL = {
+    0: "green",
+    1: "red", 2: "black", 3: "red", 4: "black", 5: "red", 6: "black",
+    7: "red", 8: "black", 9: "red", 10: "black", 11: "black", 12: "red",
+    13: "black", 14: "red", 15: "black", 16: "red", 17: "black", 18: "red",
+    19: "red", 20: "black", 21: "red", 22: "black", 23: "red", 24: "black",
+    25: "red", 26: "black", 27: "red", 28: "black", 29: "black", 30: "red",
+    31: "black", 32: "red", 33: "black", 34: "red", 35: "black", 36: "red"
+}
+
+# Payout multipliers
+PAYOUTS = {
+    "number": 35,    # 35:1 for correct number
+    "color": 1,      # 1:1 for color
+    "even_odd": 1,   # 1:1 for even/odd
+}
+
+async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
+    user_name_fr = str(ctx.author.name)
+    check_entry(user_name_fr)
+
+    # Check if the user has enough chips to place the bet
+    user_chips = get_chips(user_name_fr)
+    if bet_amount > user_chips:
+        return await ctx.channel.send(f"🚫 You don't have enough Sjekkels to bet {bet_amount}!")
+
+
+
+    # Deduct the bet amount from the user's chips
+    user_chips -= bet_amount
+    update_user_chips(user_name_fr, user_chips)
+
+    # Spin the roulette wheel
+    spin_number = secrets.randbelow(37)  # Number between 0 and 36
+    spin_color = ROULETTE_WHEEL[spin_number]
+
+    # Display spinning embed message
+    embed = discord.Embed(
+        title="🎰 Roulette Wheel Spinning...",
+        description="Good luck! The wheel is spinning!",
+        color=discord.Color.gold()
+    )
+    embed.set_thumbnail(url="https://some-url-for-roulette-wheel.gif")  # Change to actual URL
+    message = await ctx.send(embed=embed)
+
+    await asyncio.sleep(3)  # Simulate the spinning time
+
+    # Check if the user wins
+    win = False
+    payout = 0
+
+    if bet_type == "number" and int(bet_value) == spin_number:
+        win = True
+        payout = bet_amount * PAYOUTS["number"]
+    elif bet_type == "color" and bet_value.lower() == spin_color:
+        win = True
+        payout = bet_amount * PAYOUTS["color"]
+    elif bet_type == "even_odd":
+        if bet_value.lower() == "even" and spin_number % 2 == 0 or bet_value.lower() == "odd" and spin_number % 2 != 0:
+            win = True
+            payout = bet_amount * PAYOUTS["even_odd"]
+
+    # Edit the original embed message with the result
+    if win:
+        user_chips += payout
+        update_user_chips(user_name_fr, user_chips)
+        result_desc = f"🎉 Congratulations! You won **{payout}** <:Shekel:1286655809098354749> Sjekkels!\nYou now have **{user_chips:,}** Sjekkels."
+    else:
+        result_desc = f"😢 You lost the bet! The wheel landed on **{spin_number} {spin_color}**.\nYou now have **{user_chips:,}** Sjekkels."
+
+    embed.title = "🎰 Roulette Result!"
+    embed.description = result_desc
+    embed.set_thumbnail(url="https://some-url-for-roulette-result.png")  # Change to actual result image URL
+
+    return await message.edit(embed=embed)

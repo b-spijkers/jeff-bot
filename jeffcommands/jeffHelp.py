@@ -22,7 +22,7 @@ async def jeff_info(self, ctx, bot):
 
 async def help(self, ctx, bot):
     msg = discord.Embed(
-        title='List of commands and what the hell they do',
+        title='List of commands and what the hell they do (Yes its fucking ass, shut the fuck up)',
         description="This servers prefix is: Idk, something. You just used it, fuck you.\n"
                     "Below are the aliases and descriptions of all commands.\n"
                     "If you don't understand, ask someone who does. Or else just get fucked.",
@@ -55,7 +55,12 @@ async def help(self, ctx, bot):
               '➡ [coinflip, cf]: `Toss a coin, maybe get lucky. Ex: <prefix>>cf <sideOfCoin>(heads, h, tails, t) <amount>(h=half, a=all)`\n'
               '➡ [jc]: `Register at the casino, basically just adds you to the database so you can gamble.`\n'
               '➡ [gib]: `Ask the casino if you could please get some chips for your gambling addiction`\n'
-              '➡ [sjekkels, sj, s]: `See how many chips you currently have`\n',
+              '➡ [sjekkels, sj, s]: `See how many chips you currently have`\n'
+              '➡ [profile, p]: `See how many chips you currently have`\n'
+              '➡ [dice]: `See how many chips you currently have`\n'
+              '➡ [rank]: `See how many chips you currently have`\n'
+              '➡ [claimall, ca]: `See how many chips you currently have`\n',
+
         inline=False
     )
 

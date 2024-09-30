@@ -16,7 +16,7 @@ from discord.utils import find
 from botsettings import prefix, botConsole
 from apicommands import apis, uncyclopedia, tweakers
 from casinogames import casinoCommands
-from casinogames.casinoCommands import update_rank, casino_diceroll
+from casinogames.casinoCommands import update_rank, casino_diceroll, casino_roulette
 from jeffcommands import jeffThings, jeffFun, jeffHelp
 
 DISCORD_TOKEN = os.getenv("TOKEN")
@@ -78,23 +78,6 @@ class JeffThings(commands.Cog, name='Things Jeff does'):
             insult = jeffThings.el_gordo(mentioned)
             await message.channel.send(message.author.mention)
             await message.channel.send(embed=insult)
-
-        # if 'bas is gay!' in message.content.lower():
-        #     print(
-        #         'Command: PepeJs at it again \n',
-        #         'User: ' + message.author.name + '\n',
-        #         'Guild: ' + message.channel.guild.name + '\n',
-        #         'Time: ' + time.strftime("%Y-%m-%d %H:%M")
-        #     )
-        #     await message.channel.send(str(message.author.mention) + ' Ur gay')
-        # if 'owo' in message.content.lower():
-        #     print(
-        #         'Command: PepeJs at it again \n',
-        #         'User: ' + message.author.name + '\n',
-        #         'Guild: ' + message.channel.guild.name + '\n',
-        #         'Time: ' + time.strftime("%Y-%m-%d %H:%M")
-        #     )
-        #     await message.channel.send('https://c.tenor.com/Ik-kENFloS0AAAAC/pepega-pepe-the-frog.gif')
 
     @commands.command(
         help="Jeff",
@@ -383,6 +366,12 @@ class Casino(commands.Cog, name='Casino commands'):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.channel.send(
                 f'Calm the fuck down.')
+
+    @commands.command(help="Play roulette! Bet on a number, color, or even/odd!")
+    @commands.cooldown(1, 5, commands.BucketType.user)  # Cooldown to prevent spam
+    async def roulette(self, ctx, bet_type: str, bet_value: str, bet_amount: int):
+        botConsole.log_command(ctx)
+        await casino_roulette(ctx, bet_type, bet_value, bet_amount)
 
     @commands.command(
         name="diceroll",  # Name of the command
