@@ -12,7 +12,7 @@ from botsettings.databaseCalls import update_db, select_one_db, insert_db
 
 # Reward Base values
 CASINO_GIFT_AMOUNT = 1500
-GIB_REWARD_AMOUNT = 25
+GIB_REWARD_AMOUNT = secrets.randbelow(125)
 HOURLY_REWARD_AMOUNT = 100
 DAILY_REWARD_AMOUNT = 250
 MONTHLY_REWARD_AMOUNT = 1000
@@ -790,8 +790,8 @@ ROULETTE_WHEEL = {
 # Payout multipliers
 PAYOUTS = {
     "number": 35,    # 35:1 for correct number
-    "color": 1,      # 1:1 for color
-    "even_odd": 1,   # 1:1 for even/odd
+    "color": 2,      # 1:1 for color
+    "even_odd": 2,   # 1:1 for even/odd
 }
 
 async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
@@ -802,7 +802,6 @@ async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
     user_chips = get_chips(user_name_fr)
     if bet_amount > user_chips:
         return await ctx.channel.send(f"🚫 You don't have enough Sjekkels to bet {bet_amount}!")
-
 
 
     # Deduct the bet amount from the user's chips
