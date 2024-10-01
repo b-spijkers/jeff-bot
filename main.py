@@ -262,6 +262,16 @@ class Casino(commands.Cog, name='Casino commands'):
         await ctx.channel.send(embed=daily_message)
 
     @commands.command(
+        help="Claim your weekly reward.",
+        aliases=['weekly', 'cw']
+    )
+    async def weekly_chips(self, ctx):
+        botConsole.log_command(ctx)
+        weekly_message = casinoCommands.weekly_reward(ctx)
+
+        await ctx.channel.send(embed=weekly_message)
+
+    @commands.command(
         help="Claim your monthly reward.",
         aliases=['monthly', 'cm']
     )

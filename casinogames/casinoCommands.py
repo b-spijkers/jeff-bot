@@ -12,9 +12,10 @@ from botsettings.databaseCalls import update_db, select_one_db, insert_db
 
 # Reward Base values
 CASINO_GIFT_AMOUNT = 1500
-GIB_REWARD_AMOUNT = secrets.randbelow(100)
+GIB_REWARD_AMOUNT = 25
 HOURLY_REWARD_AMOUNT = 100
 DAILY_REWARD_AMOUNT = 250
+WEEKLY_REWARD_AMOUNT = 500
 MONTHLY_REWARD_AMOUNT = 1000
 
 # Rank and Prestige XP Base
@@ -84,6 +85,13 @@ def get_daily_date(user_name):
 
     return daily_date
 
+def get_weekly_date(user_name):
+    get_user_weekly_date = f'''SELECT weekly_chips FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    weekly_date = select_one_db(get_user_weekly_date)
+
+    return weekly_date
+
 def get_monthly_date(user_name):
     get_user_monthly_date = f'''SELECT monthly_chips FROM user_chips WHERE user_name_fr = '{user_name}' '''
 
@@ -113,6 +121,10 @@ def update_user_chips_hourly(user_name, chips, current_datetime):
 def update_user_chips_daily(user_name, chips, current_datetime):
     update_chips_daily = f'''UPDATE user_chips SET user_chips = {chips}, daily_chips = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
     update_db(update_chips_daily)
+
+def update_user_chips_weekly(user_name, chips, current_datetime):
+    update_chips_weekly = f'''UPDATE user_chips SET user_chips = {chips}, weekly_chips = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
+    update_db(update_chips_weekly)
 
 def update_user_chips_monthly(user_name, chips, current_datetime):
     update_chips_monthly = f'''UPDATE user_chips SET user_chips = {chips}, monthly_chips = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
@@ -514,6 +526,57 @@ def monthly_reward(ctx):
         return embed
 
 
+def weekly_reward(ctx):
+    user_name_fr = str(ctx.author.name)
+    user_prestige = get_prestige(user_name_fr)
+    user_rank = get_rank(user_name_fr)
+    last_claim = get_weekly_date(user_name_fr)
+
+    current_time_stamp = datetime.now()
+
+    time_since_last_claim = current_time_stamp - last_claim
+
+    if time_since_last_claim >= timedelta(days=7):
+        reward_chips = math.ceil(WEEKLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
+        user_chips = get_chips(user_name_fr)
+        new_chip_amount = user_chips + reward_chips
+
+        update_user_chips_weekly(user_name_fr, new_chip_amount, current_time_stamp)
+
+        embed = discord.Embed(
+            title="🎉 Weekly Reward Claimed!",
+            description=f"{ctx.author.mention}, you have received **{reward_chips}** <:Shekel:1286655809098354749> Sjekkels! Go out and lose it all!",
+            color=discord.Color.green()
+        )
+        embed.add_field(
+            name="Current **Sjekkels**",
+            value=f"**{new_chip_amount:,}** <:Shekel:1286655809098354749> **Sjekkels**",
+            inline=True
+        )
+        embed.set_footer(text="Now fuck off")
+        return embed
+    else:
+        # Not yet eligible for weekly reward
+        time_left = timedelta(days=7) - time_since_last_claim
+        days = time_left.days
+        hours, remainder = divmod(time_left.seconds, 3600)
+        minutes, _ = divmod(remainder, 60)
+
+        embed = discord.Embed(
+            title="⏳Better luck, tomorrow or something",
+            description=f"{ctx.author.mention}, you have already claimed your weekly <:Shekel:1286655809098354749> **Sjekkels**.",
+            color=discord.Color.red()
+        )
+        embed.add_field(
+            name="Time Remaining",
+            value=f"You can claim again in {days} days, {hours} hours, and {minutes} minutes.",
+            inline=False
+        )
+        embed.set_footer(text="Come back when the timer expires! Shithead!")
+
+        return embed
+
+
 def combined_rewards(ctx):
     # Get the user's name
     user_name_fr = str(ctx.author.name)
@@ -522,11 +585,8 @@ def combined_rewards(ctx):
 
     hourly_result = hourly_reward(ctx)
     gib_result = casino_contribution(ctx)
-
-    # Call the daily reward function
     daily_result = daily_reward(ctx)
-
-    # Call the monthly reward function
+    weekly_result = weekly_reward(ctx)
     monthly_result = monthly_reward(ctx)
 
     # Create the embed for combined rewards
@@ -538,7 +598,7 @@ def combined_rewards(ctx):
     if "Casino Charity Claimed!" in gib_result.title:
         embed.add_field(
             name="<:Shekel:1286655809098354749> Gib Reward",
-            value=f"Successfully claimed **{math.ceil(GIB_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))}** <:Shekel:1286655809098354749> Sjekkels.",
+            value=f"{gib_result.description}",
             inline=False
         )
     else:
@@ -571,6 +631,19 @@ def combined_rewards(ctx):
         embed.add_field(
             name="❌ Daily Reward",
             value=f"Already claimed. {daily_result.fields[0].value}",
+            inline=False
+        )
+
+    if "Weekly Reward Claimed!" in weekly_result.title:
+        embed.add_field(
+            name="📅 Weekly Reward",
+            value=f"Successfully claimed **{math.ceil(WEEKLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))}** <:Shekel:1286655809098354749> Sjekkels.",
+            inline=False
+        )
+    else:
+        embed.add_field(
+            name="❌ Weekly Reward",
+            value=f"Already claimed. {weekly_result.fields[0].value}",
             inline=False
         )
 
@@ -629,7 +702,7 @@ def casino_contribution(ctx):
 
     # 10 minutes have passed, give reward
     amount_chips = get_chips(user_name_fr)
-    reward = math.ceil(GIB_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
+    reward = math.ceil(secrets.randbelow(100) + GIB_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
     amount_chips += reward
 
     update_user_chips(user_name_fr, amount_chips)
@@ -638,7 +711,7 @@ def casino_contribution(ctx):
     # Create an embed message for a successful reward claim
     embed = discord.Embed(
         title="🎲 Casino Charity Claimed!",
-        description=f"Take you <:Shekel:1286655809098354749> **Sjekkels** and fuck off!. You received **{reward}** <:Shekel:1286655809098354749> **Sjekkels**! 👏",
+        description=f"Take your <:Shekel:1286655809098354749> **Sjekkels** and fuck off!. You received **{reward}** <:Shekel:1286655809098354749> **Sjekkels**! 👏",
         color=discord.Color.green()
     )
 
