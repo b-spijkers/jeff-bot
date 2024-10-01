@@ -981,7 +981,7 @@ async def blackjack_game(ctx, bet_amount):
     if bet_amount == 'a':
         bet_amount = current_chips
     elif bet_amount == 'h':
-        bet_amount = current_chips / 2
+        bet_amount = math.ceil(current_chips / 2)
 
     if bet_amount > current_chips:
         await ctx.send(f"{ctx.author.mention} You don't have enough chips to place this bet! 💸")
@@ -1013,10 +1013,10 @@ async def blackjack_game(ctx, bet_amount):
     # Embed showing initial hands with flair
     embed = discord.Embed(
         title="♠️ Blackjack Time! ♠️",
-        description=f"🃏 Dealer's Hand: **? {' '.join(dealer_hand[1])}**\n🃏 Your Hand: **{' '.join(player_hand)}**",
+        description=f"🃏 Dealer's Hand | **{calculate_hand(dealer_hand[1])}**:\n **? {' '.join(dealer_hand[1])}**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
         color=discord.Color.blue()
     )
-    embed.set_footer(text="React with 👍 to hit, 👎 to stand, or 💪 to double down. Good luck! 🍀")
+    embed.set_footer(text="React with 👍 to hit, 👎 to stand.")
 
     game_msg = await ctx.send(embed=embed)
     await game_msg.add_reaction("👍")  # Hit
@@ -1045,7 +1045,7 @@ async def blackjack_game(ctx, bet_amount):
 
                     embed = discord.Embed(
                         title="🎉 Five Card Charlie! 🎉",
-                        description=f"🃏 Dealer's Hand | **{calculate_hand(dealer_hand)}**:\n **[?, {dealer_hand[1]}]**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
+                        description=f"🃏 Dealer's Hand | **{calculate_hand(dealer_hand[1])}**:\n **[?, {dealer_hand[1]}]**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
                         color=discord.Color.green()
                     )
                     embed.add_field(name="🃏 Victory!", value=f"**You won {reward} <:Shekel:1286655809098354749> Sjekkels!**", inline=False)
@@ -1099,15 +1099,18 @@ async def blackjack_game(ctx, bet_amount):
         update_user_xp(user_name, get_xp(user_name) + xp_gained)
         result = f"🎉 **You win!** 🎉\nYou gained **{reward}** <:Shekel:1286655809098354749> **Sjekkels** and **{xp_gained} XP**!"
         color = discord.Color.green()
+        await game_msg.clear_reactions()
     elif player_total == dealer_total:
         result = "😐 **It's a tie!**\nYou keep your bet."
         total_chips = current_chips  # No change in chips
         color = discord.Color.orange()
+        await game_msg.clear_reactions()
     else:
         result = f"💀 **Dealer wins!**\nYou lost **{bet_amount}** <:Shekel:1286655809098354749> **Sjekkels**."
         total_chips = current_chips - bet_amount
         update_user_chips(user_name, total_chips)
         color = discord.Color.red()
+        await game_msg.clear_reactions()
 
     # Final game result embed
     embed = discord.Embed(
