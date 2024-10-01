@@ -1055,7 +1055,7 @@ async def blackjack_game(ctx, bet_amount):
                     await game_msg.edit(embed=embed)
                     return
 
-                embed.description = f"🃏 Dealer's Hand | **{calculate_hand(dealer_hand)}**:\n **? {dealer_hand[1]}**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**"
+                embed.description = f"🃏 Dealer's Hand | **{calculate_hand(dealer_hand[1])}**:\n **? {dealer_hand[1]}**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**"
                 await game_msg.edit(embed=embed)
 
                 if calculate_hand(player_hand) > 21:
