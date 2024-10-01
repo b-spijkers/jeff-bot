@@ -12,6 +12,7 @@ from shutil import chown
 import discord
 from discord.ext import commands
 from discord.utils import find
+from twisted.web.rewrite import alias
 
 from botsettings import prefix, botConsole
 from apicommands import apis, uncyclopedia, tweakers
@@ -300,6 +301,10 @@ class Casino(commands.Cog, name='Casino commands'):
 
         await ctx.channel.send(embed=profile_rank)
 
+    @commands.command(aliases=['bj'], help="Play Blackjack! Place a bet and win chips!")
+    async def blackjack(self, ctx, bet_amount: str):
+        botConsole.log_command(ctx)
+        await casinoCommands.blackjack_game(ctx, bet_amount)
 
     @commands.command(
         help='By joining you are allowed to play blackjack(Disabled) and other casino games that will be added later',
@@ -312,15 +317,6 @@ class Casino(commands.Cog, name='Casino commands'):
         except Exception as e:
             print(e)
             await ctx.channel.send('Something went wrong')
-
-    @commands.command(
-        help='Play a round of blackjack (WIP)',
-        aliases=['bj', 'blackjack']
-    )
-    async def blackjack_play(self, ctx):
-        botConsole.log_command(ctx)
-        await ctx.channel.send(
-            'Blackjack is still being worked on (Not Actively). No idea when it will be done...')
 
     @commands.command(
         help='Flip a coin and win',
@@ -379,7 +375,7 @@ class Casino(commands.Cog, name='Casino commands'):
 
     @commands.command(help="Play roulette! Bet on a number, color, or even/odd!")
     @commands.cooldown(1, 5, commands.BucketType.user)  # Cooldown to prevent spam
-    async def roulette(self, ctx, bet_type: str, bet_value: str, bet_amount: int):
+    async def roulette(self, ctx, bet_type: str, bet_value: str, bet_amount: str):
         botConsole.log_command(ctx)
         await casino_roulette(ctx, bet_type, bet_value, bet_amount)
 
@@ -389,7 +385,7 @@ class Casino(commands.Cog, name='Casino commands'):
         aliases=['dr', 'dice']  # Optional: Shorter aliases
     )
     @commands.cooldown(1, 5, commands.BucketType.user)  # 5-second cooldown
-    async def dice_roll(self, ctx, amount: int):
+    async def dice_roll(self, ctx, amount: str):
         botConsole.log_command(ctx)
         # Call the dice roll function from casinoCommands.py
         await casino_diceroll(ctx, amount)
