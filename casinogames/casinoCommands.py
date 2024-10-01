@@ -12,7 +12,7 @@ from botsettings.databaseCalls import update_db, select_one_db, insert_db
 
 # Reward Base values
 CASINO_GIFT_AMOUNT = 1500
-GIB_REWARD_AMOUNT = secrets.randbelow(125)
+GIB_REWARD_AMOUNT = secrets.randbelow(100)
 HOURLY_REWARD_AMOUNT = 100
 DAILY_REWARD_AMOUNT = 250
 MONTHLY_REWARD_AMOUNT = 1000
