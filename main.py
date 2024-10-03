@@ -230,8 +230,13 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def show_profile(self, ctx):
         botConsole.log_command(ctx)
-        profile_stats = casinoCommands.get_profile(ctx)
-        await ctx.channel.send(embed=profile_stats)
+
+        if ctx.message.mentions:
+            profile_stats = casinoCommands.get_profile(ctx.message.mentions[0])
+            await ctx.channel.send(embed=profile_stats)
+        else:
+            profile_stats = casinoCommands.get_profile(ctx)
+            await ctx.channel.send(embed=profile_stats)
 
     @commands.command(
         help='prestige',
@@ -304,6 +309,9 @@ class Casino(commands.Cog, name='Casino commands'):
     @commands.command(aliases=['bj'], help="Play Blackjack! Place a bet and win chips!")
     async def blackjack(self, ctx, bet_amount: str):
         botConsole.log_command(ctx)
+        rank_up_message = await update_rank(ctx.author.name, ctx.author.global_name)
+        if rank_up_message:
+            await ctx.channel.send(rank_up_message)
         await casinoCommands.blackjack_game(ctx, bet_amount)
 
     @commands.command(
@@ -377,6 +385,9 @@ class Casino(commands.Cog, name='Casino commands'):
     @commands.cooldown(1, 5, commands.BucketType.user)  # Cooldown to prevent spam
     async def roulette(self, ctx, bet_type: str, bet_value: str, bet_amount: str):
         botConsole.log_command(ctx)
+        rank_up_message = await update_rank(ctx.author.name, ctx.author.global_name)
+        if rank_up_message:
+            await ctx.channel.send(rank_up_message)
         await casino_roulette(ctx, bet_type, bet_value, bet_amount)
 
     @commands.command(
@@ -388,6 +399,9 @@ class Casino(commands.Cog, name='Casino commands'):
     async def dice_roll(self, ctx, amount: str):
         botConsole.log_command(ctx)
         # Call the dice roll function from casinoCommands.py
+        rank_up_message = await update_rank(ctx.author.name, ctx.author.global_name)
+        if rank_up_message:
+            await ctx.channel.send(rank_up_message)
         await casino_diceroll(ctx, amount)
 
     @commands.command(

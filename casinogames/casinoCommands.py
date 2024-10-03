@@ -1,5 +1,4 @@
 import math
-import random
 import secrets
 from datetime import datetime, timedelta
 import asyncio
@@ -140,7 +139,7 @@ def update_user_prestige(user_name, prestige):
     update_db(update_prestige)
 
 def update_user_rank(user_name, rank):
-    update_rank = f'''UPDATE user_cgips SET user_rank = {rank} WHERE user_name_fr = '{user_name}' '''
+    update_rank = f'''UPDATE user_chips SET user_rank = {rank} WHERE user_name_fr = '{user_name}' '''
     update_db(update_rank)
 
 def reset_xp(user_name, prestige):
@@ -265,6 +264,7 @@ async def prestige(ctx):
 
     if user_xp >= prestige_xp_cap:
         new_prestige_level = user_prestige + 1
+        new_rank = 0
         reward_chips = 500 * new_prestige_level  # Example: Rewards scale with prestige level
 
         embed = discord.Embed(
@@ -297,6 +297,7 @@ async def prestige(ctx):
             # Wait for the user's reaction (60 seconds timeout)
             reaction, user = await ctx.bot.wait_for('reaction_add', timeout=60.0, check=check)
             if str(reaction.emoji) == '👍':
+                update_user_rank(user_name_fr, new_rank)
                 await apply_prestige(ctx, user_name_fr, new_prestige_level, reward_chips)
             else:
                 await ctx.send(f"Bitch.")
@@ -410,7 +411,7 @@ def hourly_reward(ctx):
         # Not yet eligible for daily reward
         time_left = timedelta(hours=1) - time_since_last_claim
         hours, remainder = divmod(time_left.seconds, 3600)
-        minutes, _ = divmod(remainder, 60)
+        minutes, seconds = divmod(remainder, 60)
 
         embed = discord.Embed(
             title="⏳ Nope. An hour hasn't passed since last time. Dumbass.",
@@ -419,7 +420,7 @@ def hourly_reward(ctx):
         )
         embed.add_field(
             name="Time Remaining",
-            value=f"You can claim again in {minutes} minutes.",
+            value=f"You can claim again in {minutes} minutes and {seconds} seconds.",
             inline=False
         )
         embed.set_footer(text="Come back when the timer expires! Shithead!")
@@ -459,7 +460,7 @@ def daily_reward(ctx):
         # Not yet eligible for daily reward
         time_left = timedelta(days=1) - time_since_last_claim
         hours, remainder = divmod(time_left.seconds, 3600)
-        minutes, _ = divmod(remainder, 60)
+        minutes, seconds = divmod(remainder, 60)
 
         embed = discord.Embed(
             title="⏳ It's called daily for reason, just wait 24 hours. Dumbass.",
@@ -468,7 +469,7 @@ def daily_reward(ctx):
         )
         embed.add_field(
             name="Time Remaining",
-            value=f"You can claim again in {hours} hours, and {minutes} minutes.",
+            value=f"You can claim again in {hours} hours, {minutes} minutes and {seconds} seconds.",
             inline=False
         )
         embed.set_footer(text="Come back when the timer expires! Shithead!")
@@ -510,7 +511,7 @@ def monthly_reward(ctx):
         time_left = timedelta(days=30) - time_since_last_claim
         days = time_left.days
         hours, remainder = divmod(time_left.seconds, 3600)
-        minutes, _ = divmod(remainder, 60)
+        minutes, seconds = divmod(remainder, 60)
 
         embed = discord.Embed(
             title="⏳Better luck, tomorrow or something",
@@ -519,7 +520,7 @@ def monthly_reward(ctx):
         )
         embed.add_field(
             name="Time Remaining",
-            value=f"You can claim again in {days} days, {hours} hours, and {minutes} minutes.",
+            value=f"You can claim again in {days} days, {hours} hours, {minutes} minutes and {seconds} seconds.",
             inline=False
         )
         embed.set_footer(text="Come back when the timer expires! Shithead!")
@@ -561,7 +562,7 @@ def weekly_reward(ctx):
         time_left = timedelta(days=7) - time_since_last_claim
         days = time_left.days
         hours, remainder = divmod(time_left.seconds, 3600)
-        minutes, _ = divmod(remainder, 60)
+        minutes, seconds = divmod(remainder, 60)
 
         embed = discord.Embed(
             title="⏳Better luck, tomorrow or something",
@@ -570,7 +571,7 @@ def weekly_reward(ctx):
         )
         embed.add_field(
             name="Time Remaining",
-            value=f"You can claim again in {days} days, {hours} hours, and {minutes} minutes.",
+            value=f"You can claim again in {days} days, {hours} hours, {minutes} minutes and {seconds} seconds.",
             inline=False
         )
         embed.set_footer(text="Come back when the timer expires! Shithead!")
@@ -878,7 +879,7 @@ PAYOUTS = {
 async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
     user_name_fr = str(ctx.author.name)
     check_entry(user_name_fr)
-
+    print('bleh')
     # Check if the user has enough chips to place the bet
     user_chips = get_chips(user_name_fr)
     if bet_amount > user_chips:
@@ -889,9 +890,7 @@ async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
     elif bet_amount == 'h':
         bet_amount = user_chips / 2
 
-    # Deduct the bet amount from the user's chips
-    user_chips -= bet_amount
-    update_user_chips(user_name_fr, user_chips)
+    bet_amount = int(bet_amount)
 
     # Spin the roulette wheel
     spin_number = secrets.randbelow(37)  # Number between 0 and 36
@@ -903,7 +902,7 @@ async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
         description="Good luck! The wheel is spinning!",
         color=discord.Color.gold()
     )
-    embed.set_thumbnail(url="https://some-url-for-roulette-wheel.gif")  # Change to actual URL
+    embed.set_thumbnail(url="https://media0.giphy.com/media/nUnG7pW0ebqFhQ0s8U/giphy.gif?cid=6c09b952b9zinmyjx8775ltupy8pq72milnrueur4lz6zxfm&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=s")  # Change to actual URL
     message = await ctx.send(embed=embed)
 
     await asyncio.sleep(3)  # Simulate the spinning time
@@ -929,6 +928,8 @@ async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
         update_user_chips(user_name_fr, user_chips)
         result_desc = f"🎉 Congratulations! You won **{payout}** <:Shekel:1286655809098354749> Sjekkels!\nYou now have **{user_chips:,}** Sjekkels."
     else:
+        user_chips -= bet_amount
+        update_user_chips(user_name_fr, user_chips)
         result_desc = f"😢 You lost the bet! The wheel landed on **{spin_number} {spin_color}**.\nYou now have **{user_chips:,}** Sjekkels."
 
     embed.title = "🎰 Roulette Result!"
@@ -948,7 +949,7 @@ CARD_DECK = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"] *
 
 # Function to deal a random card
 def deal_card():
-    return random.choice(CARD_DECK)
+    return CARD_DECK[secrets.randbelow(52)]
 
 # Function to calculate hand value
 def calculate_hand(hand):
@@ -981,7 +982,9 @@ async def blackjack_game(ctx, bet_amount):
     if bet_amount == 'a':
         bet_amount = current_chips
     elif bet_amount == 'h':
-        bet_amount = math.ceil(current_chips / 2)
+        bet_amount = math.floor(current_chips / 2)
+
+    bet_amount = int(bet_amount)
 
     if bet_amount > current_chips:
         await ctx.send(f"{ctx.author.mention} You don't have enough chips to place this bet! 💸")
@@ -993,7 +996,7 @@ async def blackjack_game(ctx, bet_amount):
 
     # Handle instant Blackjack cases
     if is_blackjack(player_hand):
-        reward = int(bet_amount * 2.5)  # Blackjack pays 3:2
+        reward = int(bet_amount) * 1.5  # Blackjack pays 3:2
         total_chips = current_chips + reward
         update_user_chips(user_name, total_chips)
         xp_gained = reward
@@ -1001,30 +1004,44 @@ async def blackjack_game(ctx, bet_amount):
 
         embed = discord.Embed(
             title="♠️ Blackjack! You win! ♠️",
-            description=f"🃏 Dealer's Hand | **{calculate_hand(dealer_hand)}**:\n **{' '.join(dealer_hand)}**\n🃏 Your Hand | **{calculate_hand(player_hand)} \n**: **{' '.join(player_hand)}**",
+            description=f"🃏 Jeff's Hand | **{calculate_hand(dealer_hand)}**:\n **{' '.join(dealer_hand)}**\n🃏 Your Hand | **{calculate_hand(player_hand)} \n**: **{' '.join(player_hand)}**",
             color=discord.Color.green()
         )
         embed.add_field(name="🎉 Blackjack!", value=f"**You won {reward} <:Shekel:1286655809098354749> Sjekkels !**", inline=False)
         embed.add_field(name="💸 Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**", inline=False)
-        embed.set_footer(text="You hit a Blackjack! 🍀")
+        embed.set_footer(text="Yeah... Cool Cool")
+        await ctx.send(embed=embed)
+        return
+
+    if is_blackjack(dealer_hand):
+        embed = discord.Embed(
+            title="<:theman:1286723740880732210>️ Blackjack! Jeff wins! <:theman:1286723740880732210>",
+            description=f"🃏 Jeff's Hand | **{calculate_hand(dealer_hand)}**:\n **{' '.join(dealer_hand)}**\n🃏 Your Hand | **{calculate_hand(player_hand)} \n**: **{' '.join(player_hand)}**",
+            color=discord.Color.red()
+        )
+        embed.set_footer(text="Eat shit!")
+        result = f"<:theman:1286723740880732210>️ **Jeff wins!**\nYou lost **{bet_amount}** <:Shekel:1286655809098354749> **Sjekkels**."
+        embed.add_field(name="📊 Final Result", value=result, inline=False)
+        update_user_chips(user_name, current_chips - bet_amount)
         await ctx.send(embed=embed)
         return
 
     # Embed showing initial hands with flair
     embed = discord.Embed(
         title="♠️ Blackjack Time! ♠️",
-        description=f"🃏 Dealer's Hand | **{calculate_hand(dealer_hand[1])}**:\n **? {' '.join(dealer_hand[1])}**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
+        description=f"🃏 Jeff's Hand | **{calculate_hand(dealer_hand[1])}**:\n **? {' '.join(dealer_hand[1])}**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
         color=discord.Color.blue()
     )
-    embed.set_footer(text="React with 👍 to hit, 👎 to stand.")
+    embed.set_footer(text="React with 👍 to hit, 👎 to stand (like a bitch) or 💪 to double down like a chad.")
 
     game_msg = await ctx.send(embed=embed)
     await game_msg.add_reaction("👍")  # Hit
     await game_msg.add_reaction("👎")  # Stand
-    # await game_msg.add_reaction("💪")  # Double Down
+    if bet_amount is not current_chips:
+        await game_msg.add_reaction("💪")  # Double Down
 
     def check_reaction(reaction, user):
-        return user == ctx.author and str(reaction.emoji) in ["👍", "👎"] # add flex emoji for double down
+        return user == ctx.author and str(reaction.emoji) in ["👍", "👎", "💪"] # add flex emoji for double down
 
     player_standing = False
     doubled_down = False
@@ -1037,7 +1054,7 @@ async def blackjack_game(ctx, bet_amount):
 
                 # Check for Five Card Charlie
                 if len(player_hand) == 5 and calculate_hand(player_hand) <= 21:
-                    reward = bet_amount * 2  # Typically pays 2:1
+                    reward = bet_amount * 4  # Typically pays 2:1
                     total_chips = current_chips + reward
                     update_user_chips(user_name, total_chips)
                     xp_gained = reward
@@ -1045,21 +1062,25 @@ async def blackjack_game(ctx, bet_amount):
 
                     embed = discord.Embed(
                         title="🎉 Five Card Charlie! 🎉",
-                        description=f"🃏 Dealer's Hand | **{calculate_hand(dealer_hand[1])}**:\n **[?, {dealer_hand[1]}]**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
+                        description=f"🃏 Jeff's Hand | **{calculate_hand(dealer_hand[1])}**:\n **[?, {dealer_hand[1]}]**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
                         color=discord.Color.green()
                     )
-                    embed.add_field(name="🃏 Victory!", value=f"**You won {reward} <:Shekel:1286655809098354749> Sjekkels!**", inline=False)
-                    embed.add_field(name="💸 Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**",
+                    embed.add_field(name="🃏 Victory!", value=f"You won **{reward}** <:Shekel:1286655809098354749> **Sjekkels!** and gained **{xp_gained}** **XP**", inline=False)
+                    embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**",
                                     inline=False)
-                    embed.set_footer(text="You hit a Five Card Charlie! 🍀")
+                    embed.set_footer(text="YoU hIt A fIvE cArD cHaRlIe!1!!11 Fuck off...")
+                    await game_msg.clear_reactions()
                     await game_msg.edit(embed=embed)
                     return
 
-                embed.description = f"🃏 Dealer's Hand | **{calculate_hand(dealer_hand[1])}**:\n **? {dealer_hand[1]}**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**"
+                embed.description = f"🃏 Jeff's Hand | **{calculate_hand(dealer_hand[1])}**:\n **? {dealer_hand[1]}**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**"
                 await game_msg.edit(embed=embed)
 
                 if calculate_hand(player_hand) > 21:
-                    embed.description += "\n💥 **Bust! You lose!**"
+                    embed.title = "<:theman:1286723740880732210>️ Jeff wins! <:theman:1286723740880732210>"
+                    embed.description += "\n💥 **Dumbass**"
+                    embed.colour = discord.Color.red()
+                    await game_msg.clear_reactions()
                     await game_msg.edit(embed=embed)
                     update_user_chips(user_name, current_chips - bet_amount)
                     return
@@ -1068,20 +1089,38 @@ async def blackjack_game(ctx, bet_amount):
                 player_standing = True
                 await game_msg.clear_reactions()
 
-            # elif str(reaction.emoji) == "💪":  # Double Down
-            #     if bet_amount * 2 > current_chips:
-            #         await ctx.send(f"{ctx.author.mention} You don't have enough chips to double down!")
-            #     else:
-            #         doubled_down = True
-            #         bet_amount *= 2
-            #         player_hand.append(deal_card())
-            #         player_standing = True
-            #         await game_msg.clear_reactions()
+            elif str(reaction.emoji) == "💪":  # Double Down
+                if bet_amount * 2 > current_chips:
+                    await ctx.send(f"{ctx.author.mention} You don't have enough chips to double down!")
+                else:
+                    doubled_down = True
+                    bet_amount *= 2
+                    player_hand.append(deal_card())
+
+                    player_standing = True
+
+                    player_total = calculate_hand(player_hand)
+                    if player_total > 21:
+                        # Final game result embed
+                        embed = discord.Embed(
+                            title="♠️ Blackjack Results ♠️",
+                            description=f"🃏 Jeff's Hand | **{calculate_hand(dealer_hand)}**:\n **{' '.join(dealer_hand)}**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
+                        )
+                        result = f"<:theman:1286723740880732210>️ **Jeff wins!**\nYou lost **{bet_amount}** <:Shekel:1286655809098354749> **Sjekkels**."
+                        embed.add_field(name="📊 Final Result", value=result, inline=False)
+                        total_chips = current_chips - bet_amount
+                        update_user_chips(user_name, total_chips)
+                        embed.colour = discord.Color.red()
+                        embed.set_footer(text="I'm just better")
+                        await game_msg.clear_reactions()
+                        return ctx.channel.send(embed=embed)
+
+                    await game_msg.clear_reactions()
 
         except Exception as e:
             print(f"Error: {e}")
 
-            return await ctx.send("⏳ Time's up! You took too long to decide.")
+            return await ctx.send("⏳ Fucking decide!.")
 
     # Dealer's turn
     while calculate_hand(dealer_hand) < 17:
@@ -1092,30 +1131,32 @@ async def blackjack_game(ctx, bet_amount):
 
     # Determine result
     if dealer_total > 21 or player_total > dealer_total:
-        reward = bet_amount * 2
+        reward = bet_amount
         total_chips = current_chips + reward
         update_user_chips(user_name, total_chips)
         xp_gained = reward
         update_user_xp(user_name, get_xp(user_name) + xp_gained)
         result = f"🎉 **You win!** 🎉\nYou gained **{reward}** <:Shekel:1286655809098354749> **Sjekkels** and **{xp_gained} XP**!"
         color = discord.Color.green()
+        embed.set_footer(text="Whatever")
         await game_msg.clear_reactions()
     elif player_total == dealer_total:
-        result = "😐 **It's a tie!**\nYou keep your bet."
+        result = "😐 **If I can't win, you also can't win!**\nKeep your <:Shekel:1286655809098354749> Sjekkels"
         total_chips = current_chips  # No change in chips
         color = discord.Color.orange()
         await game_msg.clear_reactions()
     else:
-        result = f"💀 **Dealer wins!**\nYou lost **{bet_amount}** <:Shekel:1286655809098354749> **Sjekkels**."
+        result = f"<:theman:1286723740880732210>️ **Jeff wins!**\nYou lost **{bet_amount}** <:Shekel:1286655809098354749> **Sjekkels**."
         total_chips = current_chips - bet_amount
         update_user_chips(user_name, total_chips)
         color = discord.Color.red()
+        embed.set_footer(text="I'm just better")
         await game_msg.clear_reactions()
 
     # Final game result embed
     embed = discord.Embed(
         title="♠️ Blackjack Results ♠️",
-        description=f"🃏 Dealer's Hand | **{calculate_hand(dealer_hand)}**:\n **{' '.join(dealer_hand)}**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
+        description=f"🃏 Jeff's Hand | **{calculate_hand(dealer_hand)}**:\n **{' '.join(dealer_hand)}**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
         color=color
     )
     embed.add_field(name="📊 Final Result", value=result, inline=False)
