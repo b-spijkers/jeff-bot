@@ -1010,7 +1010,9 @@ async def blackjack_game(ctx, bet_amount):
         embed.add_field(name="🎉 Blackjack!", value=f"**You won {reward} <:Shekel:1286655809098354749> Sjekkels !**", inline=False)
         embed.add_field(name="💸 Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**", inline=False)
         embed.set_footer(text="Yeah... Cool Cool")
-        await ctx.send(embed=embed)
+
+        message = ctx.send(embed=embed)
+        await message
         return
 
     if is_blackjack(dealer_hand):
@@ -1023,7 +1025,8 @@ async def blackjack_game(ctx, bet_amount):
         result = f"<:theman:1286723740880732210>️ **Jeff wins!**\nYou lost **{bet_amount}** <:Shekel:1286655809098354749> **Sjekkels**."
         embed.add_field(name="📊 Final Result", value=result, inline=False)
         update_user_chips(user_name, current_chips - bet_amount)
-        await ctx.send(embed=embed)
+        message = ctx.send(embed=embed)
+        await message
         return
 
     # Embed showing initial hands with flair
@@ -1080,6 +1083,7 @@ async def blackjack_game(ctx, bet_amount):
                     embed.title = "<:theman:1286723740880732210>️ Jeff wins! <:theman:1286723740880732210>"
                     embed.description += "\n💥 **Dumbass**"
                     embed.colour = discord.Color.red()
+                    embed.set_footer(text="You're just impressively bad aren't you?")
                     await game_msg.clear_reactions()
                     await game_msg.edit(embed=embed)
                     update_user_chips(user_name, current_chips - bet_amount)
@@ -1113,7 +1117,8 @@ async def blackjack_game(ctx, bet_amount):
                         embed.colour = discord.Color.red()
                         embed.set_footer(text="I'm just better")
                         await game_msg.clear_reactions()
-                        return ctx.channel.send(embed=embed)
+                        await ctx.channel.send(embed=embed)
+                        return
 
                     await game_msg.clear_reactions()
 
