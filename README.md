@@ -1,4 +1,4 @@
-# jeff-bot, Discord bot. Current version 3.1
+# jeff-bot, Discord bot. Current version 4.5
 
 This is purely for my entertainment. And I also learn a bit of Python.
 
