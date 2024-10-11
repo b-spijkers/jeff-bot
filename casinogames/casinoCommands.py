@@ -46,8 +46,8 @@ def get_chips(user_name):
     return chips
 
 def add_new_user(user_name, nickname):
-    datetime_minus_one = datetime.now() - timedelta(days=1)
-    add_user = f''' INSERT INTO user_chips VALUES ('{user_name}', '{nickname}', {CASINO_GIFT_AMOUNT}, 0, 0, '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}') '''
+    datetime_minus_one = datetime.now() - timedelta(weeks=5)
+    add_user = f''' INSERT INTO user_chips VALUES ('{user_name}', '{nickname}', '{CASINO_GIFT_AMOUNT}', 0, 0, 0, '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}', '0') '''
     insert_db(add_user)
 
 def get_xp(user_name):

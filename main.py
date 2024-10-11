@@ -201,22 +201,6 @@ class StandardBotCommands(commands.Cog, name='Basic Bot Commands'):
         await ctx.send(file=file, embed=msg)
 
 
-########################
-# King Bas in da house #
-########################
-# class Daddy(commands.Cog, name="OwO it's the king"):  # King Bas command, showing bas at his prime. What a king
-#     def __init__(self, botClient):
-#         self.bot = botClient
-#
-#     @commands.command(
-#         help='Be blessed',
-#         aliases=['kingbas', 'bas']
-#     )
-#     async def king_bas(self, ctx):
-#         botConsole.log_command(ctx)
-#         await jeffFun.kingbas(ctx)
-
-
 ################
 # Casino games #
 ################

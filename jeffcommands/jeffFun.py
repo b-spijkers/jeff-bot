@@ -160,12 +160,6 @@ def b2ba():
     return 'https://www.youtube.com/watch?v=YajODJwJhwk'
 
 
-# async def kingbas(ctx):
-#     message = await ctx.channel.send(file=discord.File('images/kingbas.png'))
-#     heart_eyes = '\U0001F60D'
-#     await message.add_reaction(heart_eyes)
-
-
 async def jewda(ctx):
     msg = discord.Embed(
         title="Jewda",
