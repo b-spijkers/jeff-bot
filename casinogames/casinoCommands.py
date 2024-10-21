@@ -934,7 +934,7 @@ async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
 
     embed.title = "🎰 Roulette Result!"
     embed.description = result_desc
-    embed.set_thumbnail(url="https://some-url-for-roulette-result.png")  # Change to actual result image URL
+    # embed.set_thumbnail(url="https://some-url-for-roulette-result.png")  # Change to actual result image URL
 
     return await message.edit(embed=embed)
 
@@ -1165,6 +1165,7 @@ async def blackjack_game(ctx, bet_amount):
         color=color
     )
     embed.add_field(name="📊 Final Result", value=result, inline=False)
-    embed.add_field(name="💸 Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**", inline=False)
+    embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**", inline=False)
+    embed.set_footer(text="Sure, whatever...")
 
     await game_msg.edit(embed=embed)
