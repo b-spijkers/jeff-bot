@@ -996,7 +996,7 @@ async def blackjack_game(ctx, bet_amount):
 
     # Handle instant Blackjack cases
     if is_blackjack(player_hand):
-        reward = int(bet_amount) * 1.5  # Blackjack pays 3:2
+        reward = math.ceil(int(bet_amount) * 1.5)  # Blackjack pays 3:2
         total_chips = current_chips + reward
         update_user_chips(user_name, total_chips)
         xp_gained = reward
