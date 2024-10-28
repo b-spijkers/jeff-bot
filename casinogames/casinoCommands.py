@@ -955,17 +955,19 @@ def deal_card():
 def calculate_hand(hand):
     total = 0
     aces = 0
+
     for card in hand:
         if card == "A":
             aces += 1
+            total += 11  # Start by treating each Ace as 11
         else:
             total += CARD_VALUES[card]
 
-    for _ in range(aces):
-        if total + 11 <= 21:
-            total += 11
-        else:
-            total += 1
+    # Adjust for Aces if the total exceeds 21
+    while total > 21 and aces:
+        total -= 10  # Convert one Ace from 11 to 1
+        aces -= 1
+
     return total
 
 # Check if hand is a blackjack (Ace + 10 value card)
@@ -1008,7 +1010,7 @@ async def blackjack_game(ctx, bet_amount):
             color=discord.Color.green()
         )
         embed.add_field(name="🎉 Blackjack!", value=f"**You won {reward} <:Shekel:1286655809098354749> Sjekkels !**", inline=False)
-        embed.add_field(name="💸 Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**", inline=False)
+        embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**", inline=False)
         embed.set_footer(text="Yeah... Cool Cool")
 
         message = ctx.send(embed=embed)
