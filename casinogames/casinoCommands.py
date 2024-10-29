@@ -1137,7 +1137,7 @@ async def blackjack_game(ctx, bet_amount):
     dealer_total = calculate_hand(dealer_hand)
 
     # Determine result
-    if dealer_total > 21 or player_total > dealer_total:
+    if dealer_total > 21 or player_total > dealer_total or is_blackjack(player_hand):
         reward = bet_amount
         total_chips = current_chips + reward
         update_user_chips(user_name, total_chips)
