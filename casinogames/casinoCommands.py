@@ -24,19 +24,26 @@ PRESTIGE_XP_CAP_BASE = 10000000  # Base XP cap for prestige
 RANK_STEPS = [1000, 10000, 100000, 1000000, 10000000]
 PRESTIGE_MULTIPLIER = 0.25
 RANK_MULTIPLIER = 1
+DONATION_MULTIPLIER = 0.5
+# BASE interest rate
+INTEREST_RATE_MULTIPLIER = 0.05
 
 # Constants for dice roll
 WIN_MULTIPLIER = 5  # The multiplier for the winning amount on a 6 roll
 
+
 def calculate_rank_xp(user_prestige, user_rank):
     return [math.ceil(rank_step * (user_prestige * PRESTIGE_MULTIPLIER + 1)) for rank_step in RANK_STEPS]
+
 
 def calculate_prestige_xp_cap(user_prestige, user_rank):
     return math.ceil(PRESTIGE_XP_CAP_BASE * (user_prestige * PRESTIGE_MULTIPLIER + 1))
 
-#TODO: Get this to work so you can't use decimal amount of chips to bet
+
+# TODO: Get this to work so you can't use decimal amount of chips to bet
 def is_round_number(num):
     return num % 1 == 0
+
 
 def get_chips(user_name):
     user_chips = f'''SELECT user_chips FROM user_chips WHERE user_name_fr = '{user_name}' '''
@@ -45,10 +52,12 @@ def get_chips(user_name):
 
     return chips
 
+
 def add_new_user(user_name, nickname):
     datetime_minus_one = datetime.now() - timedelta(weeks=5)
-    add_user = f''' INSERT INTO user_chips VALUES ('{user_name}', '{nickname}', '{CASINO_GIFT_AMOUNT}', 0, 0, 0, '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}', '0') '''
+    add_user = f''' INSERT INTO user_chips VALUES ('{user_name}', '{nickname}', '{CASINO_GIFT_AMOUNT}', 0, 0, 0, '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}', '{datetime_minus_one}') '''
     insert_db(add_user)
+
 
 def get_xp(user_name):
     user_xp = f'''SELECT user_xp FROM user_chips WHERE user_name_fr = '{user_name}' '''
@@ -57,12 +66,14 @@ def get_xp(user_name):
 
     return xp
 
+
 def get_prestige(user_name):
     user_prestige = f'''SELECT user_prestige FROM user_chips WHERE user_name_fr = '{user_name}' '''
 
     prestige = select_one_db(user_prestige)
 
     return prestige
+
 
 def get_rank(user_name):
     user_rank = f'''SELECT user_rank FROM user_chips WHERE user_name_fr = '{user_name}' '''
@@ -71,12 +82,14 @@ def get_rank(user_name):
 
     return rank
 
+
 def get_hourly_date(user_name):
     get_user_hourly_date = f'''SELECT hourly_time FROM user_chips WHERE user_name_fr = '{user_name}' '''
 
     hourly_date = select_one_db(get_user_hourly_date)
 
     return hourly_date
+
 
 def get_daily_date(user_name):
     get_user_daily_date = f'''SELECT daily_chips FROM user_chips WHERE user_name_fr = '{user_name}' '''
@@ -85,12 +98,14 @@ def get_daily_date(user_name):
 
     return daily_date
 
+
 def get_weekly_date(user_name):
     get_user_weekly_date = f'''SELECT weekly_chips FROM user_chips WHERE user_name_fr = '{user_name}' '''
 
     weekly_date = select_one_db(get_user_weekly_date)
 
     return weekly_date
+
 
 def get_monthly_date(user_name):
     get_user_monthly_date = f'''SELECT monthly_chips FROM user_chips WHERE user_name_fr = '{user_name}' '''
@@ -99,6 +114,7 @@ def get_monthly_date(user_name):
 
     return monthly_date
 
+
 def get_gib_time(user_name):
     get_user_gib_date = f'''SELECT gib_time FROM user_chips WHERE user_name_fr = '{user_name}' '''
 
@@ -106,51 +122,63 @@ def get_gib_time(user_name):
 
     return gib_time
 
+
 def update_user_chips(user_name, chips):
     update_chips = f'''UPDATE user_chips SET user_chips = {chips} WHERE user_name_fr = '{user_name}' '''
     update_db(update_chips)
+
 
 def update_gib_time(user_name, gib_time):
     update_gib_date = f'''UPDATE user_chips SET gib_time = '{gib_time}' WHERE user_name_fr = '{user_name}' '''
     update_db(update_gib_date)
 
+
 def update_user_chips_hourly(user_name, chips, current_datetime):
     update_chips_hourly = f'''UPDATE user_chips SET user_chips = {chips}, hourly_time = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
     update_db(update_chips_hourly)
+
 
 def update_user_chips_daily(user_name, chips, current_datetime):
     update_chips_daily = f'''UPDATE user_chips SET user_chips = {chips}, daily_chips = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
     update_db(update_chips_daily)
 
+
 def update_user_chips_weekly(user_name, chips, current_datetime):
     update_chips_weekly = f'''UPDATE user_chips SET user_chips = {chips}, weekly_chips = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
     update_db(update_chips_weekly)
+
 
 def update_user_chips_monthly(user_name, chips, current_datetime):
     update_chips_monthly = f'''UPDATE user_chips SET user_chips = {chips}, monthly_chips = '{current_datetime}' WHERE user_name_fr = '{user_name}' '''
     update_db(update_chips_monthly)
 
+
 def update_user_xp(user_name, xp):
     update_xp = f'''UPDATE user_chips SET user_xp = {xp} WHERE user_name_fr = '{user_name}' '''
     update_db(update_xp)
+
 
 def update_user_prestige(user_name, prestige):
     update_prestige = f'''UPDATE user_chips SET user_prestige = {prestige}, user_xp = 0 WHERE user_name_fr = '{user_name}' '''
     update_db(update_prestige)
 
+
 def update_user_rank(user_name, rank):
     update_rank = f'''UPDATE user_chips SET user_rank = {rank} WHERE user_name_fr = '{user_name}' '''
     update_db(update_rank)
 
+
 def reset_xp(user_name, prestige):
     reset_xp = f'''UPDATE user_chips SET user_xp = 0, user_prestige = {prestige} WHERE user_name_fr = '{user_name}' '''
     update_db(reset_xp)
+
 
 def add_xp(user_name_fr, xp_gain):
     user_xp = get_xp(user_name_fr)
     user_xp += xp_gain
 
     update_user_xp(user_name_fr, user_xp)
+
 
 ####################################
 # Casino profile functions/actions #
@@ -165,9 +193,10 @@ def join_casino(ctx):
         userName_global = str(ctx.author.global_name)
         try:
             add_new_user(user_name_fr, userName_global)
+            return ctx.channel.send('You joined the casino! Use //help to see what you can do. ')
         except Exception as e:
             print(e)
-        return ctx.channel.send('You joined the casino! There is fuck all to do at the moment besides coinflips :D')
+        return ctx.channel.send(e)
     else:
         return ctx.channel.send("You've already joined the casino")
 
@@ -336,6 +365,7 @@ async def apply_prestige(ctx, user_name_fr, new_prestige_level, reward_chips):
         await ctx.send("Something went wrong with the prestige process.")
         print(e)
 
+
 def send_rank_info(ctx):
     user_name_fr = str(ctx.author.name)
     user_name_global = str(ctx.author.global_name)
@@ -352,11 +382,10 @@ def send_rank_info(ctx):
     embed.add_field(name="Current XP", value=f"**{user_xp:,}**", inline=False)
     embed.add_field(name="Current Rank", value=f"**Rank {current_rank}**", inline=False)
 
-
-
     for i, xp in enumerate(required_xp, start=1):
         status = "Reached" if current_rank >= i else "Next"
-        embed.add_field(name= f"Rank {i} (**Unlocks Prestige**)" if i == 5 else f"Rank {i}", value=f"**{xp:,} XP** (**{status}**)", inline=False)
+        embed.add_field(name=f"Rank {i} (**Unlocks Prestige**)" if i == 5 else f"Rank {i}",
+                        value=f"**{xp:,} XP** (**{status}**)", inline=False)
 
     return embed
 
@@ -371,13 +400,13 @@ async def update_rank(user_name_fr, user_name_global):
 
     for i in range(current_rank, len(RANK_STEPS)):
         if user_xp >= required_xp[i]:
-
             new_rank = i + 1
             update_user_rank(user_name_global, new_rank)
 
             return f"{user_name_global}. You've ranked up to **Rank {new_rank}**. Don't get too excited"
 
     return None  # No rank up
+
 
 def hourly_reward(ctx):
     user_name_fr = str(ctx.author.name)
@@ -390,7 +419,8 @@ def hourly_reward(ctx):
     time_since_last_claim = current_time_stamp - last_claim
     if time_since_last_claim >= timedelta(hours=1):
 
-        reward_chips = math.ceil(HOURLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
+        reward_chips = math.ceil(
+            HOURLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
         user_chips = get_chips(user_name_fr)
         new_chip_amount = user_chips + reward_chips
         update_user_chips_hourly(user_name_fr, new_chip_amount, current_time_stamp)
@@ -439,7 +469,8 @@ def daily_reward(ctx):
     time_since_last_claim = current_time_stamp - last_claim
     if time_since_last_claim >= timedelta(days=1):
 
-        reward_chips = math.ceil(DAILY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
+        reward_chips = math.ceil(
+            DAILY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
         user_chips = get_chips(user_name_fr)
         new_chip_amount = user_chips + reward_chips
         update_user_chips_daily(user_name_fr, new_chip_amount, current_time_stamp)
@@ -488,7 +519,8 @@ def monthly_reward(ctx):
     time_since_last_claim = current_time_stamp - last_claim
 
     if time_since_last_claim >= timedelta(days=30):
-        reward_chips = math.ceil(MONTHLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
+        reward_chips = math.ceil(
+            MONTHLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
         user_chips = get_chips(user_name_fr)
         new_chip_amount = user_chips + reward_chips
 
@@ -539,7 +571,8 @@ def weekly_reward(ctx):
     time_since_last_claim = current_time_stamp - last_claim
 
     if time_since_last_claim >= timedelta(days=7):
-        reward_chips = math.ceil(WEEKLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
+        reward_chips = math.ceil(
+            WEEKLY_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
         user_chips = get_chips(user_name_fr)
         new_chip_amount = user_chips + reward_chips
 
@@ -665,6 +698,35 @@ def combined_rewards(ctx):
     # Return the embed message
     return embed
 
+
+async def donate(ctx, amount: int):
+    user_name = str(ctx.author.name)
+    user_chips = get_chips(user_name)
+
+    recipient_name = str(ctx.message.mentions[0].name)
+    recipient_user_name = str(ctx.message.mentions[0].global_name)
+    recipient_chips = get_chips(recipient_name)
+
+    amount = int(amount)
+
+    if amount > user_chips:
+        return await ctx.send(
+            f"You don't have enough chips to donate {amount} <:Shekel:1286655809098354749> Sjekkels. Broke bitch!")
+    if amount < 1:
+        return await ctx.send(
+            "You can't donate less than 1 <:Shekel:1286655809098354749> Sjekkel. Trying to be smart I see?")
+    if user_name == recipient_name:
+        return await ctx.send("You can't donate to yourself, you cheating fuck!")
+
+    update_user_chips(user_name, user_chips - amount)
+    update_user_chips(recipient_name, recipient_chips + amount)
+
+    update_user_xp(user_name, get_xp(user_name) + (amount * DONATION_MULTIPLIER))
+
+    await ctx.send(
+        f"{ctx.author.mention} has donated {amount} <:Shekel:1286655809098354749> Sjekkels to {recipient_user_name}. And gained **{amount} XP**!")
+
+
 ################
 # Casino games #
 ################
@@ -672,7 +734,7 @@ def casino_contribution(ctx):
     user_name_fr = str(ctx.author.name)
     user_prestige = get_prestige(user_name_fr)
     user_rank = get_rank(user_name_fr)
-    
+
     check_entry(user_name_fr)
 
     # Get current time
@@ -702,9 +764,10 @@ def casino_contribution(ctx):
         )
         return embed
 
-    # 10 minutes have passed, give reward
+    # 5 minutes have passed, give reward
     amount_chips = get_chips(user_name_fr)
-    reward = math.ceil(secrets.randbelow(100) + GIB_REWARD_AMOUNT * (user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
+    reward = math.ceil(secrets.randbelow(100) + GIB_REWARD_AMOUNT * (
+                user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
     amount_chips += reward
 
     update_user_chips(user_name_fr, amount_chips)
@@ -729,7 +792,14 @@ def casino_contribution(ctx):
     return embed
 
 
-# function for getting cards needs to be added, and coinflips
+#########################################
+#######         Casino Games     ########
+#########################################
+
+
+########################################
+########### Coinflip Game ##############
+########################################
 def coinflip(ctx, side, amount):
     user_name_fr = str(ctx.author.name)
 
@@ -781,10 +851,9 @@ def coinflip(ctx, side, amount):
         return "That's either, not a number or you're broke 🤣"
 
 
-#########################################
-############# Dice Roll Game#############
-#########################################
-
+########################################
+############ Dice Roll Game ############
+########################################
 async def casino_diceroll(ctx, amount: str):
     user_name_fr = str(ctx.author.name)
 
@@ -838,7 +907,8 @@ async def casino_diceroll(ctx, amount: str):
             description=f"Yippie.. {ctx.author.mention}, you rolled a 6 and won {reward:,} <:Shekel:1286655809098354749> **Sjekkels**",
             color=discord.Color.green()
         )
-        embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"{new_chip_amount:,} <:Shekel:1286655809098354749> **Sjekkels**", inline=True)
+        embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels",
+                        value=f"{new_chip_amount:,} <:Shekel:1286655809098354749> **Sjekkels**", inline=True)
         embed.add_field(name="🏅 XP Earned", value=f"{xp_earned:,} XP", inline=True)
         embed.set_footer(text="You'll lose the next one, don't worry...")
         await initial_message.edit(embed=embed)
@@ -854,11 +924,15 @@ async def casino_diceroll(ctx, amount: str):
             description=f"Unlucky, {ctx.author.mention}. You rolled a {dice_roll} and lost {amount:,} <:Shekel:1286655809098354749> **Sjekkels**.",
             color=discord.Color.red()
         )
-        embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"{new_chip_amount:,} <:Shekel:1286655809098354749> **Sjekkels**", inline=True)
+        embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels",
+                        value=f"{new_chip_amount:,} <:Shekel:1286655809098354749> **Sjekkels**", inline=True)
         embed.set_footer(text="Loser")
         await initial_message.edit(embed=embed)
 
 
+########################################
+############ Roulette Game #############
+########################################
 ROULETTE_WHEEL = {
     0: "green",
     1: "red", 2: "black", 3: "red", 4: "black", 5: "red", 6: "black",
@@ -871,10 +945,11 @@ ROULETTE_WHEEL = {
 
 # Payout multipliers
 PAYOUTS = {
-    "number": 35,    # 35:1 for correct number
-    "color": 2,      # 1:1 for color
-    "even_odd": 2,   # 1:1 for even/odd
+    "number": 35,  # 35:1 for correct number
+    "color": 2,  # 1:1 for color
+    "even_odd": 2,  # 1:1 for even/odd
 }
+
 
 async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
     user_name_fr = str(ctx.author.name)
@@ -902,7 +977,8 @@ async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
         description="Good luck! The wheel is spinning!",
         color=discord.Color.gold()
     )
-    embed.set_thumbnail(url="https://media0.giphy.com/media/nUnG7pW0ebqFhQ0s8U/giphy.gif?cid=6c09b952b9zinmyjx8775ltupy8pq72milnrueur4lz6zxfm&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=s")  # Change to actual URL
+    embed.set_thumbnail(
+        url="https://media0.giphy.com/media/nUnG7pW0ebqFhQ0s8U/giphy.gif?cid=6c09b952b9zinmyjx8775ltupy8pq72milnrueur4lz6zxfm&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=s")
     message = await ctx.send(embed=embed)
 
     await asyncio.sleep(3)  # Simulate the spinning time
@@ -939,6 +1015,9 @@ async def casino_roulette(ctx, bet_type, bet_value, bet_amount):
     return await message.edit(embed=embed)
 
 
+########################################
+############ Blackjack Game ############
+########################################
 CARD_VALUES = {
     "A": [1, 11],
     "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "10": 10,
@@ -947,9 +1026,11 @@ CARD_VALUES = {
 
 CARD_DECK = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"] * 4
 
+
 # Function to deal a random card
 def deal_card():
     return CARD_DECK[secrets.randbelow(52)]
+
 
 # Function to calculate hand value
 def calculate_hand(hand):
@@ -970,9 +1051,12 @@ def calculate_hand(hand):
 
     return total
 
+
 # Check if hand is a blackjack (Ace + 10 value card)
 def is_blackjack(hand):
-    return sorted(hand) == ["A", "10"] or sorted(hand) == ["A", "J"] or sorted(hand) == ["A", "Q"] or sorted(hand) == ["A", "K"]
+    return sorted(hand) == ["A", "10"] or sorted(hand) == ["A", "J"] or sorted(hand) == ["A", "Q"] or sorted(hand) == [
+        "A", "K"]
+
 
 # Blackjack game with added Double Down and Blackjack mechanics
 async def blackjack_game(ctx, bet_amount):
@@ -1009,8 +1093,10 @@ async def blackjack_game(ctx, bet_amount):
             description=f"🃏 Jeff's Hand | **{calculate_hand(dealer_hand)}**:\n **{' '.join(dealer_hand)}**\n🃏 Your Hand | **{calculate_hand(player_hand)} \n**: **{' '.join(player_hand)}**",
             color=discord.Color.green()
         )
-        embed.add_field(name="🎉 Blackjack!", value=f"**You won {reward} <:Shekel:1286655809098354749> Sjekkels !**", inline=False)
-        embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**", inline=False)
+        embed.add_field(name="🎉 Blackjack!", value=f"**You won {reward} <:Shekel:1286655809098354749> Sjekkels !**",
+                        inline=False)
+        embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels",
+                        value=f"**{total_chips:,} <:Shekel:1286655809098354749>**", inline=False)
         embed.set_footer(text="Yeah... Cool Cool")
 
         message = ctx.send(embed=embed)
@@ -1046,7 +1132,7 @@ async def blackjack_game(ctx, bet_amount):
         await game_msg.add_reaction("💪")  # Double Down
 
     def check_reaction(reaction, user):
-        return user == ctx.author and str(reaction.emoji) in ["👍", "👎", "💪"] # add flex emoji for double down
+        return user == ctx.author and str(reaction.emoji) in ["👍", "👎", "💪"]  # add flex emoji for double down
 
     player_standing = False
     doubled_down = False
@@ -1070,8 +1156,11 @@ async def blackjack_game(ctx, bet_amount):
                         description=f"🃏 Jeff's Hand | **{calculate_hand(dealer_hand[1])}**:\n **[?, {dealer_hand[1]}]**\n🃏 Your Hand | **{calculate_hand(player_hand)}**:\n **{' '.join(player_hand)}**",
                         color=discord.Color.green()
                     )
-                    embed.add_field(name="🃏 Victory!", value=f"You won **{reward}** <:Shekel:1286655809098354749> **Sjekkels!** and gained **{xp_gained}** **XP**", inline=False)
-                    embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**",
+                    embed.add_field(name="🃏 Victory!",
+                                    value=f"You won **{reward}** <:Shekel:1286655809098354749> **Sjekkels!** and gained **{xp_gained}** **XP**",
+                                    inline=False)
+                    embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels",
+                                    value=f"**{total_chips:,} <:Shekel:1286655809098354749>**",
                                     inline=False)
                     embed.set_footer(text="YoU hIt A fIvE cArD cHaRlIe!1!!11 Fuck off...")
                     await game_msg.clear_reactions()
@@ -1167,7 +1256,8 @@ async def blackjack_game(ctx, bet_amount):
         color=color
     )
     embed.add_field(name="📊 Final Result", value=result, inline=False)
-    embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels", value=f"**{total_chips:,} <:Shekel:1286655809098354749>**", inline=False)
+    embed.add_field(name="<:Shekel:1286655809098354749> Total Sjekkels",
+                    value=f"**{total_chips:,} <:Shekel:1286655809098354749>**", inline=False)
     embed.set_footer(text="Sure, whatever...")
 
     await game_msg.edit(embed=embed)

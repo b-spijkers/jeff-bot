@@ -296,6 +296,10 @@ class Casino(commands.Cog, name='Casino commands'):
         rank_up_message = await update_rank(ctx.author.name, ctx.author.global_name)
         if rank_up_message:
             await ctx.channel.send(rank_up_message)
+
+        if 'k' in bet_amount:
+            bet_amount = bet_amount.replace('k', '000')
+
         await casinoCommands.blackjack_game(ctx, bet_amount)
 
     @commands.command(
@@ -344,6 +348,9 @@ class Casino(commands.Cog, name='Casino commands'):
             async with ctx.typing():
                 await asyncio.sleep(3)
 
+            if 'k' in to_bet:
+                to_bet = to_bet.replace('k', '000')
+
             # Process the coinflip and get the result after the delay
             cf_result = casinoCommands.coinflip(ctx, args[0], to_bet)
 
@@ -372,6 +379,8 @@ class Casino(commands.Cog, name='Casino commands'):
         rank_up_message = await update_rank(ctx.author.name, ctx.author.global_name)
         if rank_up_message:
             await ctx.channel.send(rank_up_message)
+        if 'k' in to_bet:
+            to_bet = to_bet.replace('k', '000')
         await casino_roulette(ctx, bet_type, bet_value, bet_amount)
 
     @commands.command(
@@ -386,6 +395,10 @@ class Casino(commands.Cog, name='Casino commands'):
         rank_up_message = await update_rank(ctx.author.name, ctx.author.global_name)
         if rank_up_message:
             await ctx.channel.send(rank_up_message)
+
+        if 'k' in amount:
+            amount = amount.replace('k', '000')
+
         await casino_diceroll(ctx, amount)
 
     @commands.command(
@@ -409,6 +422,22 @@ class Casino(commands.Cog, name='Casino commands'):
     async def check_chips(self, ctx):
         chip_balance = casinoCommands.check_user_chips(ctx)
         await ctx.channel.send(embed=chip_balance)
+
+    @commands.command(
+        aliases=['donate', 'give']
+    )
+    async def donate_chips(self, ctx, amount: str):
+        botConsole.log_command(ctx)
+
+        if not ctx.message.mentions:
+            await ctx.channel.send('You must mention a user to donate to')
+            return
+
+        try:
+            await casinoCommands.donate(ctx, amount)
+        except Exception as e:
+            print(e)
+            await ctx.channel.send('Something went wrong')
 
 
 #############################################################
