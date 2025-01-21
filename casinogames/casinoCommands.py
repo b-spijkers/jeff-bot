@@ -59,6 +59,14 @@ def add_new_user(user_name, nickname):
     insert_db(add_user)
 
 
+def get_achievement(user_name):
+    user_achievements = f'''SELECT user_achievements FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    achievements = select_one_db(user_achievements)
+
+    return achievements
+
+
 def get_xp(user_name):
     user_xp = f'''SELECT user_xp FROM user_chips WHERE user_name_fr = '{user_name}' '''
 
@@ -121,6 +129,11 @@ def get_gib_time(user_name):
     gib_time = select_one_db(get_user_gib_date)
 
     return gib_time
+
+
+def update_user_achievement(user_name, achievement):
+    update_achievement = f'''UPDATE user_chips SET user_achievements = {achievement} WHERE user_name_fr = '{user_name}' '''
+    update_db(update_achievement)
 
 
 def update_user_chips(user_name, chips):
@@ -767,7 +780,7 @@ def casino_contribution(ctx):
     # 5 minutes have passed, give reward
     amount_chips = get_chips(user_name_fr)
     reward = math.ceil(secrets.randbelow(100) + GIB_REWARD_AMOUNT * (
-                user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
+            user_prestige * PRESTIGE_MULTIPLIER + 1 + user_rank * RANK_MULTIPLIER))
     amount_chips += reward
 
     update_user_chips(user_name_fr, amount_chips)
