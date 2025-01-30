@@ -130,6 +130,12 @@ def get_gib_time(user_name):
 
     return gib_time
 
+def get_gift_received_at(user_name):
+    get_user_gift_received_at = f'''SELECT gift_received_at FROM user_chips WHERE user_name_fr = '{user_name}' '''
+
+    gift_received_at = select_one_db(get_user_gift_received_at)
+
+    return gift_received_at
 
 def update_user_achievement(user_name, achievement):
     update_achievement = f'''UPDATE user_chips SET user_achievements = {achievement} WHERE user_name_fr = '{user_name}' '''
@@ -179,6 +185,10 @@ def update_user_prestige(user_name, prestige):
 def update_user_rank(user_name, rank):
     update_rank = f'''UPDATE user_chips SET user_rank = {rank} WHERE user_name_fr = '{user_name}' '''
     update_db(update_rank)
+
+def update_user_gift_received_at(user_name, gift_received_at):
+    update_gift_received_at = f'''UPDATE user_chips SET gift_received_at = '{gift_received_at}' WHERE user_name_fr = '{user_name}' '''
+    update_db(update_gift_received_at)
 
 
 def reset_xp(user_name, prestige):
@@ -720,24 +730,33 @@ async def donate(ctx, amount: int):
     recipient_user_name = str(ctx.message.mentions[0].global_name)
     recipient_chips = get_chips(recipient_name)
 
+    last_donation_received = get_gift_received_at(recipient_name)
+
+    current_time_stamp = datetime.now()
+
+    last_donation_received_at = current_time_stamp - last_donation_received
+
     amount = int(amount)
 
-    if amount > user_chips:
-        return await ctx.send(
-            f"You don't have enough chips to donate {amount} <:Shekel:1286655809098354749> Sjekkels. Broke bitch!")
-    if amount < 1:
-        return await ctx.send(
-            "You can't donate less than 1 <:Shekel:1286655809098354749> Sjekkel. Trying to be smart I see?")
-    if user_name == recipient_name:
-        return await ctx.send("You can't donate to yourself, you cheating fuck!")
+    if last_donation_received_at >= timedelta(hours=3):
+        return await ctx.send(f'{recipient_user_name} has already received a donation in the last 3 hours. Try again later.')
+    else:
+        if amount > user_chips:
+            return await ctx.send(
+                f"You don't have enough chips to donate {amount} <:Shekel:1286655809098354749> Sjekkels. Broke bitch!")
+        if amount < 1:
+            return await ctx.send(
+                "You can't donate less than 1 <:Shekel:1286655809098354749> Sjekkel. Trying to be smart I see?")
+        if user_name == recipient_name:
+            return await ctx.send("You can't donate to yourself, you cheating fuck!")
 
-    update_user_chips(user_name, user_chips - amount)
-    update_user_chips(recipient_name, recipient_chips + amount)
+        update_user_chips(user_name, user_chips - amount)
+        update_user_chips(recipient_name, recipient_chips + amount)
 
-    update_user_xp(user_name, get_xp(user_name) + (amount * DONATION_MULTIPLIER))
+        update_user_xp(user_name, get_xp(user_name) + (amount * DONATION_MULTIPLIER))
 
-    await ctx.send(
-        f"{ctx.author.mention} has donated {amount} <:Shekel:1286655809098354749> Sjekkels to {recipient_user_name}. And gained **{amount} XP**!")
+        await ctx.send(
+            f"{ctx.author.mention} has donated {amount} <:Shekel:1286655809098354749> Sjekkels to {recipient_user_name}. And gained **{amount} XP**!")
 
 
 ################
