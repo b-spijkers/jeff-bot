@@ -16,8 +16,8 @@ from twisted.web.rewrite import alias
 
 from botsettings import prefix, botConsole
 from apicommands import apis, uncyclopedia, tweakers
-from casinogames import casinoCommands
-from casinogames.casinoCommands import update_rank, casino_diceroll, casino_roulette
+from casinogames import casino
+from casinogames.casino import update_rank, casino_diceroll, casino_roulette
 from jeffcommands import jeffThings, jeffFun, jeffHelp
 
 DISCORD_TOKEN = os.getenv("TOKEN")
@@ -216,10 +216,10 @@ class Casino(commands.Cog, name='Casino commands'):
         botConsole.log_command(ctx)
 
         if ctx.message.mentions:
-            profile_stats = casinoCommands.get_profile(ctx.message.mentions[0])
+            profile_stats = casino.get_profile(ctx.message.mentions[0])
             await ctx.channel.send(embed=profile_stats)
         else:
-            profile_stats = casinoCommands.get_profile(ctx)
+            profile_stats = casino.get_profile(ctx)
             await ctx.channel.send(embed=profile_stats)
 
     @commands.command(
@@ -228,7 +228,7 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def prestige_user(self, ctx):
         botConsole.log_command(ctx)
-        profile_stats = await casinoCommands.prestige(ctx)
+        profile_stats = await casino.prestige(ctx)
         await ctx.channel.send(embed=profile_stats)
 
     @commands.command(
@@ -237,7 +237,7 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def hourly_chips(self, ctx):
         botConsole.log_command(ctx)
-        hourly_message = casinoCommands.hourly_reward(ctx)
+        hourly_message = casino.hourly_reward(ctx)
 
         await ctx.channel.send(embed=hourly_message)
 
@@ -247,7 +247,7 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def daily_chips(self, ctx):
         botConsole.log_command(ctx)
-        daily_message = casinoCommands.daily_reward(ctx)
+        daily_message = casino.daily_reward(ctx)
 
         await ctx.channel.send(embed=daily_message)
 
@@ -257,7 +257,7 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def weekly_chips(self, ctx):
         botConsole.log_command(ctx)
-        weekly_message = casinoCommands.weekly_reward(ctx)
+        weekly_message = casino.weekly_reward(ctx)
 
         await ctx.channel.send(embed=weekly_message)
 
@@ -267,7 +267,7 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def monthly_chips(self, ctx):
         botConsole.log_command(ctx)
-        monthly_message = casinoCommands.monthly_reward(ctx)
+        monthly_message = casino.monthly_reward(ctx)
 
         await ctx.channel.send(embed=monthly_message)
 
@@ -277,7 +277,7 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def claim_all(self, ctx):
         botConsole.log_command(ctx)
-        embed = casinoCommands.combined_rewards(ctx)
+        embed = casino.combined_rewards(ctx)
         await ctx.channel.send(embed=embed)
 
     @commands.command(
@@ -286,7 +286,7 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def user_rank(self, ctx):
         botConsole.log_command(ctx)
-        profile_rank = casinoCommands.send_rank_info(ctx)
+        profile_rank = casino.send_rank_info(ctx)
 
         await ctx.channel.send(embed=profile_rank)
 
@@ -300,7 +300,7 @@ class Casino(commands.Cog, name='Casino commands'):
         if 'k' in bet_amount:
             bet_amount = bet_amount.replace('k', '000')
 
-        await casinoCommands.blackjack_game(ctx, bet_amount)
+        await casino.blackjack_game(ctx, bet_amount)
 
     @commands.command(
         help='By joining you are allowed to play blackjack(Disabled) and other casino games that will be added later',
@@ -309,7 +309,7 @@ class Casino(commands.Cog, name='Casino commands'):
     async def casino_join(self, ctx):
         botConsole.log_command(ctx)
         try:
-            await casinoCommands.join_casino(ctx)
+            await casino.join_casino(ctx)
         except Exception as e:
             print(e)
             await ctx.channel.send('Something went wrong')
@@ -324,7 +324,7 @@ class Casino(commands.Cog, name='Casino commands'):
         try:
             # Check if the user is registered without the typing context
             try:
-                casinoCommands.check_entry(ctx.author.name)
+                casino.check_entry(ctx.author.name)
             except Exception as e:
                 print(e)
                 return await ctx.channel.send('First you must register yourself. Use <prefix>jc')
@@ -352,7 +352,7 @@ class Casino(commands.Cog, name='Casino commands'):
                 to_bet = to_bet.replace('k', '000')
 
             # Process the coinflip and get the result after the delay
-            cf_result = casinoCommands.coinflip(ctx, args[0], to_bet)
+            cf_result = casino.coinflip(ctx, args[0], to_bet)
 
             # Check for rank updates
             rank_up_message = await update_rank(ctx.author.name, ctx.author.global_name)
@@ -391,7 +391,7 @@ class Casino(commands.Cog, name='Casino commands'):
     @commands.cooldown(1, 5, commands.BucketType.user)  # 5-second cooldown
     async def dice_roll(self, ctx, amount: str):
         botConsole.log_command(ctx)
-        # Call the dice roll function from casinoCommands.py
+        # Call the dice roll function from casino.py
         rank_up_message = await update_rank(ctx.author.name, ctx.author.global_name)
         if rank_up_message:
             await ctx.channel.send(rank_up_message)
@@ -407,7 +407,7 @@ class Casino(commands.Cog, name='Casino commands'):
     )
     async def casino_chip_gib(self, ctx):
         botConsole.log_command(ctx)
-        gib_message = casinoCommands.casino_contribution(ctx)
+        gib_message = casino.casino_contribution(ctx)
         await ctx.channel.send(embed=gib_message)
 
     @casino_chip_gib.error
@@ -420,7 +420,7 @@ class Casino(commands.Cog, name='Casino commands'):
         aliases=['sjekkels', 'sj', 's']
     )
     async def check_chips(self, ctx):
-        chip_balance = casinoCommands.check_user_chips(ctx)
+        chip_balance = casino.check_user_chips(ctx)
         await ctx.channel.send(embed=chip_balance)
 
     @commands.command(
@@ -434,7 +434,9 @@ class Casino(commands.Cog, name='Casino commands'):
             return
 
         try:
-            await casinoCommands.donate(ctx, amount)
+            if 'k' in amount:
+                amount = amount.replace('k', '000')
+            await casino.donate(ctx, amount)
         except Exception as e:
             print(e)
             await ctx.channel.send('Something went wrong')
